@@ -10,3 +10,4 @@
 - 15. okt. 23:59 fagfellevurdering del 2
 - 29. okt. 23:59 endelig innlevering (hele prosjektet)
 
+#bysykkelapi
