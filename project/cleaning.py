@@ -1,7 +1,12 @@
-# TODO make a dataframe which can be used in ML model
-# TODO Data splitting, description, visualisation, and feature engineering
-# TODO make src and utils formatting
-# TODO miniconda or env to easy work
+#----TASK----
+# make a dataframe which can be used in ML model
+# Data splitting, description, visualisation, and feature engineering
+
+#----TODO----
+# change code, make easier to read, some can 10% be refactored
+# document better
+# make src and utils formatting
+# miniconda or env to easy work
 
 import os
 from datetime import datetime
@@ -51,42 +56,69 @@ def treat_trafikk_files(filename):
 
     df = pd.read_csv(csvStringIO, delimiter=";")
 
-
-    # this time is in UTC +02:00, example format -> 2015-07-16T15:00+02:00
-    # we wish to transform it to the same time format as in the florida files
     df["DateFormatted"] = df.apply(
-        lambda row: datetime.strptime(row["Fra"], "%Y-%m-%dT%H:%M%z").strftime(
-            "%Y-%m-%d %H:%M:%S"
-        ),
-        axis=1,
-    )
+        lambda row: datetime.strptime(row["Fra"], "%Y-%m-%dT%H:%M%z").strftime("%Y-%m-%d %H:%M:%S"), axis=1)
 
-    #certain cols are missing values and are "-", this makes it diffiuclt to work with
-    #converting to NaN helps
+    # Replace '-' with null and convert column into numeric
     df['Trafikkmengde'] = df['Trafikkmengde'].replace('-', np.nan).astype(float)
 
-    #TODO
-    #pivot the dataframe? 
-    #basically i want there to only need to be one value of dateformatted,
-    #not 4 values like now, because 4 values makes the data hard to line up with the previous data
+    # Replace " " (spaces) in 'Felt' values with "_" (underscores)
+    df['Felt'] = df['Felt'].str.replace(" ", "_")
 
-    # Pivot the table
-    pivot_df = pd.pivot_table(df, values='Trafikkmengde', index='DateFormatted', columns='Felt')
-    # pivot_df.fillna(value, inplace=True)
-    print(pivot_df)
+    df = df.drop(columns=
+                [
+                "Trafikkregistreringspunkt",
+                "Navn",
+                "Vegreferanse",
+                "Fra",
+                "Til",
+                "Dato",
+                "Fra tidspunkt",
+                "Til tidspunkt",
+                "Dekningsgrad (%)",
+                "Antall timer total",
+                "Antall timer inkludert",
+                "Antall timer ugyldig",
+                "Ikke gyldig lengde",
+                "Lengdekvalitetsgrad (%)",
+                #is this data important????   
+                "< 5,6m",             
+                ">= 5,6m",
+                "5,6m - 7,6m",
+                "7,6m - 12,5m",
+                "12,5m - 16,0m",
+                ">= 16,0m",
+                "16,0m - 24,0m",
+                ">= 24,0m",
+                ] 
+                   
+                )# stuff we dont need
+    
+    print(df)
 
-        # save to have a look at the data
+    #lets drop all rows where the coloum "Felt" != 
+    # "Totalt i retning Danmarksplass" or "Totalt i retning Florida"
+    df = df[df['Felt'].isin(["Totalt_i_retning_Danmarksplass", "Totalt_i_retning_Florida"])]
+
+    # Create empty dataframe with 'DateFormatted' as index
+    result_df = pd.DataFrame(index=df['DateFormatted'].unique())
+
+    # Loop through unique 'Felt' values, filter original dataframe by 'Felt', drop 'Felt' column and join to the result dataframe
+    for felt in df['Felt'].unique():
+        felt_df = (df[df['Felt'] == felt]
+                   .drop(columns='Felt')
+                   .add_suffix(f'_{felt}')  # add suffix to column names to distinguish them when joining
+                   .set_index('DateFormatted_{0}'.format(felt)))
         
-    #---------------------------
+        result_df = result_df.join(felt_df)
+
+    print(result_df)
 
     directory = f"{str(PWD)}/out"
-    pivot_df.to_csv(
-        f"{directory}/check_pivot.csv")
+    result_df.to_csv(
+        f"{directory}/check_traffic.csv")
 
-      # :warning: when saving, delimiter becomes comma
-    #---------------------------
-
-    return pivot_df
+    return result_df
 
 
 
@@ -113,9 +145,16 @@ def main():
 
     big_florida_df = pd.concat(florida_df_list, axis=0)
 
-    df_final = pd.merge(
-        big_florida_df, trafikk_df, how="inner", left_index=True, right_index=True
-    )
+    #turn into datetime instead of string to we can use .sort_index 
+    big_florida_df.index = pd.to_datetime(big_florida_df.index)
+    trafikk_df.index = pd.to_datetime(trafikk_df.index)
+
+    df_final = big_florida_df.merge(trafikk_df, left_index=True, right_index=True, how='outer')
+    df_final = df_final.sort_index()
+
+    #remove lines where 
+
+    df_final = df_final.dropna(subset=['Trafikkmengde_Totalt_i_retning_Florida'])
 
     return df_final
 
