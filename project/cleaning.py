@@ -3,8 +3,11 @@
 # Data splitting, description, visualisation, and feature engineering
 
 #----TODO----
-# change code, make easier to read, some can 10% be refactored
+# change code, make easier to read, some can 100% be refactored
 # document better
+# MAYBE CHANGE CUTOFF DATA?
+# handle empty values - > have a look 
+
 # make src and utils formatting
 # miniconda or env to easy work
 
