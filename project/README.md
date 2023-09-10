@@ -81,13 +81,19 @@ There is a point to be made for creating artifical traffic data for previous yea
 So, 
 52500/6 = ~8750 lines
 There are **7.5** florida files in use
-8*8750 = ~65625 lines altogether
+
+(7*8750) + (24336/6) = ~65306 lines altogether
+**NOTE** (24336/6) is the amount of relevant lines in the 2015 florida weather file
+(07-16 to 12-31)
 
 This aligns nicely with our previous estimate of *65266* traffic data lines.
 
-The (65625-65266)=359 line discrepancy arises because of missing data in trafikkdata.csv
-For example, between 2015-08-20 01:00:00 and 2015-08-20 13:00:00, all traffic data is missing
-There are atleast 111 more cases of this (`using ctrl+f`), leading to 359-111 = 248 line difference
+The ***(65306-65266)=40*** line length discrepancy arises because of missing data in trafikkdata.csv
+For example, between *2015-08-20 01:00:00* and *2015-08-20 13:00:00*, all traffic data is missing
+There are atleast 111 more cases of this (`using ctrl+f`). Doing the math:
+since, we only care about 2/5's of these lines -> 111*(2/5) = 44.4 lines
+
+This is close enough that we can blame using the average length of florida files for the 4.4 row amount difference.
 
 
 #CHECK_MAIN
@@ -100,8 +106,5 @@ gap in trafikkdata
 2015-08-20T02:00+02:00
 to
 2015-08-20T12:00+02:00
-
-
-
 
 
