@@ -18,6 +18,7 @@ import pandas as pd
 from pathlib import Path
 from utils.dataframe_handling import feauture_engineer, merge_frames
 from utils.file_parsing import treat_bysykkel_files, treat_florida_files, treat_trafikk_files
+from utils.graphing import graph_df
 
 # get current filepath to use when opening/saving files
 PWD = Path().absolute()
@@ -57,6 +58,8 @@ def main():
 
 if __name__ == "__main__":
     main_df = main()
+
+    graph_df(main_df)
 
     directory = f"{str(PWD)}/out"
     main_df.to_csv(
