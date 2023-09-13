@@ -21,9 +21,9 @@ def graph_a_vs_b(df,a,b):
     plt.ylabel(b)
     plt.title(f"{a} vs {b}")
     plt.grid(True)
-    plt.savefig(f"figs/{a} vs {b}")
+    plt.savefig(f"figs/{a}VS{b}")
     plt.clf()
-    print(f"saved fig '{a} vs {b}' in figs")
+    print(f"saved fig '{a} VS {b}' in figs")
     print(f"--- Graph took: {time.time() - start_time} seconds ---")
     # plt.show()
 
