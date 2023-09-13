@@ -9,7 +9,6 @@ import pandas as pd
 # get current filepath to use when opening/saving files
 PWD = Path().absolute()
 
-
 def treat_florida_files(filename):
     """
     Input: filename of a florida weather file
@@ -42,7 +41,6 @@ def treat_florida_files(filename):
     df.set_index("DateFormatted", inplace=True)
 
     # combine all 6 values for a given hour into its mean
-    # see read me section #TODO for more info
     df = df.resample("H").mean()
 
     print(df)
@@ -104,7 +102,6 @@ def treat_trafikk_files(filename):
             "Antall timer ugyldig",
             "Ikke gyldig lengde",
             "Lengdekvalitetsgrad (%)",
-            # is this data important????
             "< 5,6m",
             ">= 5,6m",
             "5,6m - 7,6m",
@@ -116,10 +113,6 @@ def treat_trafikk_files(filename):
         ]
     )  # stuff we dont need
 
-    # print(df)
-
-    # lets drop all rows where the coloum "Felt" !=
-    # "Totalt i retning Danmarksplass" or "Totalt i retning Florida"
 
     # drop all rows where the coloum "Felt" != "Totalt i retning Danmarksplass" or "Totalt i retning Florida"
     # the two other values for felt are "1" and "2" and are the same as the "Totalt ... Danmarkplass" and  "Totalt ... Florida"
@@ -148,14 +141,9 @@ def treat_trafikk_files(filename):
 
         result_df = result_df.join(felt_df)
 
-    # print(result_df)
-
     # have a look
     directory = f"{str(PWD)}/out"
     result_df.to_csv(f"{directory}/check_traffic.csv")
 
     return result_df
 
-
-def treat_bysykkel_files(filename):
-    return

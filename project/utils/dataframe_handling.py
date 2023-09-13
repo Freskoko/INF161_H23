@@ -19,33 +19,31 @@ def feauture_engineer(df):
     Returns: the inputted df with more features
     """
 
-    #TODO
-    #forandre luftrykk skala?
-    #change True/False to 1/0
-  
+    # TODO
+    # forandre luftrykk skala?
 
     # BASIC DATE FEATURES
 
-    # hour as own coloum 0-24
+    # hour as own coloumn 0-24
     df["hour"] = df.index.hour  # get first two values
 
+    # Instead of "day_in_week" being a num 0-6, add 7 coloumns to the dataframe, monday, tuesday .. etc
+    # And have the value being 0/1 , 0 if it is not that day, 1 if it is
 
-    #Instead of "day_in_week" being a num 0-6, add 7 coloumns to the dataframe, monday, tuesday .. etc
-    #And have the value being 0/1 , 0 if it is not that day, 1 if it is
+    day_week_dict = {
+        0: "Monday",
+        1: "Tuesday",
+        2: "Wednesday",
+        3: "Thursday",
+        4: "Friday",
+        5: "Saturday",
+        6: "Sunday",
+    }
 
-    day_week_dict ={0: 'Monday', 
-                    1: 'Tuesday', 
-                    2: 'Wednesday', 
-                    3: 'Thursday',
-                    4: 'Friday', 
-                    5: 'Saturday', 
-                    6: 'Sunday'}
+    df["d"] = df.index.weekday.map(day_week_dict)
 
-    df['d'] = df.index.weekday.map(day_week_dict)
-
-    df = pd.get_dummies(df, columns=['d'])
-
-
+    #make each day their own coloumn
+    df = pd.get_dummies(df, columns=["d"]) #convert to 1/0
 
     # month as own coloum 1-12
     df["month"] = df.index.month
@@ -53,9 +51,9 @@ def feauture_engineer(df):
     # MORE ADVANCED FEATURES
 
     # add weekend
-    df["weekend"] = df.index.weekday >= 5
+    df["weekend"] = (df.index.weekday >= 5).astype(int)
 
-    # add last hour of each row, can be a good indicator
+    # add the hour values of the previous row, this can be a good indicator
     df["Last_Danmarksplass"] = df["Trafikkmengde_Totalt_i_retning_Danmarksplass"].shift(
         1
     )
@@ -81,41 +79,33 @@ def feauture_engineer(df):
         "05-18",
     ]
 
+    #change public holiday to int
     df["public_holiday"] = df.index.strftime("%m-%d").isin(holidays).astype(int)
 
     # feature engineering (the shift to get data from last row)
     # leads to some missing values,
     # ex first row which has nothing to shift from, so we remove this.
 
-    # drop of like 2 rows
+    # drop of like 2 rows where there is no .shift value
+    # (row 0 cant get a value from row -1)
     df = df.dropna(subset=["Last_Florida"])
 
+    # add combo of total trafikk
 
-    #add combo of total trafikk
-
-    df["Total_trafikk"] = df["Trafikkmengde_Totalt_i_retning_Florida"] + df["Trafikkmengde_Totalt_i_retning_Danmarksplass"]
-
-    # #in the dataframe change all False to 0, and True to 1
-    # df["weekend"] = df["weekend"].astype(int)
-    # df["public_holiday"] = df["public_holiday"].astype(int)
-
-    # df["d_Monday"] = df["d_Monday"].astype(int)
-    # df["d_Tuesday"] = df["d_Tuesday"].astype(int)
-    # df["d_Wednsday"] = df["d_Wednsday"].astype(int)
-    # df["d_Thi"] = df["d_"].astype(int)
-    # df["d_"] = df["d_"].astype(int)
-    # df["d_"] = df["d_"].astype(int)
-    # df["d_"] = df["d_"].astype(int)    
+    df["Total_trafikk"] = (
+        df["Trafikkmengde_Totalt_i_retning_Florida"]
+        + df["Trafikkmengde_Totalt_i_retning_Danmarksplass"]
+    )
 
     return df
 
 
 def merge_frames(frames: list):
 
-    # initialize first DataFrame
+    #initialize first DataFrame
     df_final = frames[0]
 
-    # convert index (date) from string to datetime once only as we'll apply it to other frames
+    #convert index (date) from string to datetime once only as we'll apply it to other frames
     df_final.index = pd.to_datetime(df_final.index)
 
     for frame in frames[1:]:
@@ -129,9 +119,8 @@ def merge_frames(frames: list):
 
     # remove lines where we dont have traffic information, as many missing values can cause model training
     # to overly rely on values which are there often.
-    # :warning: this causes a loss in data -> se #TODO readme for more
 
-    # drops like two rows
+    # Drops missing values
     df_final = df_final.dropna(subset=["Trafikkmengde_Totalt_i_retning_Florida"])
 
     # finding means of values lead to floating point errors, round to fix these
@@ -143,85 +132,66 @@ def merge_frames(frames: list):
 def trim_outliers(df):
     # return df
 
-    # TODO
-    # Trimme outliers 
-    #- globalstrålng 2000 maks
-    #- luftrykk endre maks til 2000, og skala
-    #- vindkast maks til 2000
-    #- vindstyrke maks til 2000
-
     # dette er innanfor grensene funnet her
-    #https://veret.gfi.uib.no/?prod=3&action=today#
-    df = df[df["Globalstraling"] < 1000] #g
+    # https://veret.gfi.uib.no/?prod=3&action=today#
+    df = df[df["Globalstraling"] < 1000]  # g
+    print(len(df))
 
-    #må være under 1000, en på 1750 ble funnet
-    #men det må være feil #TODO check
-    df = df[df["Solskinstid"] < 1000]#unsure
+    # må være fra 0-10, alt over er feil
+    df = df[df["Solskinstid"] < 10]  # unsure
+    print(len(df))
 
-    #må være under 1000, en på 1750 ble funnet
-    #men det må være feil #TODO check
-    df = df[df["Lufttemperatur"] < 1000]#g
-    
-    #må være mellom 935 og 1050 
-    #https://veret.gfi.uib.no/?prod=7&action=today#
-    df = df[(df["Lufttrykk"] < 1050)] #g
-    # df = df[(df["Lufttrykk"] > 935)]
+    # må være under 50, alt over er feil
+    df = df[df["Lufttemperatur"] < 50]  # g
+    print(len(df))
 
-    #må være mellom 935 og 1050 
-    #https://veret.gfi.uib.no/?prod=7&action=today#
-    df = df[(df["Vindkast"] < 4050)]
-    # df = df[(df["Vindkast"] > 935)]
+    # må være mellom 935 og 1050, det er max og min 
+    # verdien of all time
+    # https://veret.gfi.uib.no/?prod=7&action=today#
+    df = df[(df["Lufttrykk"] < 1050)]  
+    print(len(df))
 
-    #må være under 1000, en på 1750 ble funnet
-    #men det må være feil #TODO check
-    df = df[df["Vindstyrke"] < 4000]
+    # må være mindre en 30
+    # https://veret.gfi.uib.no/?prod=7&action=today#
+    df = df[(df["Vindkast"] < 30)]
+    print(len(df))
 
-    #må være under 1000, en på 1750 ble funnet
-    #men det må være feil #TODO check
-    df = df[df["Vindretning"] < 1000]#g
+    # må være under 15
+    df = df[df["Vindstyrke"] < 15]
+    print(len(df))
+
+    # må være under 400, 
+    df = df[df["Vindretning"] < 400]  # g
+    print(len(df))
 
     return df
 
+def drop_uneeded_rows(df):
+    return df
 
-def train_test_split_stuff(df):
-    y = df ["Total_trafikk"]
-    print("--- here is the supa cool dat aframe ------------------")
-    print(df)
+def train_test_split_process(df):
+
+    y = df["Total_trafikk"]
     x = df.drop(["Total_trafikk"], axis=1)
     # vi gjør at 70% blir treningsdata
 
-    print(x)
-    print(y)
-
     x_train, x_val, y_train, y_val = train_test_split(
-                            x,y, 
-                            shuffle=False, 
-                            test_size=0.3)
-    
-    #vi deler val data opp i val data og test data
+        x, y, shuffle=False, test_size=0.3
+    )
 
-    #vi bruker val data for å sjekke hvilekn ML moddel er best 
+    # vi deler val data opp i val data og test data
+    # vi bruker val data for å sjekke hvilekn ML model er best
     # (data ikke har sett flr)
-
     # BESTE ML -> bruker vi TEST DATA
 
-    x_val,x_test,y_val,y_test = train_test_split(
-                            x_val,y_val, 
-                            shuffle=False, 
-                            test_size=0.5)
-    
-    #utforskende anaylse se kun på trenignsdata
+    x_val, x_test, y_val, y_test = train_test_split(
+        x_val, y_val, shuffle=False, test_size=0.5
+    )
 
-    #VI VIL BARE SE PÅ X_train og Y_train
+    # utforskende anaylse ser kun på trenignsdata -> bruk x_train/y_train
+    test_df = x_test.merge(y_test, how="outer", left_index=True, right_index=True)
+    validation_df = x_val.merge(y_val, how="outer", left_index=True, right_index=True)
+    training_df = x_train.merge(y_train, how="outer", left_index=True, right_index=True)
+    print(training_df)
 
-    print("----------XTRAIN")
-    print(x_train)
-    
-
-    print("----------YTRAIN")
-    print(y_train)
-
-    out_df = x_train.merge(y_train, how="outer", left_index=True, right_index=True)
-    print(out_df)
-    
-    return out_df 
+    return training_df,test_df,validation_df

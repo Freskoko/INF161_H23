@@ -10,18 +10,30 @@ In figs, there are images presenting each of the coloums in the final data frame
 
 Looking at the *Globalstråling vs Total_trafikk* graph above, it is clear that there is some correlation between the two. The higher the "globalstråling", the less traffic, perhaps as 
 the weather is better, more people walk?
-The correlation is there, but not very strong.
 
--------------
-![globalstråling vs traffik](figs/LufttemperaturVSTotal_trafikk.png)
+With a pearson corr value of *0.2858*, this is not very strong, but can still be an indiactor of correlation.
+The spearmann correlation value of *0.4472* is a good sign, and the spearmann data fits especially well since this data is monotonic.
 
-Looking at the *Lufttemperatur vs Total_trafikk* graph above, it is clear that there is a clear correlation between the two. The higher the "lufttemperatur", the more traffic as a result. 
 This will be an important variable to use when making a model.
 
 -------------
-![globalstråling vs traffik](figs/LufttrykkVSTotal_trafikk.png)
+![lufttemperatur vs traffik](figs/LufttemperaturVSTotal_trafikk.png)
+
+Looking at the *Lufttemperatur vs Total_trafikk* graph above, it is clear that there is a clear correlation between the two. The higher the "lufttemperatur", the more traffic as a result. 
+
+With a pearson corr value of *0.2634*, this is not very strong, but can still be an indiactor of correlation.
+The spearmann correlation value of *0.3124* is an OK sign, but the spearmann corr may not be as good of an indicator as the pearson corr since this data is not monotonic.
+
+This will be an important variable to use when making a model.
+
+-------------
+![lufttrykk vs traffik](figs/LufttrykkVSTotal_trafikk.png)
 
 Looking at the *Lufttrykk vs Total_trafikk* graph above, it is clear that there is a strong correlation between the two. It seems that a "middle" or average luft-trykk results in more traffic, but too high or too low, results in less traffic.
+
+With a pearson corr value of *0.0534*, this is not very strong at all, despite what it may seem at first look.
+The spearmann correlation value of *0.0499* is an also a bad sign, but the spearmann corr may not be as good of an indicator as the pearson corr since this data is not monotonic.
+
 This will be an important variable to use when predicting.
 
 -------------
@@ -31,23 +43,53 @@ Looking at the *Solskinstid vs Total_trafikk* graph above, it is hard to say if 
 It seems that when solskinstid = 0, there is a lot of traffic, which sound a bit unrealsitic?
 If there is a lot of sun, there is more traffic, but there is not a clear correlation.
 This will be an OK variable to use when predicting.
+With a pearson corr value of *0.2398*, this is alright, despite what it may seem at first look.
+It seems like the decrease in cyclicsts in regard to weather is very minimal.
+The spearmann correlation value of *0.3139* is a good sign, and the spearmann corr may be a good of an indicator as the pearson corr since this data is monotonic.
 
 -------------
 ![Vindkast vs traffik](figs/VindkastVSTotal_trafikk.png)
 
-Looking at the *Vindkast vs Total_trafikk*  graph above, it is clear that there is a strong correlation between the two. At values between 0-10, there is not much of a difference, but past 15, the increase in wind clearly causes a drop in traffic. This will be an important variable to use when predicting.
+Looking at the *Vindkast vs Total_trafikk*  graph above, it is clear that there is a strong correlation between the two. At values between 0-10, there is not much of a difference, but past 15, the increase in wind clearly causes a drop in traffic. 
+
+With a pearson corr value of *0.0288*, this is not very strong at all.
+The spearmann correlation value of *0.1023* is a little better, but the spearmann corr may not be as good of an indicator as the pearson corr since this data is not monotonic.
+
+This will be an OK variable to use when predicting.
+
+
 
 -------------
 ![Vindretning vs traffik](figs/VindretningVSTotal_trafikk.png)
 
 Looking at the *Vindretning vs Total_trafikk*  graph above, it is up for argument if there is a strong correlation between the two, but there is some data that can be useful.
 It seems that between x=100-350 values are pretty much consistent, however a drop is seen at around 250. Values between 100-0 are also very very low, and could be reflective of something else?
+
+With a pearson corr value of *0.1026*, this is quite weak.
+The spearmann correlation value of *0.1507* is a little better, but the spearmann corr may not be as good of an indicator as the pearson corr since this data is not monotonic, and goes up and down several times.
+
 This will be an OK variable to use when predicting.
+
 
 -------------
 ![Vindstyrke vs traffik](figs/VindstyrkeVSTotal_trafikk.png)
 
-Looking at the *Vindstyrke vs Total_trafikk*  graph above, it is cleae that there is a strong correlation between the two. It seems between x=0-7 values are mostly consistent in the y=500-450 range, but at x=10 to x=15, values drop fast! This will be an important variable to use when predicting.
+Looking at the *Vindstyrke vs Total_trafikk*  graph above, it is clear that there is a strong correlation between the two. It seems between x=0-7 values are mostly consistent in the y=500-450 range, but at x=10 to x=15, values drop fast! 
+
+With a pearson corr value of *0.0259*, this is quite weak, compared to what i thought at first glance.
+The spearmann correlation value of *0.0923* is a little better, and the data is somewhat monotonic, so this could be an ok predictor.
+
+This will be an OK variable to use when predicting.
+
+-------------
+![FloridaDanmarksplass vs time](figs/timeVStrafficBoth.png)
+
+Looking at the *FloridaDanmarksplass vs time* graph above, it can be seen that the two variables are very correlated.
+
+Both of the statistical tests back this up aswell, having high values of: 
+pearson = *0.0407*
+spearmann = *0.8269
+It is for this reason i have chosen to combine the two variables into one, as a "total traffic variable".
 
 
 ----------------
@@ -85,6 +127,8 @@ open the file as a long string, replace all "|" with ";"
 save the string as a bytes object using StringIO
 open the bytes object with pd.open_csv()
 
+----------------
+
 ## With aligning the two files
 
 - Issue:
@@ -94,6 +138,7 @@ This seems important, and could help the model
 - Solution:
 Since this is missing for all the other years, it is best just to drop it
 
+----------------
 
 - Issue:
 Weather data has 6 data points for an hour
@@ -104,6 +149,7 @@ Take the mean of the 6 values in the weather data
 example:
 `df_weather_resampled = df_weather.resample('H').mean() # or median()`
 
+----------------
 
 - Issue:
 Traffic data is only in the range:
@@ -114,6 +160,7 @@ meanwhile weather data is in much longer from 2010-2023
 After merging the two frames drop all rows where values in traffic data is empty, such as the col:
 `Trafikkmengde_Totalt_i_retning_Florida`
 
+----------------
 
 - Issue:
 In *trafikkdata.csv* there are gaps in the data for trafikkmende, such as between
@@ -125,12 +172,13 @@ and
 These gaps are not big enough to warrant large changes, and data is still found for 08-20 for other years, 
 the model should be able to predict fine with some data loss like this. 
 
+----------------
 
+# Data loss
+**Below is a walkthrough of how the files have been treated, and where data loss comes would come from**
 
-# Data loss?
-**Below is a walkthrough of how the files have been treated, and where data loss comes from**
+The final *out_file.csv* has 65266 lines of data (before splitting into train,validation and test data)
 
-The final *out_file.csv* has 65266 lines of data 
 This is much less than the **trafikkdata.csv** and **florida.csv** files contain!
 How did we get here?
 
@@ -196,6 +244,21 @@ There are atleast 111 more cases of this (`using ctrl+f` for `Totalt i retning D
 Doing the math:
 since, we only care about 2/5's of these lines -> 111*(2/5) = 44.4 lines
 This is close enough that we can blame using the average length of florida files for the 4.4 row amount difference.
+
+### Splitting data into train,test,validation
+
+Data was split like this:
+
+type      |percent of wholedata   
+----------|--------------------
+training  | 70%
+test      | 15%
+validation| 15%
+
+This was done using ```train_test_split()```
+from ```sklearn.model_selection```
+    
+
 
 
 
