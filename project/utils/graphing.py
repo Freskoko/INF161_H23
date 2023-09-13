@@ -5,7 +5,16 @@ import matplotlib.pyplot as plt
 
 def graph_a_vs_b(df,a,b):
     print(f" fig working on graphing '{a} vs {b}'")
+    print(f"{a} looks like ")
+    print(f"max {a} is {max(df[a])}")
+    print(f"min {a} is {min(df[a])}")
+    print(df[a])
+    
+    # print(f"{b} looks like ")
+    # print(df[b])
+
     start_time = time.time()
+    plt.xlim([min(df[a])-5, max(df[a])+5])  #x axis limits
     plt.bar(df[a], df[b])
 
     plt.xlabel(a)
@@ -13,6 +22,7 @@ def graph_a_vs_b(df,a,b):
     plt.title(f"{a} vs {b}")
     plt.grid(True)
     plt.savefig(f"figs/{a} vs {b}")
+    plt.clf()
     print(f"saved fig '{a} vs {b}' in figs")
     print(f"--- Graph took: {time.time() - start_time} seconds ---")
     # plt.show()

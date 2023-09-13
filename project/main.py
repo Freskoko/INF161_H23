@@ -15,17 +15,14 @@
 
 import os
 from pathlib import Path
-
 import pandas as pd
-from sklearn.model_selection import train_test_split
 from utils.dataframe_handling import feauture_engineer, merge_frames, train_test_split_stuff, trim_outliers
-from utils.file_parsing import (treat_bysykkel_files, treat_florida_files,
+from utils.file_parsing import (treat_florida_files,
                                 treat_trafikk_files)
-from utils.graphing import graph_a_vs_b, graph_df
+from utils.graphing import graph_a_vs_b
 
 # get current filepath to use when opening/saving files
 PWD = Path().absolute()
-
 
 def main():
     # loop over files in local directory
@@ -43,9 +40,6 @@ def main():
         if "trafikkdata" in str(filename):
             trafikk_df = treat_trafikk_files(f"{str(directory)}/{filename.name}")
 
-        if "bysykkel" in str(filename):
-            bysykkel_df = treat_bysykkel_files(f"{str(directory)}/{filename.name}")
-
     # concat all the florida df's to one
     big_florida_df = pd.concat(florida_df_list, axis=0)
 
@@ -54,8 +48,11 @@ def main():
 
     # add important features to help the model
     df_final = feauture_engineer(df_final)
+
+    #remove weird outliers like 2000 globalstråling
     df_final = trim_outliers(df_final)
 
+    #divide data into training,test and validation
     df_final = train_test_split_stuff(df_final)
 
     print(df_final)
@@ -67,7 +64,7 @@ if __name__ == "__main__":
     main_df = main()
 
     directory = f"{str(PWD)}/out"
-    main_df.to_csv(f"{directory}/check_main.csv")
+    main_df.to_csv(f"{directory}/main_training_data.csv")
 
     #:warning: GRAPHING TAKES A WHILE!
     

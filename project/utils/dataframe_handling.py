@@ -19,17 +19,10 @@ def feauture_engineer(df):
     Returns: the inputted df with more features
     """
 
-    # TODO
-    # Trimme outliers 
-    #- globalstrålng 2000 maks
-    #- luftrykk endre maks til 2000, og skala
-    #- vindkast maks til 2000
-    #- vindstyrke maks til 2000
-
-
+    #TODO
     #forandre luftrykk skala?
-    #smekke sammen traffik hour danmarplass og traffic hour florida?
-
+    #change True/False to 1/0
+  
 
     # BASIC DATE FEATURES
 
@@ -88,7 +81,7 @@ def feauture_engineer(df):
         "05-18",
     ]
 
-    df["public_holiday"] = df.index.strftime("%m-%d").isin(holidays)
+    df["public_holiday"] = df.index.strftime("%m-%d").isin(holidays).astype(int)
 
     # feature engineering (the shift to get data from last row)
     # leads to some missing values,
@@ -101,6 +94,18 @@ def feauture_engineer(df):
     #add combo of total trafikk
 
     df["Total_trafikk"] = df["Trafikkmengde_Totalt_i_retning_Florida"] + df["Trafikkmengde_Totalt_i_retning_Danmarksplass"]
+
+    # #in the dataframe change all False to 0, and True to 1
+    # df["weekend"] = df["weekend"].astype(int)
+    # df["public_holiday"] = df["public_holiday"].astype(int)
+
+    # df["d_Monday"] = df["d_Monday"].astype(int)
+    # df["d_Tuesday"] = df["d_Tuesday"].astype(int)
+    # df["d_Wednsday"] = df["d_Wednsday"].astype(int)
+    # df["d_Thi"] = df["d_"].astype(int)
+    # df["d_"] = df["d_"].astype(int)
+    # df["d_"] = df["d_"].astype(int)
+    # df["d_"] = df["d_"].astype(int)    
 
     return df
 
@@ -136,6 +141,7 @@ def merge_frames(frames: list):
 
 
 def trim_outliers(df):
+    # return df
 
     # TODO
     # Trimme outliers 
@@ -144,27 +150,49 @@ def trim_outliers(df):
     #- vindkast maks til 2000
     #- vindstyrke maks til 2000
 
-    df = df[df["Globalstraling"] < 2000]
+    # dette er innanfor grensene funnet her
+    #https://veret.gfi.uib.no/?prod=3&action=today#
+    df = df[df["Globalstraling"] < 1000] #g
 
-    df = df[df["Solskinstid"] < 2000]
+    #må være under 1000, en på 1750 ble funnet
+    #men det må være feil #TODO check
+    df = df[df["Solskinstid"] < 1000]#unsure
 
-    df = df[df["Lufttemperatur"] < 2000]
+    #må være under 1000, en på 1750 ble funnet
+    #men det må være feil #TODO check
+    df = df[df["Lufttemperatur"] < 1000]#g
+    
+    #må være mellom 935 og 1050 
+    #https://veret.gfi.uib.no/?prod=7&action=today#
+    df = df[(df["Lufttrykk"] < 1050)] #g
+    # df = df[(df["Lufttrykk"] > 935)]
 
-    df = df[df["Lufttrykk"] < 2000]
+    #må være mellom 935 og 1050 
+    #https://veret.gfi.uib.no/?prod=7&action=today#
+    df = df[(df["Vindkast"] < 4050)]
+    # df = df[(df["Vindkast"] > 935)]
 
-    df = df[df["Vindkast"] < 2000]
+    #må være under 1000, en på 1750 ble funnet
+    #men det må være feil #TODO check
+    df = df[df["Vindstyrke"] < 4000]
 
-    df = df[df["Vindstyrke"] < 2000]
-
-    df = df[df["Vindretning"] < 2000]
+    #må være under 1000, en på 1750 ble funnet
+    #men det må være feil #TODO check
+    df = df[df["Vindretning"] < 1000]#g
 
     return df
 
 
 def train_test_split_stuff(df):
     y = df ["Total_trafikk"]
+    print("--- here is the supa cool dat aframe ------------------")
+    print(df)
     x = df.drop(["Total_trafikk"], axis=1)
     # vi gjør at 70% blir treningsdata
+
+    print(x)
+    print(y)
+
     x_train, x_val, y_train, y_val = train_test_split(
                             x,y, 
                             shuffle=False, 
