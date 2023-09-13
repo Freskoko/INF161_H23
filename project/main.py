@@ -17,10 +17,11 @@ import os
 from pathlib import Path
 
 import pandas as pd
-from utils.dataframe_handling import feauture_engineer, merge_frames
+from sklearn.model_selection import train_test_split
+from utils.dataframe_handling import feauture_engineer, merge_frames, train_test_split_stuff, trim_outliers
 from utils.file_parsing import (treat_bysykkel_files, treat_florida_files,
                                 treat_trafikk_files)
-from utils.graphing import graph_df
+from utils.graphing import graph_a_vs_b, graph_df
 
 # get current filepath to use when opening/saving files
 PWD = Path().absolute()
@@ -53,6 +54,9 @@ def main():
 
     # add important features to help the model
     df_final = feauture_engineer(df_final)
+    df_final = trim_outliers(df_final)
+
+    df_final = train_test_split_stuff(df_final)
 
     print(df_final)
 
@@ -62,7 +66,16 @@ def main():
 if __name__ == "__main__":
     main_df = main()
 
-    graph_df(main_df)
-
     directory = f"{str(PWD)}/out"
     main_df.to_csv(f"{directory}/check_main.csv")
+
+    #:warning: GRAPHING TAKES A WHILE!
+    
+    graph_a_vs_b(main_df,"Globalstraling","Total_trafikk")
+    graph_a_vs_b(main_df,"Solskinstid","Total_trafikk")
+    graph_a_vs_b(main_df,"Lufttemperatur","Total_trafikk")
+    graph_a_vs_b(main_df,"Vindretning","Total_trafikk")
+    graph_a_vs_b(main_df,"Vindstyrke","Total_trafikk")
+    graph_a_vs_b(main_df,"Lufttrykk","Total_trafikk")
+    graph_a_vs_b(main_df,"Vindkast","Total_trafikk")
+    

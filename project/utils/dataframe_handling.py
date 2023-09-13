@@ -1,4 +1,5 @@
 import pandas as pd
+from sklearn.model_selection import train_test_split
 
 
 def feauture_engineer(df):
@@ -18,16 +19,40 @@ def feauture_engineer(df):
     Returns: the inputted df with more features
     """
 
+    # TODO
+    # Trimme outliers 
+    #- globalstrålng 2000 maks
+    #- luftrykk endre maks til 2000, og skala
+    #- vindkast maks til 2000
+    #- vindstyrke maks til 2000
+
+
+    #forandre luftrykk skala?
+    #smekke sammen traffik hour danmarplass og traffic hour florida?
+
+
     # BASIC DATE FEATURES
 
     # hour as own coloum 0-24
     df["hour"] = df.index.hour  # get first two values
 
-    # day as own coloum 0-31
-    df["day"] = df.index.day
 
-    # day in the week 0-7
-    df["day_in_week"] = df.index.weekday
+    #Instead of "day_in_week" being a num 0-6, add 7 coloumns to the dataframe, monday, tuesday .. etc
+    #And have the value being 0/1 , 0 if it is not that day, 1 if it is
+
+    day_week_dict ={0: 'Monday', 
+                    1: 'Tuesday', 
+                    2: 'Wednesday', 
+                    3: 'Thursday',
+                    4: 'Friday', 
+                    5: 'Saturday', 
+                    6: 'Sunday'}
+
+    df['d'] = df.index.weekday.map(day_week_dict)
+
+    df = pd.get_dummies(df, columns=['d'])
+
+
 
     # month as own coloum 1-12
     df["month"] = df.index.month
@@ -42,6 +67,8 @@ def feauture_engineer(df):
         1
     )
     df["Last_Florida"] = df["Trafikkmengde_Totalt_i_retning_Florida"].shift(1)
+
+    df["Last_total"] = df["Last_Danmarksplass"] + df["Last_Florida"]
 
     # add public holidays
     holidays = [
@@ -69,6 +96,11 @@ def feauture_engineer(df):
 
     # drop of like 2 rows
     df = df.dropna(subset=["Last_Florida"])
+
+
+    #add combo of total trafikk
+
+    df["Total_trafikk"] = df["Trafikkmengde_Totalt_i_retning_Florida"] + df["Trafikkmengde_Totalt_i_retning_Danmarksplass"]
 
     return df
 
@@ -101,3 +133,67 @@ def merge_frames(frames: list):
     df_final = df_final.apply(pd.to_numeric, errors="ignore").round(1)
 
     return df_final
+
+
+def trim_outliers(df):
+
+    # TODO
+    # Trimme outliers 
+    #- globalstrålng 2000 maks
+    #- luftrykk endre maks til 2000, og skala
+    #- vindkast maks til 2000
+    #- vindstyrke maks til 2000
+
+    df = df[df["Globalstraling"] < 2000]
+
+    df = df[df["Solskinstid"] < 2000]
+
+    df = df[df["Lufttemperatur"] < 2000]
+
+    df = df[df["Lufttrykk"] < 2000]
+
+    df = df[df["Vindkast"] < 2000]
+
+    df = df[df["Vindstyrke"] < 2000]
+
+    df = df[df["Vindretning"] < 2000]
+
+    return df
+
+
+def train_test_split_stuff(df):
+    y = df ["Total_trafikk"]
+    x = df.drop(["Total_trafikk"], axis=1)
+    # vi gjør at 70% blir treningsdata
+    x_train, x_val, y_train, y_val = train_test_split(
+                            x,y, 
+                            shuffle=False, 
+                            test_size=0.3)
+    
+    #vi deler val data opp i val data og test data
+
+    #vi bruker val data for å sjekke hvilekn ML moddel er best 
+    # (data ikke har sett flr)
+
+    # BESTE ML -> bruker vi TEST DATA
+
+    x_val,x_test,y_val,y_test = train_test_split(
+                            x_val,y_val, 
+                            shuffle=False, 
+                            test_size=0.5)
+    
+    #utforskende anaylse se kun på trenignsdata
+
+    #VI VIL BARE SE PÅ X_train og Y_train
+
+    print("----------XTRAIN")
+    print(x_train)
+    
+
+    print("----------YTRAIN")
+    print(y_train)
+
+    out_df = x_train.merge(y_train, how="outer", left_index=True, right_index=True)
+    print(out_df)
+    
+    return out_df 

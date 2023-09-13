@@ -1,6 +1,24 @@
+import time
 import matplotlib.pyplot as plt
 
+#visualisere vær vs trafikk -> se hva som trengs
 
+def graph_a_vs_b(df,a,b):
+    print(f" fig working on graphing '{a} vs {b}'")
+    start_time = time.time()
+    plt.bar(df[a], df[b])
+
+    plt.xlabel(a)
+    plt.ylabel(b)
+    plt.title(f"{a} vs {b}")
+    plt.grid(True)
+    plt.savefig(f"figs/{a} vs {b}")
+    print(f"saved fig '{a} vs {b}' in figs")
+    print(f"--- Graph took: {time.time() - start_time} seconds ---")
+    # plt.show()
+
+
+    
 def graph_df(df):
     plt.figure(figsize=(15, 7))
     plt.plot(
