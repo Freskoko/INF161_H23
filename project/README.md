@@ -6,26 +6,26 @@ This README explains issues met, decisons made, and features added
 In figs, there are images presenting each of the coloums in the final data frame, plotted against the total amount of traffic.
 
 -------------
-!(globalstråling vs traffik)[figs/Globalstraling vs Total_trafikk.png]
+![globalstråling vs traffik](figs/Globalstraling vs Total_trafikk.png)
 
 Looking at the *Globalstråling vs Total_trafikk* graph above, it is clear that there is some correlation between the two. The higher the "globalstråling", the less traffic, perhaps as 
 the weather is better, more people walk?
 The correlation is there, but not very strong.
 
 -------------
-!(globalstråling vs traffik)[figs/Lufttemperatur vs Total_trafikk.png]
+![globalstråling vs traffik](figs/Lufttemperatur vs Total_trafikk.png)
 
 Looking at the *Lufttemperatur vs Total_trafikk* graph above, it is clear that there is a clear correlation between the two. The higher the "lufttemperatur", the more traffic as a result. 
 This will be an important variable to use when making a model.
 
 -------------
-!(globalstråling vs traffik)[figs/Lufttrykk vs Total_trafikk.png]
+![globalstråling vs traffik](figs/Lufttrykk vs Total_trafikk.png)
 
 Looking at the *Lufttrykk vs Total_trafikk* graph above, it is clear that there is a strong correlation between the two. It seems that a "middle" or average luft-trykk results in more traffic, but too high or too low, results in less traffic.
 This will be an important variable to use when predicting.
 
 -------------
-!(Solskinstid vs traffik)[figs/Solskinstid vs Total_trafikk.png]
+![Solskinstid vs traffik](figs/Solskinstid vs Total_trafikk.png)
 
 Looking at the *Solskinstid vs Total_trafikk* graph above, it is hard to say if there is a clear correlation between the two.
 It seems that when solskinstid = 0, there is a lot of traffic, which sound a bit unrealsitic?
@@ -33,19 +33,19 @@ If there is a lot of sun, there is more traffic, but there is not a clear correl
 This will be an OK variable to use when predicting.
 
 -------------
-!(Vindkast vs traffik)[figs/Vindkast vs Total_trafikk.png]
+![Vindkast vs traffik](figs/Vindkast vs Total_trafikk.png)
 
 Looking at the *Vindkast vs Total_trafikk*  graph above, it is clear that there is a strong correlation between the two. At values between 0-10, there is not much of a difference, but past 15, the increase in wind clearly causes a drop in traffic. This will be an important variable to use when predicting.
 
 -------------
-!(Vindretning vs traffik)[figs/Vindretning vs Total_trafikk.png]
+![Vindretning vs traffik](figs/Vindretning vs Total_trafikk.png)
 
 Looking at the *Vindretning vs Total_trafikk*  graph above, it is up for argument if there is a strong correlation between the two, but there is some data that can be useful.
 It seems that between x=100-350 values are pretty much consistent, however a drop is seen at around 250. Values between 100-0 are also very very low, and could be reflective of something else?
 This will be an OK variable to use when predicting.
 
 -------------
-!(Vindstyrke vs traffik)[figs/Vindstyrke vs Total_trafikk.png]
+![Vindstyrke vs traffik](figs/Vindstyrke vs Total_trafikk.png)
 
 Looking at the *Vindstyrke vs Total_trafikk*  graph above, it is cleae that there is a strong correlation between the two. It seems between x=0-7 values are mostly consistent in the y=500-450 range, but at x=10 to x=15, values drop fast! This will be an important variable to use when predicting.
 
