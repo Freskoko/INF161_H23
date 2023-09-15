@@ -160,25 +160,29 @@ Range: 0-24
 -----------------------------------
 
 - *Day_in_week*
-From the date, the day in the week was added, This will help the model make a link between days and traffic
+<p> From the date, the day in the week was added, This will help the model make a link between days and traffic
+</p>
 Range: 0-7
 
 -----------------------------------
 
 - *Month*
-From the date, the month was added as a coloumn. This can help the model make a link between time of year and traffic
+<p> From the date, the month was added as a coloumn. This can help the model make a link between time of year and traffic
+</p>
 Range: 1-12
 
 -----------------------------------
 
 - *Weekend*
-From the date, a 0/1 coloumn for if it is a weekend or not was added. This can help the model make a link between time of week and traffic
+<p> From the date, a 0/1 coloumn for if it is a weekend or not was added. This can help the model make a link between time of week and traffic
+</p>
 Range: 0/1
 
 -----------------------------------
 
 - *Public_holiday*
-From the date, a 0/1 coloumn for if it is a public holiday or not was added. This can help the model make a link between specials days of the year and traffic.
+<p> From the date, a 0/1 coloumn for if it is a public holiday or not was added. This can help the model make a link between specials days of the year and traffic.
+</p>
 Range: 0/1
 
 -----------------------------------
@@ -188,7 +192,8 @@ Range: 0/1
 - *Total traffic in retning danmarkplass*,
 - *Total traffic in retning florida*,
 
-The reason adding this coloumn doesnt work is, well, if we know how much traffic there is, there is no point in guessing how much traffic there is
+<p> The reason adding this coloumn doesnt work is, well, if we know how much traffic there is, there is no point in guessing how much traffic there is
+</p>
 
 Range: 0/?
 
@@ -198,16 +203,18 @@ Range: 0/?
 - *Last_Total traffic in retning danmarksplass*,
 - *Last_Total traffic*,
 
-This coloumn would be the value for traffic in the previous row.
+<p> This coloumn would be the value for traffic in the previous row.
 The reason adding this coloumn doesnt work is that it is much harder to train the model when you have to train one line at a time, and use the last row's value's as training values. 
 This could also be a big problem because if we guess wrong on the next traffic, that value will be brought with to the next row's guess, and further for ALL the rows, and if that value is wrong, well then ALL the guesses are potentially wrong. 
+</p>
 
 Range: 0/?
 
 -----------------------------------
 - *Day in month*
 
-This coloumn would tell us what day in the month it is, but this is a bit overkill considering the other values we have, and i dont expect traffic to fluctuate a lot betwene the start and the end of the month.
+<p> This coloumn would tell us what day in the month it is, but this is a bit overkill considering the other values we have, and i dont expect traffic to fluctuate a lot betwene the start and the end of the month.
+</p>
 
 Range : 1-31
 
