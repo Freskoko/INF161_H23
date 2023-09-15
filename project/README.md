@@ -280,7 +280,7 @@ the model should be able to predict fine with some data loss like this.
 # Data loss
 **Below is a walkthrough of how the files have been treated, and where data loss comes would come from**
 
-The final *out_file.csv* has 65266 lines of data (before splitting into train,validation and test data)
+The final *out_file.csv* has 64652 lines of data (before splitting into train,validation and test data)
 
 This is much less than the **trafikkdata.csv** and **florida.csv** files contain!
 How did we get here?
@@ -310,7 +310,7 @@ were dropped, and the date is the index
 
 130723 / 2 = *65361*
 
-This number lines quite nicely up with the amount in our final out file: *65266*
+This number lines up almost quite nicely up with the amount in our final out file: *64652*
 
 ## florida.csv
 
@@ -335,28 +335,45 @@ However, florida data files contain weather data from *2010-2023 (halfway throug
 52500/6 = ~8750 lines
 There are **7.5** florida files in use
 
-(7*8750) + (24336/6) = ~65306 lines altogether
+(7*8750) + (24336/6) = ~65266 lines altogether
 **NOTE** <p> (24336/6) is the amount of relevant lines in the 2015 florida weather file
 (07-16 to 12-31) <p>
 
-This aligns nicely with our previous estimate of *65266* traffic data lines.
+This aligns almost quite nicely with our previous estimate of *64652* traffic data lines.
 
-The ***(65306-65266)= *40* *** line length discrepancy arises because of missing data in trafikkdata.csv
-For example, between *2015-08-20 01:00:00* and *2015-08-20 13:00:00*, all traffic data is missing
-There are atleast 111 more cases of this (`using ctrl+f` for `Totalt i retning Danmarksplass;-;`). 
-Doing the math:
-since, we only care about 2/5's of these lines -> 111*(2/5) = 44.4 lines
-This is close enough that we can blame using the average length of florida files for the 4.4 row amount difference.
+The discrepency in length comes from severe outliers.
+*65266 - 64652 = 614 lines too many*
+
+When dropping unreasonable values in ```dataframe_handling.py```
+
+### Dropped values
+<p> When values above 1000 in **Globalstraling** are dropped, </p>
+114 rows are lost
+
+<p>
+When values above 10.01 in **Solskinstid** are dropped </p>
+18 rows are lost
+
+<p>
+When values above 50 in **Lufttemperatur** are dropped </p>
+482 values are lost.
+
+114 + 18 + 482 = 614 
+
+**NOTE**
+<p> 
+There are valdiation to check for outliers in other rows, but none of these drop values
+</p> 
 
 ### Splitting data into train,test,validation
 
 Data was split like this:
 
-type      |percent of wholedata   
-----------|--------------------
-training  | 70%
-test      | 15%
-validation| 15%
+type      |percent of wholedata| 
+----------|--------------------|
+training  | 70%                |
+test      | 15%                |
+validation| 15%                |
 
 This was done using ```train_test_split()```
 from ```sklearn.model_selection```

@@ -37,13 +37,17 @@ def main():
     # merge the dataframes
     df_final = merge_frames([big_florida_df, trafikk_df])
 
+    # remove weird outliers like 2000 globalstråling
+    df_final = trim_outliers(df_final)
+    
     # add important features to help the model
     df_final = feauture_engineer(df_final)
 
-    # remove weird outliers like 2000 globalstråling
-    df_final = trim_outliers(df_final)
 
     df_final = drop_uneeded_rows(df_final)
+
+    print("LENGTH = ")
+    print(len(df_final.index))
 
     # divide data into training,test and validation
     training_df,test_df,validation_df = train_test_split_process(df_final)
@@ -62,14 +66,14 @@ if __name__ == "__main__":
 
     #:warning: GRAPHING TAKES A WHILE!
 
-    create_covariance_matrix(main_df)
-    graph_a_vs_b(main_df, "Globalstraling", "Total_trafikk","stråling"      , "antall sykler")
-    graph_a_vs_b(main_df, "Solskinstid", "Total_trafikk"   ,"solskinn"      , "antall sykler")         
-    graph_a_vs_b(main_df, "Lufttemperatur", "Total_trafikk","grader celcius", "antall sykler")
-    graph_a_vs_b(main_df, "Vindretning_x", "Total_trafikk"   , "Grader"       , "antall sykler")    
-    graph_a_vs_b(main_df, "Vindretning_y", "Total_trafikk"   , "Grader"       , "antall sykler")        
-    graph_a_vs_b(main_df, "Vindretning", "Total_trafikk"   , "Grader"       , "antall sykler")    
-    graph_a_vs_b(main_df, "Vindstyrke", "Total_trafikk"    , "Vind"         , "antall sykler")       
-    graph_a_vs_b(main_df, "Lufttrykk", "Total_trafikk"     ,"hPa"           , "antall sykler")      
-    graph_a_vs_b(main_df, "Vindkast", "Total_trafikk"      ,"m/s"           , "antall sykler")      
+    # create_covariance_matrix(main_df)
+    # graph_a_vs_b(main_df, "Globalstraling", "Total_trafikk","stråling"      , "antall sykler")
+    # graph_a_vs_b(main_df, "Solskinstid", "Total_trafikk"   ,"solskinn"      , "antall sykler")         
+    # graph_a_vs_b(main_df, "Lufttemperatur", "Total_trafikk","grader celcius", "antall sykler")
+    # graph_a_vs_b(main_df, "Vindretning_x", "Total_trafikk"   , "Grader"       , "antall sykler")    
+    # graph_a_vs_b(main_df, "Vindretning_y", "Total_trafikk"   , "Grader"       , "antall sykler")        
+    # graph_a_vs_b(main_df, "Vindretning", "Total_trafikk"   , "Grader"       , "antall sykler")    
+    # graph_a_vs_b(main_df, "Vindstyrke", "Total_trafikk"    , "Vind"         , "antall sykler")       
+    # graph_a_vs_b(main_df, "Lufttrykk", "Total_trafikk"     ,"hPa"           , "antall sykler")      
+    # graph_a_vs_b(main_df, "Vindkast", "Total_trafikk"      ,"m/s"           , "antall sykler")      
     # graph_df(main_df)

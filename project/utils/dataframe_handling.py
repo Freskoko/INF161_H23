@@ -144,13 +144,14 @@ def merge_frames(frames: list):
 def trim_outliers(df):
     # return df
 
+    print(len(df))
     # dette er innanfor grensene funnet her
     # https://veret.gfi.uib.no/?prod=3&action=today#
     df = df[df["Globalstraling"] < 1000]  # g
     print(len(df))
 
     # må være fra 0-10, alt over er feil
-    df = df[df["Solskinstid"] < 10]  # unsure
+    df = df[df["Solskinstid"] < 10.01]  # unsure
     print(len(df))
 
     # må være under 50, alt over er feil
@@ -166,6 +167,10 @@ def trim_outliers(df):
     # må være mindre en 30
     # https://veret.gfi.uib.no/?prod=7&action=today#
     df = df[(df["Vindkast"] < 30)]
+    print(len(df))
+
+    # må være under 15
+    df = df[df["Vindretning"] < 361]
     print(len(df))
 
     # må være under 15
