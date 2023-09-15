@@ -127,7 +127,7 @@ This variable has the highest correlation with *Total_trafikk*, and will be valu
 *Lufttemperatur* is important as one could imagine, low temperature = less cyclists. 
 Good correlation, will be useful. 
 
-- Vindretning_x/Vindretning_y (**~ +/- 0.1**)
+- Vindretning_x/Vindretning_y (~ +/- **0.1**)
 *Vindretning* is actually very useful, since it can tell us something about the rain! Rain is something we would love to know, but this is perhaps a close approximation. 
 As talked about above, the x and y directions the wind comes from, was more important that just the general direction as degrees.
 This will be useful.
@@ -139,8 +139,8 @@ Splitting this variable up will be useful i hope.
 ----------------
 *Simply put*
 
-- Remove vindstyrke
-- Remove vindretning in favour of Vindretning_x and Vindretning_y 
+- Remove *Vindstyrke* in favour of *Vindkast*
+- Remove *Vindretning* in favour of *Vindretning_x* and *Vindretning_y* 
 - Most variables here are useful
 
 
@@ -152,52 +152,60 @@ Splitting this variable up will be useful i hope.
 
 ### These features were added:
 
-**Hour**
+- *Hour*
 From the date, the hour was added as a coloumn. This can help the model make a link between hour and traffic
 Range: 0-24
+
 -----------------------------------
 
-**Day_in_week**
+- *Day_in_week*
 From the date, the day in the week was added, This will help the model make a link between days and traffic
 Range: 0-7
+
 -----------------------------------
 
-**Month**
+- *Month*
 From the date, the month was added as a coloumn. This can help the model make a link between time of year and traffic
 Range: 1-12
+
 -----------------------------------
 
-**Weekend**
+- *Weekend*
 From the date, a 0/1 coloumn for if it is a weekend or not was added. This can help the model make a link between time of week and traffic
 Range: 0/1
+
 -----------------------------------
 
-**Public_holiday**
+- *Public_holiday*
 From the date, a 0/1 coloumn for if it is a public holiday or not was added. This can help the model make a link between specials days of the year and traffic.
 Range: 0/1
+
 -----------------------------------
 
 ### Considered Features that were dropped
 
-**Total traffic in retning danmarkplass**,
-**Total traffic in retning florida**,
+- *Total traffic in retning danmarkplass*,
+- *Total traffic in retning florida*,
 
 The reason adding this coloumn doesnt work is, well, if we know how much traffic there is, there is no point in guessing how much traffic there is
 
 Range: 0/?
+
 -----------------------------------
 
-**Last_Total traffic in retning florida**,
-**Last_Total traffic in retning danmarksplass**,
-**Last_Total traffic**,
+- *Last_Total traffic in retning florida*,
+- *Last_Total traffic in retning danmarksplass*,
+- *Last_Total traffic*,
 
 This coloumn would be the value for traffic in the previous row.
 The reason adding this coloumn doesnt work is that it is much harder to train the model when you have to train one line at a time, and use the last row's value's as training values. 
 This could also be a big problem because if we guess wrong on the next traffic, that value will be brought with to the next row's guess, and further for ALL the rows, and if that value is wrong, well then ALL the guesses are potentially wrong. 
 
 Range: 0/?
+
 -----------------------------------
-**Day in month**
+- *Day in month*
+
 This coloumn would tell us what day in the month it is, but this is a bit overkill considering the other values we have, and i dont expect traffic to fluctuate a lot betwene the start and the end of the month.
 
 Range : 1-31
