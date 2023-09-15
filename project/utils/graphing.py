@@ -1,7 +1,9 @@
 from scipy.stats import spearmanr
 import matplotlib.pyplot as plt
+import seaborn as sns
 import numpy as np
 import time
+
 
 # visualisere vær vs trafikk -> se hva som trengs
 
@@ -58,3 +60,57 @@ def graph_df(df):
     plt.grid(True)
     plt.legend()
     plt.savefig(f"figs/timeVStrafficBoth.png")
+
+
+def create_covariance_matrix(df):
+
+    #drop uneeded cols:
+    df = df.drop(
+        labels = [
+            "d_Monday",
+            "d_Tuesday",
+            "d_Wednesday",
+            "d_Thursday",
+            "d_Friday",
+            "d_Saturday",
+            "d_Sunday",
+            "public_holiday",
+            "weekend",
+            "month",
+            "weekend",
+            "hour",
+
+        ],
+        axis = 1,
+        inplace = False
+    )
+
+    print(df)
+
+
+    cov_matrix = df.cov()
+
+    #normalizing values between 0 and 1
+    cov_matrix_normalized = (cov_matrix - cov_matrix.min().min()) / (cov_matrix.max().max() - cov_matrix.min().min())
+
+
+    plt.figure(figsize=(16, 16)) 
+    sns.heatmap(cov_matrix_normalized, cmap="YlGnBu") 
+    plt.title("Covariance Matrix Heatmap") 
+    plt.savefig("figs/covv_matrix.png")
+
+    plt.clf()
+
+    #--------------------------
+
+    # calculate the correlation matrix
+    corr_matrix = df.corr()
+
+    
+    plt.figure(figsize=(16, 16)) 
+    sns.heatmap(corr_matrix, annot=True, cmap='RdBu', vmin=-1, vmax=1, center=0)
+    plt.title("Correlation Matrix Heatmap") 
+    plt.savefig("figs/corr_matrix.png")
+
+
+    # return matrix

@@ -1,6 +1,6 @@
+from matplotlib import pyplot as plt
 import pandas as pd
 from sklearn.model_selection import train_test_split
-
 
 def feauture_engineer(df):
     """
@@ -53,13 +53,15 @@ def feauture_engineer(df):
     # add weekend
     df["weekend"] = (df.index.weekday >= 5).astype(int)
 
+    #THIS COULD NOT BE DONE - CHECK README
+    #------------------
     # add the hour values of the previous row, this can be a good indicator
-    df["Last_Danmarksplass"] = df["Trafikkmengde_Totalt_i_retning_Danmarksplass"].shift(
-        1
-    )
-    df["Last_Florida"] = df["Trafikkmengde_Totalt_i_retning_Florida"].shift(1)
-
-    df["Last_total"] = df["Last_Danmarksplass"] + df["Last_Florida"]
+    # df["Last_Danmarksplass"] = df["Trafikkmengde_Totalt_i_retning_Danmarksplass"].shift(
+        # 1
+    # )
+    # df["Last_Florida"] = df["Trafikkmengde_Totalt_i_retning_Florida"].shift(1)
+    # df["Last_total"] = df["Last_Danmarksplass"] + df["Last_Florida"]
+    #------------------
 
     # add public holidays
     holidays = [
@@ -88,7 +90,7 @@ def feauture_engineer(df):
 
     # drop of like 2 rows where there is no .shift value
     # (row 0 cant get a value from row -1)
-    df = df.dropna(subset=["Last_Florida"])
+    df = df.dropna(subset=["Trafikkmengde_Totalt_i_retning_Florida"])
 
     # add combo of total trafikk
 
@@ -96,6 +98,16 @@ def feauture_engineer(df):
         df["Trafikkmengde_Totalt_i_retning_Florida"]
         + df["Trafikkmengde_Totalt_i_retning_Danmarksplass"]
     )
+
+    df = df.drop(
+        labels = [
+            "Trafikkmengde_Totalt_i_retning_Florida",
+            "Trafikkmengde_Totalt_i_retning_Danmarksplass"
+        ],
+        axis = 1,
+        inplace = False
+    )
+    #total is found, these two are not needed
 
     return df
 
@@ -160,9 +172,9 @@ def trim_outliers(df):
     df = df[df["Vindstyrke"] < 15]
     print(len(df))
 
-    # må være under 400, 
-    df = df[df["Vindretning"] < 400]  # g
-    print(len(df))
+    # # må være under 400, 
+    # df = df[df["Vindretning"] < 400]  # g
+    # print(len(df))
 
     return df
 

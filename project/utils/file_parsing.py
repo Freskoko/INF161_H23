@@ -2,7 +2,6 @@ import datetime as dt
 from datetime import datetime
 from io import StringIO
 from pathlib import Path
-
 import numpy as np
 import pandas as pd
 
@@ -39,6 +38,14 @@ def treat_florida_files(filename):
 
     # change date to index, in order to
     df.set_index("DateFormatted", inplace=True)
+
+    #Vindretning is treated differently, see README
+    #TODO
+    
+    #df["Vindretning"] is full of values 0-360, transform these to points on a circle
+    df['Vindretning'] = df['Vindretning'].apply(lambda x: np.radians(x))
+    #lag x og y
+    #two different coloumns!!
 
     # combine all 6 values for a given hour into its mean
     df = df.resample("H").mean()

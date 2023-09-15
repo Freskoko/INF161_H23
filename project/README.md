@@ -57,8 +57,6 @@ The spearmann correlation value of *0.1023* is a little better, but the spearman
 
 This will be an OK variable to use when predicting.
 
-
-
 -------------
 ![Vindretning vs traffik](figs/VindretningVSTotal_trafikk.png)
 
@@ -70,6 +68,8 @@ The spearmann correlation value of *0.1507* is a little better, but the spearman
 
 This will be an OK variable to use when predicting.
 
+It is important to note that the *Vindretning* Variable has values between 0-360, and if we were to calculate the mean of the 6 values per hour, and *Vindretning* looked like this : [0,0,0,0,0,365] we would end up with a value way higher than the most common value, 0. 
+Therefore, i decided to set 180 as the base value, and calculate the absolute value of the difference from 180.
 
 -------------
 ![Vindstyrke vs traffik](figs/VindstyrkeVSTotal_trafikk.png)
@@ -92,28 +92,100 @@ spearmann = *0.8269
 It is for this reason i have chosen to combine the two variables into one, as a "total traffic variable".
 
 
-----------------
+-------------
+![Corr matrix](figs/corr_matrix.png)
 
-*Overall, it seems most variables here are useful*
+Looking at the *Corr matrix* graph above, it tells us alot about the correlation between variables.
+
+Notably, the variables *Vindkast* and *Vindstyrke* have a correlation of 0.98, for the purpouses of the data, they tell us virtually the same thing, however, *Vindkast* has a correlation of 0.029 with *Total trafikk*, which is 0.003 less than between *Vindstyrke* og *Total trafikk*, this is almost nothing, but for the purpouses of this paper, i choose to keep *Vindkast*
+
+The variables *Globalstråling* and *Solskinnstid* have a high degree of correlation, at 0.68.
+This is high, but not high enough that they tell us the same thing, so i am going to keep both variables. It is also important to note that both variables have a decent degree of correlation with *Total_trafikk*, so they could both be very important.
+
+
+### Variable correlation check
+The variables which seem to have a good correlation with *Total_trafikk* are:
+
+- Globalstråling (**0.29**)
+The amount of radiation hitting the earth, may just seem like a reflection of *Solskinnstid*, but there could be radiation, and clouds, meaning that the two are not always linked.
+This variable has the highest correlation with *Total_trafikk*, and will be valuable.
+
+- Solskinnstid (**0.24**)
+*Solskinnstid* is a good indicator of the sun, has a high correlation, and as described earlier, is different from *Globalstråling*. This will be useful
+
+- Lufttemperatur (**0.26**)
+*Lufttemperatur* is important as one could imagine, low temperature = less cyclists. 
+Good correlation, will be useful. 
+
+- Vindretning (**0.1**)
+*Vindretning* is actually very useful, since it can tell us something about the rain! Rain is something we would love to know, but this is perhaps a close approximation. Useful
+
+
+----------------
+*Simply put*
+
+- Remove vindstyrke
+- Most variables here are useful
 
 
 # Important decisons
+
 
 #TODO
 
 # Feature engineering
 
-#TODO
+### These features were added:
 
-These features were added:
-hour: 0-24 
-day: 0-31 day in month -> is this needed?
-day_in_week: 0-7
-month: 1-12
-weekend: True/False
-public holiday: True/False
-Last hour traffic florida: the value of the last row's florida traffic
-Last hour traffic danmarksplass: the value of the last row's danmarksplass traffic
+**Hour**
+From the date, the hour was added as a coloumn. This can help the model make a link between hour and traffic
+Range: 0-24
+-----------------------------------
+
+**Day_in_week**
+From the date, the day in the week was added, This will help the model make a link between days and traffic
+Range: 0-7
+-----------------------------------
+
+**Month**
+From the date, the month was added as a coloumn. This can help the model make a link between time of year and traffic
+Range: 1-12
+-----------------------------------
+
+**Weekend**
+From the date, a 0/1 coloumn for if it is a weekend or not was added. This can help the model make a link between time of week and traffic
+Range: 0/1
+-----------------------------------
+
+**Public_holiday**
+From the date, a 0/1 coloumn for if it is a public holiday or not was added. This can help the model make a link between specials days of the year and traffic.
+Range: 0/1
+-----------------------------------
+
+### Considered Features that were dropped
+
+**Total traffic in retning danmarkplass**,
+**Total traffic in retning florida**,
+
+The reason adding this coloumn doesnt work is, well, if we know how much traffic there is, there is no point in guessing how much traffic there is
+
+Range: 0/?
+-----------------------------------
+
+**Last_Total traffic in retning florida**,
+**Last_Total traffic in retning danmarksplass**,
+**Last_Total traffic**,
+
+This coloumn would be the value for traffic in the previous row.
+The reason adding this coloumn doesnt work is that it is much harder to train the model when you have to train one line at a time, and use the last row's value's as training values. 
+This could also be a big problem because if we guess wrong on the next traffic, that value will be brought with to the next row's guess, and further for ALL the rows, and if that value is wrong, well then ALL the guesses are potentially wrong. 
+
+Range: 0/?
+-----------------------------------
+**Day in month**
+This coloumn would tell us what day in the month it is, but this is a bit overkill considering the other values we have, and i dont expect traffic to fluctuate a lot betwene the start and the end of the month.
+
+Range : 1-31
 
 # Issues
 
