@@ -153,8 +153,9 @@ Splitting this variable up will be useful i hope.
 ### These features were added:
 
 - *Hour*
-<p> From the date, the hour was added as a coloumn. This can help the model make a link between hour and traffic
-Range: 0-24 </p>
+<p> From the date, the hour was added as a coloumn. This can help the model make a link between hour and traffic 
+</p>
+Range: 0-24
 
 -----------------------------------
 
