@@ -50,9 +50,6 @@ def main():
 
     print(training_df)
 
-    #create covar matrix
-
-
     return training_df
 
 
@@ -64,12 +61,15 @@ if __name__ == "__main__":
 
 
     #:warning: GRAPHING TAKES A WHILE!
+
     create_covariance_matrix(main_df)
-    # graph_a_vs_b(main_df, "Globalstraling", "Total_trafikk","stråling"      , "antall sykler")
-    # graph_a_vs_b(main_df, "Solskinstid", "Total_trafikk"   ,"solskinn"      , "antall sykler")         
-    # graph_a_vs_b(main_df, "Lufttemperatur", "Total_trafikk","grader celcius", "antall sykler")
-    # graph_a_vs_b(main_df, "Vindretning", "Total_trafikk"   , "Grader"       , "antall sykler")         
-    # graph_a_vs_b(main_df, "Vindstyrke", "Total_trafikk"    , "Vind"         , "antall sykler")       
-    # graph_a_vs_b(main_df, "Lufttrykk", "Total_trafikk"     ,"hPa"           , "antall sykler")      
-    # graph_a_vs_b(main_df, "Vindkast", "Total_trafikk"      ,"m/s"           , "antall sykler")      
+    graph_a_vs_b(main_df, "Globalstraling", "Total_trafikk","stråling"      , "antall sykler")
+    graph_a_vs_b(main_df, "Solskinstid", "Total_trafikk"   ,"solskinn"      , "antall sykler")         
+    graph_a_vs_b(main_df, "Lufttemperatur", "Total_trafikk","grader celcius", "antall sykler")
+    graph_a_vs_b(main_df, "Vindretning_x", "Total_trafikk"   , "Grader"       , "antall sykler")    
+    graph_a_vs_b(main_df, "Vindretning_y", "Total_trafikk"   , "Grader"       , "antall sykler")        
+    graph_a_vs_b(main_df, "Vindretning", "Total_trafikk"   , "Grader"       , "antall sykler")    
+    graph_a_vs_b(main_df, "Vindstyrke", "Total_trafikk"    , "Vind"         , "antall sykler")       
+    graph_a_vs_b(main_df, "Lufttrykk", "Total_trafikk"     ,"hPa"           , "antall sykler")      
+    graph_a_vs_b(main_df, "Vindkast", "Total_trafikk"      ,"m/s"           , "antall sykler")      
     # graph_df(main_df)

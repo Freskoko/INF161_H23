@@ -59,17 +59,27 @@ This will be an OK variable to use when predicting.
 
 -------------
 ![Vindretning vs traffik](figs/VindretningVSTotal_trafikk.png)
+![Vindretning vs traffik](figs/Vindretning_xVSTotal_trafikk.png)
+![Vindretning vs traffik](figs/Vindretning_yVSTotal_trafikk.png)
 
 Looking at the *Vindretning vs Total_trafikk*  graph above, it is up for argument if there is a strong correlation between the two, but there is some data that can be useful.
 It seems that between x=100-350 values are pretty much consistent, however a drop is seen at around 250. Values between 100-0 are also very very low, and could be reflective of something else?
 
-With a pearson corr value of *0.1026*, this is quite weak.
-The spearmann correlation value of *0.1507* is a little better, but the spearmann corr may not be as good of an indicator as the pearson corr since this data is not monotonic, and goes up and down several times.
+With a pearson corr value of *0.0898*, this is quite weak.
+The spearmann correlation value of *0.1385 is a little better, but the spearmann corr may not be as good of an indicator as the pearson corr since this data is not monotonic, and goes up and down several times.
 
 This will be an OK variable to use when predicting.
 
 It is important to note that the *Vindretning* Variable has values between 0-360, and if we were to calculate the mean of the 6 values per hour, and *Vindretning* looked like this : [0,0,0,0,0,365] we would end up with a value way higher than the most common value, 0. 
-Therefore, i decided to set 180 as the base value, and calculate the absolute value of the difference from 180.
+Therefore, first the corresponding points on a circle from the degrees were added to the data frame
+*Vindretning_x* and
+*Vindretning_y*, then the average of these were computed, and transformed back into degrees.
+
+It is probably better to use *Vindretning_x* and *Vindretning_y* as two different variables, instead of just *Vindretning*, since by looking at their graphs, one can see that *Vindretning_x* has a positive pearson corr of 0.0925, and a positive spearmann_corr of 0.0832.
+
+while *Vindretning_y* has a negative pearson_corr of -0.0989 and a negative spearmann_cor of -0.1443!
+
+While these numbers are not very high, it is an important distinction to make that the x, and y values are together, not so useful, but divided, they can help predict traffic values.
 
 -------------
 ![Vindstyrke vs traffik](figs/VindstyrkeVSTotal_trafikk.png)

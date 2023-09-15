@@ -43,12 +43,23 @@ def treat_florida_files(filename):
     #TODO
     
     #df["Vindretning"] is full of values 0-360, transform these to points on a circle
-    df['Vindretning'] = df['Vindretning'].apply(lambda x: np.radians(x))
-    #lag x og y
-    #two different coloumns!!
+    df['Vindretning_radians'] = np.radians(df['Vindretning'])
+
+    df['Vindretning_x'] = np.cos(df['Vindretning_radians'])
+    df['Vindretning_y'] = np.sin(df['Vindretning_radians'])
+
+    #we dont need these, drop em
+    df.drop(["Vindretning","Vindretning_radians"], axis=1, inplace=True)
 
     # combine all 6 values for a given hour into its mean
     df = df.resample("H").mean()
+
+    #convert back if we need to, not really needed
+    #-------------------------
+    average_rad = np.arctan2(df['Vindretning_x'], df['Vindretning_y'])
+    average_deg = np.degrees(average_rad)
+    average_deg[average_deg < 0] += 360
+    df["Vindretning"] = average_deg
 
     print(df)
 

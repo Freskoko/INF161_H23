@@ -172,10 +172,6 @@ def trim_outliers(df):
     df = df[df["Vindstyrke"] < 15]
     print(len(df))
 
-    # # må være under 400, 
-    # df = df[df["Vindretning"] < 400]  # g
-    # print(len(df))
-
     return df
 
 def drop_uneeded_rows(df):
