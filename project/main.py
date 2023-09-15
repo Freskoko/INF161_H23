@@ -5,7 +5,7 @@
 import os
 from pathlib import Path
 import pandas as pd
-from utils.dataframe_handling import (drop_uneeded_rows, feauture_engineer,
+from utils.dataframe_handling import (drop_uneeded_cols, feauture_engineer,
                                       merge_frames, train_test_split_process,
                                       trim_outliers)
 from utils.file_parsing import treat_florida_files, treat_trafikk_files
@@ -43,8 +43,7 @@ def main():
     # add important features to help the model
     df_final = feauture_engineer(df_final)
 
-
-    df_final = drop_uneeded_rows(df_final)
+    df_final = drop_uneeded_cols(df_final)
 
     print("LENGTH = ")
     print(len(df_final.index))

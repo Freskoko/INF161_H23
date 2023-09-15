@@ -109,6 +109,9 @@ def feauture_engineer(df):
     )
     #total is found, these two are not needed
 
+    #change all values of TRUE in all rows to 1 and FALSE to 0
+    df = df.replace({True: 1, False: 0})
+
     return df
 
 
@@ -179,7 +182,17 @@ def trim_outliers(df):
 
     return df
 
-def drop_uneeded_rows(df):
+def drop_uneeded_cols(df):
+    #drop 
+
+    df.drop(
+    [
+        "Vindstyrke",
+        "Vindretning"
+    ],
+    axis = 1,
+    inplace = True)
+
     return df
 
 def train_test_split_process(df):
