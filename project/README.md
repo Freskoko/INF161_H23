@@ -127,19 +127,24 @@ This variable has the highest correlation with *Total_trafikk*, and will be valu
 *Lufttemperatur* is important as one could imagine, low temperature = less cyclists. 
 Good correlation, will be useful. 
 
-- Vindretning (**0.1**)
-*Vindretning* is actually very useful, since it can tell us something about the rain! Rain is something we would love to know, but this is perhaps a close approximation. Useful
+- Vindretning_x/Vindretning_y (**~ +/- 0.1**)
+*Vindretning* is actually very useful, since it can tell us something about the rain! Rain is something we would love to know, but this is perhaps a close approximation. 
+As talked about above, the x and y directions the wind comes from, was more important that just the general direction as degrees.
+This will be useful.
 
+I will therefore be removing "Vindretning" from the final dataframe, as Vindretning_x Vindretning_y are much more useful.
+This can be also seen in the correlation matrix, where *Vindretning_x* and *Vindretning* have virtually the same score of -0.099 and -0.09 respectively. 
+Splitting this variable up will be useful i hope. 
 
 ----------------
 *Simply put*
 
 - Remove vindstyrke
+- Remove vindretning in favour of Vindretning_x and Vindretning_y 
 - Most variables here are useful
 
 
 # Important decisons
-
 
 #TODO
 
