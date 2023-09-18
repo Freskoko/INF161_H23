@@ -1,0 +1,97 @@
+### data forb 
+
+(a) Er data klar for analysen?
+
+Ja, men noen cols blir droppet:
+```
+columns_to_remove_vær = ['Globalstraling', 'Relativ luftfuktighet', 'Vindretning', 'Lufttrykk']
+```
+
+Føler det mangler begrunnelser om hvorfor de droppes, og at de kanskje ikke burde bli dropped?
+
+
+
+(b) Er det endelige datasettet sånn at hver rad tilsvarer akkurat en dato og tid med tilhørende antall sykler?
+
+Ser sånn ut, bra!
+
+
+(c) Gir variablene i datasettet mening?
+
+Ja, synes det er lurt.
+Kan være lurt å dele opp ukedag til flere coloumns, å ha en for mandag, tirsdag etc
+Også at den er 0 eller 1
+
+
+(d) Brukte studenten både værdata og traffikdata?
+
+Yes, det er de gode på!
+
+(e) Er oppdeling i trenings-, validerings- og testdata meningsfull og som det skal være for tidsavhengige data?
+
+Ja synes det, men kanskje de kunne sett på
+```train_test_split()``` funksjonen fra sklearn
+
+
+### data analysen
+
+(a) Gjorde studenten den utforskende dataanalysen på treningsdata?
+
+Ikke egentlig.
+
+(b) Er det en statistisk beskrivelse av alle variablene i datasettet?
+
+Nei
+
+(c) Er det en beskrivelse av manglende data?
+
+Noe, de blir håntert men står ikke beskrivelser om hvorfor
+(feks at neon rader har 9999 som value)
+
+(d) Er det noen meningsfulle visualiseringer av data som hjelper å forstå egenskaper av data?
+
+Nei
+
+(e) Mangler det visualiseringer som burde være med?
+
+Ja, traffikk mot alle coloumns, og kanskje cols mot andre cols
+
+(f) Har alle visualiseringer aksebeskrivelser og fargeskalaer?
+
+Nei
+
+### rapport
+
+(a) Er rapporten tydelig, velskrevet og forståelig?
+
+Ja den er grei, men det er litt mye comments som kanskje er viktig? Deler av kode som bare er commentet ut feks.
+
+(b) Er alle data science-stegene forklart?
+
+Ikke helt
+
+(c) Er alle valg som studenten gjorde rettferdiggjort?
+
+Ikke egentlig, sier at feks noen data trengs ikke men går ikke i dybden.
+
+(d) Har alle figurene en figurlegende som beskriver figuren?
+
+N/A, ingen figurer
+
+(e) Er koden forståelig og godt dokumentert?
+
+Ja, kommentarene som er der sier mye bra om koden.
+
+### general
+
+(a) Nevn to ting du likte best med denne løsningen av oppgaven.
+
+Bra commentert kode, som gjør det lett å skjønne hva hver linje gjør
+
+Hver code-block gjør kun en ting, som er veldig greit. lett å skjønne!
+
+
+(b) Nevn hva du synes er viktigst å forbedre før neste innleveringen
+
+Data-utforskelse er viktig, og maybe rydde litt i comments osv (men det må jeg og :P )
+
