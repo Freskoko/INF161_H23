@@ -50,6 +50,10 @@ The spearmann correlation value of *0.3139* is a good sign, and the spearmann co
 -------------
 ![Vindkast vs traffik](figs/VindkastVSTotal_trafikk.png)
 
+
+TODO: maybe expotnailly transofrm the data (opposite of log transform)
+
+
 Looking at the *Vindkast vs Total_trafikk*  graph above, it is clear that there is a strong correlation between the two. At values between 0-10, there is not much of a difference, but past 15, the increase in wind clearly causes a drop in traffic. 
 
 With a pearson corr value of *0.0288*, this is not very strong at all.
