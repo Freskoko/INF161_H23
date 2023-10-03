@@ -2,11 +2,13 @@ import datetime as dt
 from datetime import datetime
 from io import StringIO
 from pathlib import Path
+
 import numpy as np
 import pandas as pd
 
 # get current filepath to use when opening/saving files
 PWD = Path().absolute()
+
 
 def treat_florida_files(filename):
     """
@@ -39,24 +41,24 @@ def treat_florida_files(filename):
     # change date to index, in order to
     df.set_index("DateFormatted", inplace=True)
 
-    #Vindretning is treated differently, see README
-    #TODO
-    
-    #df["Vindretning"] is full of values 0-360, transform these to points on a circle
-    df['Vindretning_radians'] = np.radians(df['Vindretning'])
+    # Vindretning is treated differently, see README
+    # TODO
 
-    df['Vindretning_x'] = np.cos(df['Vindretning_radians'])
-    df['Vindretning_y'] = np.sin(df['Vindretning_radians'])
+    # df["Vindretning"] is full of values 0-360, transform these to points on a circle
+    df["Vindretning_radians"] = np.radians(df["Vindretning"])
 
-    #we dont need these, drop em
-    df.drop(["Vindretning","Vindretning_radians"], axis=1, inplace=True)
+    df["Vindretning_x"] = np.cos(df["Vindretning_radians"])
+    df["Vindretning_y"] = np.sin(df["Vindretning_radians"])
+
+    # we dont need these, drop em
+    df.drop(["Vindretning", "Vindretning_radians"], axis=1, inplace=True)
 
     # combine all 6 values for a given hour into its mean
     df = df.resample("H").mean()
 
-    #convert back if we need to, not really needed
-    #-------------------------
-    average_rad = np.arctan2(df['Vindretning_x'], df['Vindretning_y'])
+    # convert back if we need to, not really needed
+    # -------------------------
+    average_rad = np.arctan2(df["Vindretning_x"], df["Vindretning_y"])
     average_deg = np.degrees(average_rad)
     average_deg[average_deg < 0] += 360
     df["Vindretning"] = average_deg
@@ -131,7 +133,6 @@ def treat_trafikk_files(filename):
         ]
     )  # stuff we dont need
 
-
     # drop all rows where the coloum "Felt" != "Totalt i retning Danmarksplass" or "Totalt i retning Florida"
     # the two other values for felt are "1" and "2" and are the same as the "Totalt ... Danmarkplass" and  "Totalt ... Florida"
     df = df[
@@ -164,4 +165,3 @@ def treat_trafikk_files(filename):
     result_df.to_csv(f"{directory}/check_traffic.csv")
 
     return result_df
-
