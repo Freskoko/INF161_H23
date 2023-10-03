@@ -2,6 +2,7 @@
 # make a dataframe which can be used in ML model
 # Data splitting, description, visualisation, and feature engineering
 
+import json
 import os
 from pathlib import Path
 import pandas as pd
@@ -10,6 +11,7 @@ from utils.dataframe_handling import (drop_uneeded_cols, feauture_engineer,
                                       trim_outliers)
 from utils.file_parsing import treat_florida_files, treat_trafikk_files
 from utils.graphing import graph_a_vs_b, graph_df, create_covariance_matrix
+from utils.models import find_accuracy_logloss, train_models
 
 # get current filepath to use when opening/saving files
 PWD = Path().absolute()
@@ -49,19 +51,28 @@ def main():
     print(len(df_final.index))
 
     # divide data into training,test and validation
-    training_df,test_df,validation_df = train_test_split_process(df_final)
+    split_dict, training_df,test_df,validation_df = train_test_split_process(df_final)
 
     print(training_df)
 
-    return training_df
+    return split_dict,training_df,test_df,validation_df
 
 
 if __name__ == "__main__":
-    main_df = main()
+    split_dict,training_df,test_df,validation_df = main()
+
+    print("----------")
+    print(split_dict)
 
     directory = f"{str(PWD)}/out"
-    main_df.to_csv(f"{directory}/main_training_data.csv")
+    training_df.to_csv(f"{directory}/main_training_data.csv")
+    test_df.to_csv(f"{directory}/main_test_data.csv")
+    validation_df.to_csv(f"{directory}/main_validation_data.csv")
+    # with open(f"{directory}/split_dict.json", 'w') as f:
+    #     json.dumps(split_dict)
 
+    model_dict = train_models(split_dict)
+    find_accuracy_logloss(split_dict,model_dict)
 
     #:warning: GRAPHING TAKES A WHILE!
 

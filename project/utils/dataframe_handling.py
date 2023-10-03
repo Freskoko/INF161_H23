@@ -218,6 +218,16 @@ def train_test_split_process(df):
     test_df = x_test.merge(y_test, how="outer", left_index=True, right_index=True)
     validation_df = x_val.merge(y_val, how="outer", left_index=True, right_index=True)
     training_df = x_train.merge(y_train, how="outer", left_index=True, right_index=True)
+
     print(training_df)
 
-    return training_df,test_df,validation_df
+    split_dict = { 
+        "x_train":x_train,
+        "y_train":y_train,
+        "x_test":x_test,
+        "y_test":y_test,
+        "x_val":x_val,
+        "y_val":y_val,
+    }
+
+    return split_dict,training_df,test_df,validation_df
