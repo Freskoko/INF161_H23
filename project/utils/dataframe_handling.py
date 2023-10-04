@@ -1,6 +1,7 @@
 import pandas as pd
 from matplotlib import pyplot as plt
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import MinMaxScaler
 
 
 def feauture_engineer(df):
@@ -183,6 +184,16 @@ def trim_outliers(df):
 
     return df
 
+def normalize_cols(df):
+    #normalize between 0-1, 
+    #"Lufttrykk"
+    #"Globalstraling"
+    
+    scaler = MinMaxScaler()
+    df[["Globalstraling", "Lufttrykk"]] = scaler.fit_transform(df[["Globalstraling", "Lufttrykk"]])
+    return df
+
+
 
 def drop_uneeded_cols(df):
     # drop
@@ -193,6 +204,13 @@ def drop_uneeded_cols(df):
 
 
 def train_test_split_process(df):
+
+    print(df)
+
+    df = df.reset_index()
+    df = df.drop(["DateFormatted"], axis=1)
+
+    print(df)
 
     y = df["Total_trafikk"]
     x = df.drop(["Total_trafikk"], axis=1)

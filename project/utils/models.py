@@ -5,7 +5,8 @@ import pandas as pd
 import plotly.express as px
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.linear_model import ElasticNet, Lasso, LogisticRegression
-from sklearn.metrics import accuracy_score, log_loss, mezan_squared_error
+from sklearn.metrics import mean_squared_error
+# from sklearn.metrics import accuracy_score, log_loss, mezan_squared_error
 from sklearn.svm import SVC, SVR
 
 RANDOM_STATE = 2
@@ -80,7 +81,7 @@ def train_models(split_dict: dict):
         labels={"x": "Model", "y": "Mean Squared Error"},
     )
 
-    fig.write_image(f"{PWD}/MSE_models.png")
+    fig.write_image(f"{PWD}/MSE_models_V3.png")
 
     data_models = pd.DataFrame(
         {
@@ -97,7 +98,7 @@ def train_models(split_dict: dict):
         labels={"x": "Model", "y": "Mean Error"},
     )
 
-    fig.write_image(f"{PWD}/ME_models.png")
+    fig.write_image(f"{PWD}/ME_models_V3.png")
 
     print("Done training!")
 
@@ -128,51 +129,42 @@ def train_best_model(split_dict: dict):
     print("Test MSE:", test_mse)
     print("Test RMSE:", test_rmse)
 
+    importance_df = pd.DataFrame({
+        'Feature': X_train.columns,
+        'Importance': best_model.feature_importances_
+    })
+
+    print(importance_df.sort_values(by='Importance', ascending=False))
 
 # Test MSE: 635.0193488252329
 # Test RMSE: 25.199590251137675
-# This is pretty good!
+
+#UPDATE - removed DateFormatted, and normalized some values
+
+## TODO:
+
+# A few suggestions to improve your code:
+
+# 1. **Hyperparameter tuning**: You can improve your machine learning models by tuning their hyperparameters. For instance, you can adjust the "n_estimators" and "max_depth" parameters in the `RandomForestRegressor`. The optimal parameters often depend on your specific dataset, so you can use approaches like grid search or random search to experiment with different combinations and find the best ones.
+
+# 2. **Feature importance**: Random forest provides feature importances which can show you which features are most influential in predicting your target variable. This can help you to simplify your model by excluding features that don't contribute much to the prediction. You can get the feature importances from a trained random forest model by accessing its `feature_importances_` attribute.
+
+# 3. **Use other regression models**: You may also consider experimenting with other regression models. For instance, gradient boosting regressors (like XGBoost or LightGBM) often perform very well on various datasets.
+
+# 4. **Cross-validation**: Use cross-validation for more robust results. K-fold cross-validation splits the data into K subsets and then trains the model K times, each time using a different subset as the test set. This can lead to a more robust estimation of the model's performance.
+
+# 5. **Scaling the data**: Some algorithms, especially those that use a form of gradient descent to optimize their parameters, assume all features are centered around zero and have a similar variance. Features in your dataset like 'Lufttrykk' and 'Globalstraling' may have different scales that can negatively impact the performance of these models. Consider transforming your features to have a mean of 0 and a standard deviation of 1 using techniques such as StandardScaler.
+
+# 6. **Handling Imbalanced Data**: If the number of cycles across the bridge is heavily imbalanced in your dataset (as in very few events of people cycling), you can consider techniques such as SMOTE or ADASYN for over-sampling the minority class, or use algorithms that handle imbalance internally, like gradient boosting.
+
+# Remember, while these strategies can potentially improve your results, they can also increase the complexity and running time of your code. Therefore, consider the trade-off between prediction accuracy and time efficiency based on your specific use case.
 
 
-# def find_accuracy_logloss(split_dict:dict, model_dict:dict):
 
-#     X_train = split_dict["x_train"]
-#     y_train = split_dict["y_train"]
-#     X_test  = split_dict["x_test"]
-#     y_test  = split_dict["y_test"]
-#     X_val   = split_dict["x_val"]
-#     y_val   = split_dict["y_val"]
 
-#     accuracies = [accuracy_score(y_val,model.predict(X_val)) for model in model_dict.values()]
-#     accuracy_dict = dict(zip(model_dict.keys(),accuracies))
 
-#     data_models = pd.DataFrame({
-#         'model_name': accuracy_dict.keys(),
-#         'accuracy_values': accuracy_dict.values()
-#     })
 
-#     fig = px.bar(data_models, x='model_name', y='accuracy_values',
-#                 title='accruacy values for different models',
-#                 labels={'x':'Model', 'y':'accuracy_values'})
 
-#     fig.write_image(f"{PWD}/ACCURACY_models.png")
 
-#     #-------------
+#-----------------
 
-#     logs = [log_loss(y_val,model.predict(X_val)) for model in model_dict.values()]
-#     accuracy_dict = dict(zip(model_dict.keys(),logs))
-
-#     data_models = pd.DataFrame({
-#         'model_name': accuracy_dict.keys(),
-#         'log_values': accuracy_dict.values()
-#     })
-
-#     fig = px.bar(data_models, x='model_name', y='log_values',
-#                 title='accruacy values for different models',
-#                 labels={'x':'Model', 'y':'log_values'})
-
-#     fig.write_image(f"{PWD}/ALOGLOSS_models.png")
-
-#     print("Done finding accuracy and log loss!")
-
-#     return

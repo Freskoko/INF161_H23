@@ -12,6 +12,7 @@ from utils.dataframe_handling import (
     drop_uneeded_cols,
     feauture_engineer,
     merge_frames,
+    normalize_cols,
     train_test_split_process,
     trim_outliers,
 )
@@ -50,6 +51,8 @@ def main():
 
     # add important features to help the model
     df_final = feauture_engineer(df_final)
+
+    df_final = normalize_cols(df_final)
 
     df_final = drop_uneeded_cols(df_final)
 

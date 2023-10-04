@@ -1,6 +1,6 @@
 # README for INF161 data parsing
 
-This README explains issues met, decisons made, and features added
+This README explains issues met, decisons made, and features added, for the entire INF161 project this fall.
 
 # Data exploration:
 In figs, there are images presenting each of the coloums in the final data frame, plotted against the total amount of traffic.
@@ -386,5 +386,51 @@ from ```sklearn.model_selection```
 
 
 
+# RESULTS:
 
+### ATTEMPT 1: RandomForestRegressor was best on validation
 
+![attempt1_MSE](figs/MSE_models.png)
+![attempt1_ME](figs/ME_models.png)
+
+**Test MSE: 635.0193488252329**
+**Test RMSE: 25.199590251137675**
+
+### ATTEMPT 2:
+
+#CHANGES: - removed DateFormatted, and normalized some values
+
+![attempt2_MSE](figs/MSE_models_V2.png)
+![attempt2_ME](figs/ME_models_V2.png)
+
+**Test MSE: 635.0630707103542**
+**Test RMSE: 25.20045774803216**
+
+### ATTEMPT 3:
+
+#CHANGES: 
+
+![attempt3_MSE](figs/MSE_models_V3.png)
+![attempt3_ME](figs/ME_models_V3.png)
+
+FEATURE IMPORTANCE: RANDOM FOREST REGRESSOR
+
+           Feature  Importance
+7             hour    0.560084
+2   Lufttemperatur    0.121082
+16         weekend    0.117478
+15           month    0.057479
+0   Globalstraling    0.039347
+3        Lufttrykk    0.025139
+4         Vindkast    0.020246
+1      Solskinstid    0.011832
+6    Vindretning_y    0.011155
+5    Vindretning_x    0.011079
+17  public_holiday    0.008792
+8         d_Friday    0.007867
+9         d_Monday    0.002490
+12      d_Thursday    0.002128
+13       d_Tuesday    0.001868
+14     d_Wednesday    0.001548
+11        d_Sunday    0.000199
+10      d_Saturday    0.000188
