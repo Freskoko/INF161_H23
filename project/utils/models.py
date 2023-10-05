@@ -1,11 +1,13 @@
+import json
 from math import sqrt
 from pathlib import Path
 
 import pandas as pd
 import plotly.express as px
-from sklearn.ensemble import RandomForestRegressor
+from sklearn.ensemble import GradientBoostingRegressor, RandomForestRegressor
 from sklearn.linear_model import ElasticNet, Lasso, LogisticRegression
 from sklearn.metrics import mean_squared_error
+from sklearn.neighbors import KNeighborsRegressor
 # from sklearn.metrics import accuracy_score, log_loss, mezan_squared_error
 from sklearn.svm import SVC, SVR
 
@@ -49,6 +51,9 @@ def train_models(split_dict: dict):
         },
         {"model_type": SVR, "settings": {"degree": 2}},
         {"model_type": SVC, "settings": {}},
+        {"model_type": GradientBoostingRegressor, "settings": {"n_estimators": 100, "learning_rate": 0.1, "random_state": RANDOM_STATE}},
+    # {"model_type": XGBRegressor, "settings": {"n_estimators": 100, "learning_rate": 0.1, "max_depth": 5, "random_state": RANDOM_STATE}},
+        {"model_type": KNeighborsRegressor, "settings": {"n_neighbors": 5}}
     ]
 
     model_strings = []
@@ -117,7 +122,7 @@ def train_best_model(split_dict: dict):
     X_val = split_dict["x_val"]
     y_val = split_dict["y_val"]
 
-    best_model = RandomForestRegressor(n_estimators=100, random_state=RANDOM_STATE)
+    best_model = RandomForestRegressor(n_estimators=151, random_state=RANDOM_STATE)
     best_model.fit(X_train, y_train)
 
     y_test_predicted = best_model.predict(X_test)
@@ -129,6 +134,11 @@ def train_best_model(split_dict: dict):
     print("Test MSE:", test_mse)
     print("Test RMSE:", test_rmse)
 
+    # out_dict[f"i"] = test_rmse
+
+    # bst = sorted(out_dict.items(), key=lambda x:x[0])
+    # print(json.dumps(bst,indent=2))
+
     importance_df = pd.DataFrame({
         'Feature': X_train.columns,
         'Importance': best_model.feature_importances_
@@ -136,24 +146,27 @@ def train_best_model(split_dict: dict):
 
     print(importance_df.sort_values(by='Importance', ascending=False))
 
-# Test MSE: 635.0193488252329
-# Test RMSE: 25.199590251137675
 
-#UPDATE - removed DateFormatted, and normalized some values
+
+
+
 
 ## TODO:
 
 # A few suggestions to improve your code:
 
 # 1. **Hyperparameter tuning**: You can improve your machine learning models by tuning their hyperparameters. For instance, you can adjust the "n_estimators" and "max_depth" parameters in the `RandomForestRegressor`. The optimal parameters often depend on your specific dataset, so you can use approaches like grid search or random search to experiment with different combinations and find the best ones.
+#"n_estimators" and "max_depth"
 
 # 2. **Feature importance**: Random forest provides feature importances which can show you which features are most influential in predicting your target variable. This can help you to simplify your model by excluding features that don't contribute much to the prediction. You can get the feature importances from a trained random forest model by accessing its `feature_importances_` attribute.
 
 # 3. **Use other regression models**: You may also consider experimenting with other regression models. For instance, gradient boosting regressors (like XGBoost or LightGBM) often perform very well on various datasets.
+#XGBoost or LightGBM
 
 # 4. **Cross-validation**: Use cross-validation for more robust results. K-fold cross-validation splits the data into K subsets and then trains the model K times, each time using a different subset as the test set. This can lead to a more robust estimation of the model's performance.
 
 # 5. **Scaling the data**: Some algorithms, especially those that use a form of gradient descent to optimize their parameters, assume all features are centered around zero and have a similar variance. Features in your dataset like 'Lufttrykk' and 'Globalstraling' may have different scales that can negatively impact the performance of these models. Consider transforming your features to have a mean of 0 and a standard deviation of 1 using techniques such as StandardScaler.
+#StandardScaler
 
 # 6. **Handling Imbalanced Data**: If the number of cycles across the bridge is heavily imbalanced in your dataset (as in very few events of people cycling), you can consider techniques such as SMOTE or ADASYN for over-sampling the minority class, or use algorithms that handle imbalance internally, like gradient boosting.
 

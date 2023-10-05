@@ -406,13 +406,6 @@ from ```sklearn.model_selection```
 **Test MSE: 635.0630707103542**
 **Test RMSE: 25.20045774803216**
 
-### ATTEMPT 3:
-
-#CHANGES: 
-
-![attempt3_MSE](figs/MSE_models_V3.png)
-![attempt3_ME](figs/ME_models_V3.png)
-
 FEATURE IMPORTANCE: RANDOM FOREST REGRESSOR
 
            Feature  Importance
@@ -434,3 +427,159 @@ FEATURE IMPORTANCE: RANDOM FOREST REGRESSOR
 14     d_Wednesday    0.001548
 11        d_Sunday    0.000199
 10      d_Saturday    0.000188
+
+### ATTEMPT 3:
+
+#CHANGES: VINDKAST EXPOENTIAL / RAIN COL
+
+**Test MSE: 632.4220936735477**
+**Test RMSE: 25.14800377114549**
+
+           Feature  Importance
+7             hour    0.560098
+2   Lufttemperatur    0.121029
+16         weekend    0.117477
+15           month    0.057486
+0   Globalstraling    0.039300
+3        Lufttrykk    0.024802
+4         Vindkast    0.020224
+1      Solskinstid    0.011829
+6    Vindretning_y    0.011102
+5    Vindretning_x    0.011073
+18  public_holiday    0.008797
+8         d_Friday    0.007867
+9         d_Monday    0.002502
+12      d_Thursday    0.002194
+13       d_Tuesday    0.001882
+14     d_Wednesday    0.001514
+17         raining    0.000448
+11        d_Sunday    0.000188
+10      d_Saturday    0.000187
+
+### ATTEMPT 4:
+
+#CHANGES: REMOVE 
+   d_Friday   
+   d_Monday   
+ d_Thursday   
+  d_Tuesday   
+d_Wednesday   
+    raining   
+   d_Sunday   
+ d_Saturday   
+
+Test MSE: 677.0847578046513
+Test RMSE: 26.02085236506774
+
+           Feature  Importance
+7             hour    0.560251
+2   Lufttemperatur    0.123484
+9          weekend    0.117491
+8            month    0.058301
+0   Globalstraling    0.042114
+3        Lufttrykk    0.028505
+4         Vindkast    0.023094
+6    Vindretning_y    0.012595
+1      Solskinstid    0.012595
+5    Vindretning_x    0.011986
+11  public_holiday    0.009106
+10         raining    0.000478
+
+
+### ATTEMPT 5:
+
+RUNNING BEST MODEL WITH DIFFERENT n_estimators:
+range(1,2000,50)
+
+151 was best n=estimators
+
+### ATTEMPT 6:
+
+standardscaler
+
+scaler = StandardScaler()
+df[["Globalstraling", 
+    "Lufttrykk",
+    "Solkinstid",
+    "Vindkast"
+        ]] = scaler.fit_transform(df[[
+        "Globalstraling", 
+        "Lufttrykk",
+        "Solskinstid",
+        "Vindkast"
+        ]])
+
+**Test MSE: 632.9224388842421**
+**Test RMSE: 25.157949814804905**
+
+
+           Feature  Importance
+7             hour    0.559959
+2   Lufttemperatur    0.120732
+16         weekend    0.117371
+15           month    0.058155
+0   Globalstraling    0.040058
+3        Lufttrykk    0.025102
+4         Vindkast    0.018137
+1      Solskinstid    0.011853
+5    Vindretning_x    0.011423
+6    Vindretning_y    0.011286
+18  public_holiday    0.008876
+8         d_Friday    0.008008
+9         d_Monday    0.002605
+12      d_Thursday    0.002168
+13       d_Tuesday    0.001929
+14     d_Wednesday    0.001525
+17         raining    0.000439
+10      d_Saturday    0.000192
+11        d_Sunday    0.000182
+
+### ATTEMPT 7:
+
+minmaxscale
+
+    scaler = MinMaxScaler()
+    df[["Globalstraling", 
+        "Lufttrykk",
+        "Solskinstid",
+        "Vindkast"
+
+        ]] = scaler.fit_transform(df[[
+        "Globalstraling", 
+        "Lufttrykk",
+        "Solskinstid",
+        "Vindkast"
+        ]])
+
+**Test MSE: 630.2607723119808**
+**Test RMSE: 25.10499496737613**
+
+           Feature  Importance
+7             hour    0.559972
+2   Lufttemperatur    0.120674
+16         weekend    0.117370
+15           month    0.057724
+0   Globalstraling    0.039476
+3        Lufttrykk    0.025023
+4         Vindkast    0.020328
+1      Solskinstid    0.011739
+5    Vindretning_x    0.011048
+6    Vindretning_y    0.011018
+18  public_holiday    0.008862
+8         d_Friday    0.007860
+9         d_Monday    0.002503
+12      d_Thursday    0.002206
+13       d_Tuesday    0.001902
+14     d_Wednesday    0.001488
+17         raining    0.000437
+10      d_Saturday    0.000185
+11        d_Sunday    0.000185
+
+### ATTEMPT 8: ADDED MORE MODELS
+
+GradientBoostingRegressor
+
+KNeighborsRegressor
+
+![attempt3_MSE](figs/MSE_models_V3.png)
+![attempt3_ME](figs/ME_models_V3.png)

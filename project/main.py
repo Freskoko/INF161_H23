@@ -80,8 +80,8 @@ if __name__ == "__main__":
     # with open(f"{directory}/split_dict.json", 'w') as f:
     #     json.dumps(split_dict)
 
-    # model_dict = train_models(split_dict)
-    train_best_model(split_dict)
+    model_dict = train_models(split_dict)
+    # train_best_model(split_dict)
 
     #:warning: GRAPHING TAKES A WHILE!
 

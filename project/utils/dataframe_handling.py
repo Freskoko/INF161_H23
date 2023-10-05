@@ -1,5 +1,6 @@
 import pandas as pd
 from matplotlib import pyplot as plt
+from sklearn.discriminant_analysis import StandardScaler
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
 
@@ -82,6 +83,10 @@ def feauture_engineer(df):
         "05-17",
         "05-18",
     ]
+
+    #add coloumn for rain if air pressure is higher than 1050
+    #https://geo.libretexts.org/Bookshelves/Oceanography/Oceanography_101_(Miracosta)/08%3A_Atmospheric_Circulation/8.08%3A_How_Does_Air_Pressure_Relate_to_Weather
+    df["raining"] = df["Lufttrykk"] <= 992
 
     # change public holiday to int
     df["public_holiday"] = df.index.strftime("%m-%d").isin(holidays).astype(int)
@@ -190,7 +195,21 @@ def normalize_cols(df):
     #"Globalstraling"
     
     scaler = MinMaxScaler()
-    df[["Globalstraling", "Lufttrykk"]] = scaler.fit_transform(df[["Globalstraling", "Lufttrykk"]])
+    df[["Globalstraling", 
+        "Lufttrykk",
+        "Solskinstid",
+        "Vindkast"
+
+        ]] = scaler.fit_transform(df[[
+        "Globalstraling", 
+        "Lufttrykk",
+        "Solskinstid",
+        "Vindkast"
+        ]])
+
+    #change vindkast to be an expoential scale
+    df["Vindkast"] = df["Vindkast"]**2
+
     return df
 
 
