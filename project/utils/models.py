@@ -148,7 +148,7 @@ def train_models_loop(split_dict: dict):
 
     models = []
 
-    for i in range(130,251,10):
+    for i in range(140,250,5):
         model = {
         "model_type": RandomForestRegressor,
         "settings": {"n_estimators": i, "random_state": RANDOM_STATE},

@@ -687,9 +687,12 @@ df["winter"] = (df["month"] >= 10) | (df["month"] <= 2)
 
 ### ATTEMPT 12:
 
-
-
-
+                                          model_name  mse_values
+3  RandomForestRegressor_{'n_estimators': 215, 'r...   25.266064
+2  RandomForestRegressor_{'n_estimators': 190, 'r...   25.268575
+1  RandomForestRegressor_{'n_estimators': 165, 'r...   25.269830
+4  RandomForestRegressor_{'n_estimators': 240, 'r...   25.270180
+0  RandomForestRegressor_{'n_estimators': 140, 'r...   25.270511
 
 
 
