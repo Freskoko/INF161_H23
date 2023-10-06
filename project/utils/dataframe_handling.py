@@ -57,7 +57,7 @@ def feauture_engineer(df):
     df["weekend"] = (df.index.weekday >= 5).astype(int)
 
     # THIS COULD NOT BE DONE - CHECK README
-    # ------------------
+    # ------------------    
     # add the hour values of the previous row, this can be a good indicator
     # df["Last_Danmarksplass"] = df["Trafikkmengde_Totalt_i_retning_Danmarksplass"].shift(
     # 1
@@ -86,17 +86,22 @@ def feauture_engineer(df):
 
     #add coloumn for rain if air pressure is higher than 1050
     #https://geo.libretexts.org/Bookshelves/Oceanography/Oceanography_101_(Miracosta)/08%3A_Atmospheric_Circulation/8.08%3A_How_Does_Air_Pressure_Relate_to_Weather
-    df["raining"] = df["Lufttrykk"] <= 992
+    df["raining"] = df["Lufttrykk"] <= 996
+
+    #add seasons
+    df["summer"] = (df["month"] > 5) & (df["month"] < 8)
+
+    df["winter"] = (df["month"] >= 10) | (df["month"] <= 2)
+
+    #add when we expect a lot of traffic
+    df["rush_hour"] = ((df["hour"].between(7,9)) | (df["hour"].between(15,17)))
+
+    df["sleeptime"] = df["hour"].between(22,6)
 
     # change public holiday to int
     df["public_holiday"] = df.index.strftime("%m-%d").isin(holidays).astype(int)
 
-    # feature engineering (the shift to get data from last row)
-    # leads to some missing values,
-    # ex first row which has nothing to shift from, so we remove this.
-
-    # drop of like 2 rows where there is no .shift value
-    # (row 0 cant get a value from row -1)
+    #we cant train where there are no traffic values
     df = df.dropna(subset=["Trafikkmengde_Totalt_i_retning_Florida"])
 
     # add combo of total trafikk
@@ -198,13 +203,11 @@ def normalize_cols(df):
     df[["Globalstraling", 
         "Lufttrykk",
         "Solskinstid",
-        "Vindkast"
 
         ]] = scaler.fit_transform(df[[
         "Globalstraling", 
         "Lufttrykk",
         "Solskinstid",
-        "Vindkast"
         ]])
 
     #change vindkast to be an expoential scale

@@ -583,3 +583,113 @@ KNeighborsRegressor
 
 ![attempt3_MSE](figs/MSE_models_V3.png)
 ![attempt3_ME](figs/ME_models_V3.png)
+
+### ATTEMPT 9: 
+
+ADDED RUSH HOUR, SUMMER
+
+vindkast is vindkast **2
+
+Test MSE: 632.407599193798
+Test RMSE: 25.14771558598908
+
+           Feature  Importance
+19       rush_hour    0.328055
+16         weekend    0.183390
+7             hour    0.169753
+2   Lufttemperatur    0.117076
+15           month    0.049614
+0   Globalstraling    0.032174
+3        Lufttrykk    0.025406
+4         Vindkast    0.020498
+1      Solskinstid    0.013090
+18          summer    0.012090
+5    Vindretning_x    0.011510
+6    Vindretning_y    0.010939
+20  public_holiday    0.009407
+8         d_Friday    0.007850
+9         d_Monday    0.002454
+12      d_Thursday    0.002317
+13       d_Tuesday    0.001860
+14     d_Wednesday    0.001442
+17         raining    0.000699
+10      d_Saturday    0.000192
+11        d_Sunday    0.000185
+
+### ATTEMPT 10:
+
+CHANGED SUMMER TO BE SHORTER
+
+Test MSE: 629.7359126745486
+Test RMSE: 25.09453949915297
+           Feature  Importance
+19       rush_hour    0.328055
+16         weekend    0.183387
+7             hour    0.169728
+2   Lufttemperatur    0.117031
+15           month    0.049658
+0   Globalstraling    0.032303
+3        Lufttrykk    0.025368
+4         Vindkast    0.020541
+1      Solskinstid    0.013105
+18          summer    0.012024
+5    Vindretning_x    0.011449
+6    Vindretning_y    0.010956
+20  public_holiday    0.009407
+8         d_Friday    0.007858
+9         d_Monday    0.002472
+12      d_Thursday    0.002318
+13       d_Tuesday    0.001871
+14     d_Wednesday    0.001443
+17         raining    0.000646
+10      d_Saturday    0.000194
+11        d_Sunday    0.000185
+
+### ATTEMPT 11:
+
+CHANGED N_ESTIMATORS TO 200
+
+Test MSE: 629.7531801000669
+Test RMSE: 25.094883544261904
+
+           Feature  Importance
+19       rush_hour    0.327729
+16         weekend    0.183519
+7             hour    0.169785
+2   Lufttemperatur    0.117006
+15           month    0.049490
+0   Globalstraling    0.032485
+3        Lufttrykk    0.025322
+4         Vindkast    0.020434
+1      Solskinstid    0.013225
+18          summer    0.012080
+5    Vindretning_x    0.011444
+6    Vindretning_y    0.010980
+20  public_holiday    0.009454
+8         d_Friday    0.007910
+9         d_Monday    0.002455
+12      d_Thursday    0.002306
+13       d_Tuesday    0.001889
+14     d_Wednesday    0.001458
+17         raining    0.000649
+10      d_Saturday    0.000195
+11        d_Sunday    0.000183
+
+
+
+### ATTEMPT 11:
+
+df["sleeptime"] = df["hour"].between(22,6)
+
+df["winter"] = (df["month"] >= 10) | (df["month"] <= 2)
+
+![attempt8_ME](figs/ME_models_V8.png)
+
+### ATTEMPT 12:
+
+
+
+
+
+
+

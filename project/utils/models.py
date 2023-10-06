@@ -4,12 +4,14 @@ from pathlib import Path
 
 import pandas as pd
 import plotly.express as px
+from sklearn.dummy import DummyRegressor
 from sklearn.ensemble import GradientBoostingRegressor, RandomForestRegressor
 from sklearn.linear_model import ElasticNet, Lasso, LogisticRegression
 from sklearn.metrics import mean_squared_error
 from sklearn.neighbors import KNeighborsRegressor
 # from sklearn.metrics import accuracy_score, log_loss, mezan_squared_error
 from sklearn.svm import SVC, SVR
+from sklearn.tree import DecisionTreeRegressor
 
 RANDOM_STATE = 2
 PWD = Path().absolute()
@@ -37,23 +39,56 @@ def train_models(split_dict: dict):
     # det er kult, men kanskje litt vel overkomplisert
 
     models = [
+
+        {
+                    "model_type": DummyRegressor,
+            "settings": {},
+        },
         # {"model_type": GaussianProcessRegressor, "settings": {"alpha": 300, "random_state":RANDOM_STATE}},
         # {"model_type": MultinomialNB,"settings": {}},
-        {"model_type": LogisticRegression, "settings": {}},
-        {"model_type": Lasso, "settings": {"alpha": 300, "random_state": RANDOM_STATE}},
+        # {"model_type": LogisticRegression, "settings": {}},
+        # {"model_type": Lasso, "settings": {"alpha": 300, "random_state": RANDOM_STATE}},
+        # {
+        #     "model_type": RandomForestRegressor,
+        #     "settings": {"n_estimators": 100, "random_state": RANDOM_STATE},
+        # }, 
+        # {
+        #     "model_type": ElasticNet,
+        #     "settings": {"alpha": 1500, "random_state": RANDOM_STATE},
+        # },
+        # {"model_type": SVR, "settings": {"degree": 2}},
+        # {"model_type": SVC, "settings": {}},
+        # {"model_type": GradientBoostingRegressor, "settings": {"n_estimators": 100, "learning_rate": 0.1, "random_state": RANDOM_STATE}},
+    # {"model_type": XGBRegressor, "settings": {"n_estimators": 100, "learning_rate": 0.1, "max_depth": 5, "random_state": RANDOM_STATE}},
+
         {
             "model_type": RandomForestRegressor,
-            "settings": {"n_estimators": 100, "random_state": RANDOM_STATE},
-        },  # hadde n_estimators på 1000, da funker an bra men tar sykt lang tid
-        {
-            "model_type": ElasticNet,
-            "settings": {"alpha": 1500, "random_state": RANDOM_STATE},
+            "settings": {"n_estimators": 151, "random_state": RANDOM_STATE},
         },
-        {"model_type": SVR, "settings": {"degree": 2}},
-        {"model_type": SVC, "settings": {}},
-        {"model_type": GradientBoostingRegressor, "settings": {"n_estimators": 100, "learning_rate": 0.1, "random_state": RANDOM_STATE}},
-    # {"model_type": XGBRegressor, "settings": {"n_estimators": 100, "learning_rate": 0.1, "max_depth": 5, "random_state": RANDOM_STATE}},
-        {"model_type": KNeighborsRegressor, "settings": {"n_neighbors": 5}}
+
+        {
+            "model_type": RandomForestRegressor,
+            "settings": {"n_estimators": 50, "random_state": RANDOM_STATE},
+        },
+
+        {
+            "model_type": RandomForestRegressor,
+            "settings": {"n_estimators": 200, "random_state": RANDOM_STATE},
+        },
+        
+        {"model_type": KNeighborsRegressor, "settings": {"n_neighbors": 5}},
+
+        {"model_type": KNeighborsRegressor, "settings": {"n_neighbors": 50}},
+
+        {"model_type": KNeighborsRegressor, "settings": {"n_neighbors": 100}},
+
+        {"model_type":DecisionTreeRegressor,"settings":{"max_depth":12}},
+
+        {"model_type":DecisionTreeRegressor,"settings":{"max_depth":50}},
+
+        {"model_type":DecisionTreeRegressor,"settings":{"max_depth":100}},
+
+       
     ]
 
     model_strings = []
@@ -61,7 +96,7 @@ def train_models(split_dict: dict):
     clf_vals = []
 
     for mod in models:
-        print(f"Training model type: {str(mod['model_type'])}")
+        print(f"Training model type: {mod['model_type'].__name__}_{mod['settings']}")
         clf = mod["model_type"](**mod["settings"])  # henter ut settings her
         clf.fit(X_train, y_train)
 
@@ -71,45 +106,103 @@ def train_models(split_dict: dict):
         pf_mse = mean_squared_error(y_val, y_predicted, squared=True)
 
         mse_values_models.append(pf_mse)
-        model_strings.append(str(mod["model_type"]))
+        model_strings.append(f"{mod['model_type'].__name__}_{mod['settings']}")
         clf_vals.append(clf)
 
+
     data_models = pd.DataFrame(
-        {"model_name": model_strings, "mse_values": mse_values_models}
+        {
+            "model_name": model_strings,
+            "mse_values": [sqrt(i) for i in mse_values_models]
+        }
     )
+
 
     fig = px.bar(
         data_models,
         x="model_name",
         y="mse_values",
         title="MSE values for different models",
-        labels={"x": "Model", "y": "Mean Squared Error"},
-    )
-
-    fig.write_image(f"{PWD}/MSE_models_V3.png")
-
-    data_models = pd.DataFrame(
-        {
-            "model_name": model_strings,
-            "mse_values": [sqrt(i) for i in mse_values_models],
-        }
-    )
-
-    fig = px.bar(
-        data_models,
-        x="model_name",
-        y="mse_values",
-        title="ME values for different models",
         labels={"x": "Model", "y": "Mean Error"},
+        text=data_models['mse_values'].round(3)
     )
+    fig.update_traces(textposition='auto')
 
-    fig.write_image(f"{PWD}/ME_models_V3.png")
+    fig.write_image(f"{PWD}/figs/MSE_models_V9.png")
 
     print("Done training!")
 
     model_dict = dict(zip(model_strings, clf_vals))
 
     return model_dict
+
+def train_models_loop(split_dict: dict):
+
+    X_train = split_dict["x_train"]
+    y_train = split_dict["y_train"]
+    X_test = split_dict["x_test"]
+    y_test = split_dict["y_test"]
+    X_val = split_dict["x_val"]
+    y_val = split_dict["y_val"]
+
+
+    models = []
+
+    for i in range(130,251,10):
+        model = {
+        "model_type": RandomForestRegressor,
+        "settings": {"n_estimators": i, "random_state": RANDOM_STATE},
+        }
+        models.append(model)
+
+
+    model_strings = []
+    mse_values_models = []
+    clf_vals = []
+
+    for mod in models:
+        print(f"Training model type: {mod['model_type'].__name__}_{mod['settings']}")
+        clf = mod["model_type"](**mod["settings"])  # henter ut settings her
+        clf.fit(X_train, y_train)
+
+        y_predicted = clf.predict(X_val)
+
+        # finn mse
+        pf_mse = mean_squared_error(y_val, y_predicted, squared=True)
+
+        mse_values_models.append(pf_mse)
+        model_strings.append(f"{mod['model_type'].__name__}_{mod['settings']}")
+        clf_vals.append(clf)
+
+
+    data_models = pd.DataFrame(
+        {
+            "model_name": model_strings,
+            "mse_values": [sqrt(i) for i in mse_values_models]
+        }
+    )
+
+    print(data_models.sort_values(by='mse_values'))
+
+
+    fig = px.bar(
+        data_models,
+        x="model_name",
+        y="mse_values",
+        title="MSE values for different models",
+        labels={"x": "Model", "y": "Mean Error"},
+        text=data_models['mse_values'].round(3)
+    )
+    fig.update_traces(textposition='auto')
+
+    fig.write_image(f"{PWD}/figs/MSE_models_V9.png")
+
+    print("Done training!")
+
+    model_dict = dict(zip(model_strings, clf_vals))
+
+    return model_dict
+
 
 
 def train_best_model(split_dict: dict):
@@ -121,8 +214,8 @@ def train_best_model(split_dict: dict):
     y_test = split_dict["y_test"]
     X_val = split_dict["x_val"]
     y_val = split_dict["y_val"]
-
-    best_model = RandomForestRegressor(n_estimators=151, random_state=RANDOM_STATE)
+    #151
+    best_model = RandomForestRegressor(n_estimators=200, random_state=RANDOM_STATE)
     best_model.fit(X_train, y_train)
 
     y_test_predicted = best_model.predict(X_test)
