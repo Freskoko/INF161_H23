@@ -11,7 +11,7 @@ from utils.dataframe_handling import (
     trim_outliers,
 )
 from utils.file_parsing import treat_florida_files, treat_trafikk_files
-from utils.graphing import create_covariance_matrix, graph_a_vs_b, graph_df
+from utils.graphing import create_covariance_matrix, graph_a_vs_b, graph_all_models, graph_df
 from utils.models import train_best_model, train_models, train_models_loop
 
 # get current filepath to use when opening/saving files
@@ -55,11 +55,14 @@ def main():
     print("LENGTH = ")
     print(len(df_final.index))
 
+    graph_all_models(training_df)
+
     # divide data into training,test and validation
     split_dict, training_df, test_df, validation_df = train_test_split_process(df_final)
 
     #have a look
-    print(training_df)
+    #:warning: GRAPHING TAKES A WHILE!
+    # print(training_df)
 
     return split_dict, training_df, test_df, validation_df
 
@@ -74,23 +77,12 @@ if __name__ == "__main__":
     training_df.to_csv(f"{directory}/main_training_data.csv")
     test_df.to_csv(f"{directory}/main_test_data.csv")
     validation_df.to_csv(f"{directory}/main_validation_data.csv")
-    # with open(f"{directory}/split_dict.json", 'w') as f:
-    #     json.dumps(split_dict)
 
     model_dict = train_models_loop(split_dict)
     # model_dict = train_models(split_dict)
     # train_best_model(split_dict)
 
-    #:warning: GRAPHING TAKES A WHILE!
+    
+    
 
-    # create_covariance_matrix(main_df)
-    # graph_a_vs_b(main_df, "Globalstraling", "Total_trafikk","stråling"      , "antall sykler")
-    # graph_a_vs_b(main_df, "Solskinstid", "Total_trafikk"   ,"solskinn"      , "antall sykler")
-    # graph_a_vs_b(main_df, "Lufttemperatur", "Total_trafikk","grader celcius", "antall sykler")
-    # graph_a_vs_b(main_df, "Vindretning_x", "Total_trafikk"   , "Grader"       , "antall sykler")
-    # graph_a_vs_b(main_df, "Vindretning_y", "Total_trafikk"   , "Grader"       , "antall sykler")
-    # graph_a_vs_b(main_df, "Vindretning", "Total_trafikk"   , "Grader"       , "antall sykler")
-    # graph_a_vs_b(main_df, "Vindstyrke", "Total_trafikk"    , "Vind"         , "antall sykler")
-    # graph_a_vs_b(main_df, "Lufttrykk", "Total_trafikk"     ,"hPa"           , "antall sykler")
-    # graph_a_vs_b(main_df, "Vindkast", "Total_trafikk"      ,"m/s"           , "antall sykler")
-    # graph_df(main_df)
+
