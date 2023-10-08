@@ -79,6 +79,7 @@ if __name__ == "__main__":
     split_dict, training_df, test_df, validation_df = main()
 
     model_dict = find_hyper_param(split_dict)
+    # model_dict = train_models(split_dict)
     assert False
 
     #:warning: GRAPHING TAKES A WHILE!

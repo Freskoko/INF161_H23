@@ -10,7 +10,6 @@ from sklearn.ensemble import GradientBoostingRegressor, RandomForestRegressor
 from sklearn.gaussian_process import GaussianProcessRegressor
 from sklearn.linear_model import ElasticNet, Lasso, LogisticRegression
 from sklearn.metrics import mean_squared_error
-from sklearn.naive_bayes import MultinomialNB
 from sklearn.neighbors import KNeighborsRegressor
 from sklearn.svm import SVC, SVR
 from sklearn.tree import DecisionTreeRegressor
@@ -38,22 +37,17 @@ def train_models(split_dict: dict) -> dict:
     # models are saved as dicts in a list
     models = [
         {"model_type": DummyRegressor, "settings": {}},
-        {
-            "model_type": GaussianProcessRegressor,
-            "settings": {"alpha": 300, "random_state": RANDOM_STATE},
-        },
-        {"model_type": LogisticRegression, "settings": {}},
-        {"model_type": Lasso, "settings": {"alpha": 300, "random_state": RANDOM_STATE}},
+
+        {"model_type": Lasso, "settings": {"alpha": 100, "random_state": RANDOM_STATE}},
         {
             "model_type": RandomForestRegressor,
             "settings": {"n_estimators": 100, "random_state": RANDOM_STATE},
         },
         {
             "model_type": ElasticNet,
-            "settings": {"alpha": 1500, "random_state": RANDOM_STATE},
+            "settings": {"alpha": 100, "random_state": RANDOM_STATE},
         },
         {"model_type": SVR, "settings": {"degree": 2}},
-        {"model_type": SVC, "settings": {}},
         {
             "model_type": GradientBoostingRegressor,
             "settings": {
@@ -64,11 +58,11 @@ def train_models(split_dict: dict) -> dict:
         },
         {
             "model_type": RandomForestRegressor,
-            "settings": {"n_estimators": 100, "random_state": RANDOM_STATE},
+            "settings": {"n_estimators": 50, "random_state": RANDOM_STATE},
         },
         {
             "model_type": RandomForestRegressor,
-            "settings": {"n_estimators": 151, "random_state": RANDOM_STATE},
+            "settings": {"n_estimators": 15, "random_state": RANDOM_STATE},
         },
         {
             "model_type": RandomForestRegressor,
@@ -121,7 +115,7 @@ def train_models(split_dict: dict) -> dict:
     )
     fig.update_traces(textposition="auto")
 
-    fig.write_image(f"{PWD}/figs/MSE_models_V10.png")
+    fig.write_image(f"{PWD}/figs/MANYMODELS_MSE.png")
 
     model_dict = dict(zip(model_strings, clf_vals))
 
@@ -142,7 +136,9 @@ def find_hyper_param(split_dict: dict) -> dict:
 
     models = []
 
-    for i in range(130, 201, 15):
+    for i in range(1, 351, 50):
+        if i == 0:
+            i = 1
         model = {
             "model_type": RandomForestRegressor,
             "settings": {"n_estimators": i, "random_state": RANDOM_STATE},
@@ -189,7 +185,7 @@ def find_hyper_param(split_dict: dict) -> dict:
     )
     fig.update_traces(textposition="auto")
 
-    fig.write_image(f"{PWD}/figs/MSE_hyperparam_models_V1.png")
+    fig.write_image(f"{PWD}/figs/MSE_hyperparam_models_V2.png")
 
     logger.info("Done training hyperparameter models!")
 
