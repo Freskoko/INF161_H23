@@ -1,5 +1,7 @@
 # README for INF161 data parsing
 
+***Please open me in markdown formatting (in vscode there is a button in the top right!)***
+
 This README explains issues met, decisons made, and features added, for the entire INF161 project this fall.
 
 # Data exploration:
@@ -148,9 +150,6 @@ Splitting this variable up will be useful i hope.
 - Most variables here are useful
 
 
-# Important decisons
-
-#TODO
 
 # Feature engineering
 
@@ -191,12 +190,78 @@ Range: 0/1
 
 -----------------------------------
 
+- *Raining*
+<p> From the air pressure, a 0/1 coloumn for if it is raining or not was added. Rain and air pressure are not directly linked, but it may be possible to guess weather from air pressure. Reference:
+
+[Rain link]("https://geo.libretexts.org/Bookshelves/Oceanography/Oceanography_101_(Miracosta)/08%3A_Atmospheric_Circulation/8.08%3A_How_Does_Air_Pressure_Relate_to_Weather)
+
+</p>
+Range: 0/1
+
+-----------------------------------
+
+- *Summer*
+<p> From the months, a 0/1 coloumn that specificed if it is summer or not was added (June-July)
+
+</p>
+Range: 0/1
+
+-----------------------------------
+
+- *Winter*
+<p> From the months, a 0/1 coloumn that specificed if it is summer or not was added (October-Feburary)
+
+</p>
+Range: 0/1
+
+-----------------------------------
+
+- *Rush hour*
+<p> From the months, a 0/1 coloumn that specificed if the hour is a rush hour (7-9 and 15-17)
+
+</p>
+Range: 0/1
+
+-----------------------------------
+
+- *Nightime*
+<p> From the months, a 0/1 coloumn that specificed if the hour is in the middle of the night (22-6)
+
+</p>
+Range: 0/1
+
+-----------------------------------
+
+- *Vindretning_x/Vindretning_y*
+<p> Vindretning contains values between 0-360, and these are transformed to points on a circle
+
+```python
+
+    df["Vindretning_radians"] = np.radians(df["Vindretning"])
+    df["Vindretning_x"] = np.cos(df["Vindretning_radians"])
+    df["Vindretning_y"] = np.sin(df["Vindretning_radians"])
+
+```
+
+</p>
+Range: -1/1
+
+-----------------------------------
+
+- *Total_trafikk*
+<p> The numbers for the two rows of traffic were combined to one. 
+
+</p>
+Range: N/A
+
+-----------------------------------
+
 ### Considered Features that were dropped
 
 - *Total traffic in retning danmarkplass*,
 - *Total traffic in retning florida*,
 
-<p> The reason adding this coloumn doesnt work is, well, if we know how much traffic there is, there is no point in guessing how much traffic there is
+<p> The reason adding this coloumn doesnt work is, well, if we know how much traffic there is, there is no point in guessing how much traffic there is. 
 </p>
 
 Range: 0/?
@@ -217,7 +282,7 @@ Range: 0/?
 -----------------------------------
 - *Day in month*
 
-<p> This coloumn would tell us what day in the month it is, but this is a bit overkill considering the other values we have, and i dont expect traffic to fluctuate a lot betwene the start and the end of the month.
+<p> This coloumn would tell us what day in the month it is, but this is a bit overkill considering the other values we have, and i dont expect traffic to fluctuate a lot between the start and the end of the month.
 </p>
 
 Range : 1-31
@@ -351,23 +416,63 @@ The discrepency in length comes from severe outliers.
 When dropping unreasonable values in ```dataframe_handling.py```
 
 ### Dropped values
+
+- *Globalstråling*
+
 <p> When values above 1000 in **Globalstraling** are dropped, </p>
 114 rows are lost
 
+This value was chosen because values over this are only observed "ved atmosfærenses yttergrense"
+
+[ref]("https://veret.gfi.uib.no/") 
+
+- *Solskinnstid*
+
 <p>
 When values above 10.01 in **Solskinstid** are dropped </p>
-18 rows are lost
+18 rows are lost, this scale is between 0-10
+
+[ref]("https://veret.gfi.uib.no/") 
+
+- *Lufttrykk*
 
 <p>
-When values above 50 in **Lufttemperatur** are dropped </p>
+When values above 1050 in **Lufttrykk** are dropped </p>
+0 rows are lost.
+
+935 and 1050 are the min/max records of all time. 
+
+[ref]("https://en.wikipedia.org/wiki/List_of_atmospheric_pressure_records_in_Europe") 
+
+
+- *Luftemperatur*
+
+<p>
+When values above 37 in **Lufttemperatur** are dropped </p>
 482 values are lost.
 
-114 + 18 + 482 = 614 
+Over 37 degrees is not realistic for norway, as the warmest ever recorded was 35.6 degrees
 
-**NOTE**
-<p> 
-There are valdiation to check for outliers in other rows, but none of these drop values
-</p> 
+[ref]("https://no.wikipedia.org/wiki/Norske_v%C3%A6rrekorder") 
+
+- *Vindkast*
+
+<p>
+When values above 65 in **Vindkast** are dropped </p>
+0 values are lost. So no difference.
+
+Over 65m/s is not realistic for norway, as the highest value ever recorded was 64,7m/s
+
+[ref]("https://no.wikipedia.org/wiki/Norske_v%C3%A6rrekorder") 
+
+- *Vindretning*
+
+<p>
+When values above 360 in **Vindretning** are dropped </p>
+--- values are lost.
+
+Since vindretning is measured from 0-360, there is no way a degrees of more than 360 could be measured.
+
 
 ### Splitting data into train,test,validation
 
@@ -383,6 +488,86 @@ This was done using ```train_test_split()```
 from ```sklearn.model_selection```
     
 
+### Normalized values
+
+
+- *Globalstraling*
+
+<p>
+These values are between 0-1000, and could therefore be normalized to a 0-1 scale without much data loss
+<p>
+
+- *Luftrykk*
+
+<p>
+These values are between 940-1050, and normalizing these values to a 0-1 scale could help the model understand the numbers.
+<p>
+
+- *Solskinnstid*
+
+<p>
+These values are between 0-10, and could therefore be normalized to a 0-1 scale without much data loss
+<p>
+
+- *Vindkast*
+
+["graph"]("figs/VindkastVSTotal_trafikk.png")
+
+<p>
+These values are between 0-25, but there is a clear link between high vindkast and low traffic, so by squaring the values of vindkast could help the model understand that higher numbers mean a large descrease in traffic, while lower numbers do not have an effect on traffic.
+
+### Dropped coloumns
+
+- *Vindstyrke*
+
+<p>
+Vindstyrke and vindkast have a high degree of correlation, and statistically, it is like having the same variable two times. The two variables also have a very similar correlation with traffic amounts. Vindstyrke was dropped, as vindkast had a slightly higher correlation to traffic. 
+<p>
+
+- *Vindretning/Vindretning_radians*
+
+<p>
+These have been transformed to Vindretning_x and Vindretning_y which provide more information about the variables.
+<p>
+
+- *Relativ luftfuktighet*
+
+<p>
+Drop "Relativ luftfuktighet" as this data only exists in 2022 and 2023. While this would be very valuable, its hard to train a dataset with a lot of missing data. 
+<p>
+
+- *Data in traffic files*
+
+``` json
+
+    columns=[
+        "Trafikkregistreringspunkt",
+        "Navn",
+        "Vegreferanse",
+        "Fra",
+        "Til",
+        "Dato",
+        "Fra tidspunkt",
+        "Til tidspunkt",
+        "Dekningsgrad (%)",
+        "Antall timer total",
+        "Antall timer inkludert",
+        "Antall timer ugyldig",
+        "Ikke gyldig lengde",
+        "Lengdekvalitetsgrad (%)",
+        "< 5,6m",
+        ">= 5,6m",
+        "5,6m - 7,6m",
+        "7,6m - 12,5m",
+        "12,5m - 16,0m",
+        ">= 16,0m",
+        "16,0m - 24,0m",
+        ">= 24,0m",
+    ]
+
+```
+
+These coloumns do not really tell us much, and could really just confuse the model. 
 
 
 

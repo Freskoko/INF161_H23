@@ -1,19 +1,26 @@
 import time
+from loguru import logger
 
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 import seaborn as sns
 from scipy.stats import spearmanr
 
-# visualisere vær vs trafikk -> se hva som trengs
+def graph_a_vs_b(df: pd.DataFrame, a:str , b:str , alabel: str, blabel: str) -> None:
+    """
+    General function to plot two items in a dataframe against eachother
 
+    Also calculates spearmann and pearson correlation between the two values
+    """
 
-def graph_a_vs_b(df, a, b, alabel, blabel):
+    # see limits on data
     print(f" fig working on graphing '{a} vs {b}'")
     print(f"{a} looks like :")
     print(f"max {a} is {max(df[a])}")
     print(f"min {a} is {min(df[a])}")
 
+    # Set limits on x - axis to limits + 5 in order to see range of data
     start_time = time.time()
     plt.xlim([min(df[a]) - 5, max(df[a]) + 5])  # x axis limits
     plt.figure(figsize=(15, 7))
@@ -22,27 +29,41 @@ def graph_a_vs_b(df, a, b, alabel, blabel):
     plt.xlabel(f"{a} ({alabel})")
     plt.ylabel(f"{b} ({blabel})")
     plt.suptitle(f"{a} vs {b} ")
+
+    #Calculate spearmann/pearson correlation to see if trends observed visually also can be seen statistically
+    pear  = round(pearson_r_corr(df[a],df[b]),4)
+    spear = round(spearman_rho_corr(df[a],df[b]),4)
+
     plt.title(
-        f"""pearson_corr = {round(pearson_r_corr(df[a],df[b]),4)} spearmann_corr = {round(spearman_rho_corr(df[a],df[b]),4)}"""
+        f"""pearson_corr = {pear} spearmann_corr = {spear}"""
     )
     plt.grid(True)
     plt.savefig(f"figs/{a}VS{b}")
+
+    # :warning: clear fig is very important as not clearing will cause many figs to be created ontop of eachother
     plt.clf()
     print(f"saved fig '{a} VS {b}' in figs")
     print(f"--- Graph took: {time.time() - start_time} seconds ---")
 
+    return
 
-def pearson_r_corr(a, b):
+
+def pearson_r_corr(a: float, b: float) -> float:
     corr = np.corrcoef(a, b)[0, 1]
     return corr
 
-
-def spearman_rho_corr(a, b):
+def spearman_rho_corr(a: float, b: float) -> float:
     corr, _ = spearmanr(a, b)
     return corr
 
 
-def graph_df(df):
+def graph_df(df: pd.DataFrame) -> None:
+    """
+    Graphs Trafikkmengde_Totalt_i_retning_Danmarksplass vs Traffic towards Danmarksplass.
+
+    This is to visualize how well the two lanes correlate.
+    
+    """
     plt.clf()
     plt.figure(figsize=(15, 7))
     plt.plot(
@@ -66,11 +87,15 @@ def graph_df(df):
     plt.grid(True)
     plt.legend()
     plt.savefig(f"figs/timeVStrafficBoth.png")
+    return None
 
 
-def create_covariance_matrix(df):
+def create_df_matrix(df: pd.DataFrame) -> None:
+    """
+    Function to create a covariance and correlation matrix for values in a dataframe
+    """
 
-    # drop uneeded cols:
+    # drop uneeded cols: #TODO
     df = df.drop(
         labels=[
             "d_Monday",
@@ -90,8 +115,7 @@ def create_covariance_matrix(df):
         inplace=False,
     )
 
-    print(df)
-
+    # calculate the covariance matrix
     cov_matrix = df.cov()
 
     # normalizing values between 0 and 1
@@ -100,13 +124,11 @@ def create_covariance_matrix(df):
     )
 
     plt.figure(figsize=(16, 16))
-    sns.heatmap(cov_matrix_normalized, cmap="YlGnBu")
+    sns.heatmap(cov_matrix_normalized, annot=True, cmap="RdBu", vmin=-1, vmax=1, center=0)
     plt.title("Covariance Matrix Heatmap")
     plt.savefig("figs/covv_matrix.png")
 
     plt.clf()
-
-    # --------------------------
 
     # calculate the correlation matrix
     corr_matrix = df.corr()
@@ -116,12 +138,12 @@ def create_covariance_matrix(df):
     plt.title("Correlation Matrix Heatmap")
     plt.savefig("figs/corr_matrix.png")
 
-    # return matrix
+    return
 
 
-def graph_all_models(main_df):
+def graph_all_models(main_df: pd.DataFrame) -> None:
 
-    create_covariance_matrix(main_df)
+    create_df_matrix(main_df)
     graph_a_vs_b(main_df, "Globalstraling", "Total_trafikk","stråling"      , "antall sykler")
     graph_a_vs_b(main_df, "Solskinstid", "Total_trafikk"   ,"solskinn"      , "antall sykler")
     graph_a_vs_b(main_df, "Lufttemperatur", "Total_trafikk","grader celcius", "antall sykler")
@@ -133,5 +155,5 @@ def graph_all_models(main_df):
     graph_a_vs_b(main_df, "Vindkast", "Total_trafikk"      ,"m/s"           , "antall sykler")
     graph_df(main_df)
     
-    print("Finished graphing!")
+    logger.info("Finished graphing!")
     return
