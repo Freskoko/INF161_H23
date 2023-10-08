@@ -13,17 +13,26 @@ This README pertains to the INF161 project this fall, in creating a model which 
 - update data loss parsing section
 
 - predict data for 2023 days 
+  - fix the dataframe for 2023 with the features too!
 
 - create website
 
+- conda and lock file
+
+- cleanup files that may not be used
+
+- run again since changed sleeptime
+
+- FEATURES TO ADD: 
+  - good weather and weekend
 
 
 # Data exploration:
-In figs, there are images presenting each of the coloums in the final data frame, plotted against the total amount of traffic.
+In src/figs, there are images presenting each of the coloums in the final data frame, plotted against the total amount of traffic.
 
 **SOME OF THE VALUES IN THIS ARE WRONG: THIS IS TO BE FIXED SEE TODO**
 -------------
-![globalstråling vs traffik](figs/GlobalstralingVSTotal_trafikk.png)
+![globalstråling vs traffik](src/figs/GlobalstralingVSTotal_trafikk.png)
 
 Looking at the *Globalstråling vs Total_trafikk* graph above, it is clear that there is some correlation between the two. The higher the "globalstråling", the less traffic, perhaps as 
 the weather is better, more people walk?
@@ -34,7 +43,7 @@ The spearmann correlation value of *0.4472* is a good sign, and the spearmann da
 This will be an important variable to use when making a model.
 
 -------------
-![lufttemperatur vs traffik](figs/LufttemperaturVSTotal_trafikk.png)
+![lufttemperatur vs traffik](src/figs/LufttemperaturVSTotal_trafikk.png)
 
 Looking at the *Lufttemperatur vs Total_trafikk* graph above, it is clear that there is a clear correlation between the two. The higher the "lufttemperatur", the more traffic as a result. 
 
@@ -44,7 +53,7 @@ The spearmann correlation value of *0.3124* is an OK sign, but the spearmann cor
 This will be an important variable to use when making a model.
 
 -------------
-![lufttrykk vs traffik](figs/LufttrykkVSTotal_trafikk.png)
+![lufttrykk vs traffik](src/figs/LufttrykkVSTotal_trafikk.png)
 
 Looking at the *Lufttrykk vs Total_trafikk* graph above, it is clear that there is a strong correlation between the two. It seems that a "middle" or average luft-trykk results in more traffic, but too high or too low, results in less traffic.
 
@@ -54,7 +63,7 @@ The spearmann correlation value of *0.0499* is an also a bad sign, but the spear
 This will be an important variable to use when predicting.
 
 -------------
-![Solskinstid vs traffik](figs/SolskinstidVSTotal_trafikk.png)
+![Solskinstid vs traffik](src/src/figs/SolskinstidVSTotal_trafikk.png)
 
 Looking at the *Solskinstid vs Total_trafikk* graph above, it is hard to say if there is a clear correlation between the two.
 It seems that when solskinstid = 0, there is a lot of traffic, which sound a bit unrealsitic?
@@ -65,7 +74,7 @@ It seems like the decrease in cyclicsts in regard to weather is very minimal.
 The spearmann correlation value of *0.3139* is a good sign, and the spearmann corr may be a good of an indicator as the pearson corr since this data is monotonic.
 
 -------------
-![Vindkast vs traffik](figs/VindkastVSTotal_trafikk.png)
+![Vindkast vs traffik](src/figs/VindkastVSTotal_trafikk.png)
 
 
 TODO: maybe expotnailly transofrm the data (opposite of log transform)
@@ -79,9 +88,9 @@ The spearmann correlation value of *0.1023* is a little better, but the spearman
 This will be an OK variable to use when predicting.
 
 -------------
-![Vindretning vs traffik](figs/VindretningVSTotal_trafikk.png)
-![Vindretning vs traffik](figs/Vindretning_xVSTotal_trafikk.png)
-![Vindretning vs traffik](figs/Vindretning_yVSTotal_trafikk.png)
+![Vindretning vs traffik](src/figs/VindretningVSTotal_trafikk.png)
+![Vindretning vs traffik](src/figs/Vindretning_xVSTotal_trafikk.png)
+![Vindretning vs traffik](src/figs/Vindretning_yVSTotal_trafikk.png)
 
 Looking at the *Vindretning vs Total_trafikk*  graph above, it is up for argument if there is a strong correlation between the two, but there is some data that can be useful.
 It seems that between x=100-350 values are pretty much consistent, however a drop is seen at around 250. Values between 100-0 are also very very low, and could be reflective of something else?
@@ -103,7 +112,7 @@ while *Vindretning_y* has a negative pearson_corr of -0.0989 and a negative spea
 While these numbers are not very high, it is an important distinction to make that the x, and y values are together, not so useful, but divided, they can help predict traffic values.
 
 -------------
-![Vindstyrke vs traffik](figs/VindstyrkeVSTotal_trafikk.png)
+![Vindstyrke vs traffik](src/figs/VindstyrkeVSTotal_trafikk.png)
 
 Looking at the *Vindstyrke vs Total_trafikk*  graph above, it is clear that there is a strong correlation between the two. It seems between x=0-7 values are mostly consistent in the y=500-450 range, but at x=10 to x=15, values drop fast! 
 
@@ -113,7 +122,7 @@ The spearmann correlation value of *0.0923* is a little better, and the data is 
 This will be an OK variable to use when predicting.
 
 -------------
-![FloridaDanmarksplass vs time](figs/timeVStrafficBoth.png)
+![FloridaDanmarksplass vs time](src/figs/timeVStrafficBoth.png)
 
 Looking at the *FloridaDanmarksplass vs time* graph above, it can be seen that the two variables are very correlated.
 
@@ -124,7 +133,7 @@ It is for this reason i have chosen to combine the two variables into one, as a 
 
 
 -------------
-![Corr matrix](figs/corr_matrix.png)
+![Corr matrix](src/figs/corr_matrix.png)
 
 Looking at the *Corr matrix* graph above, it tells us alot about the correlation between variables.
 
@@ -187,7 +196,7 @@ These values are between 0-10, and could therefore be normalized to a 0-1 scale 
 
 - *Vindkast*
 
-["graph"]("figs/VindkastVSTotal_trafikk.png")
+["graph"]("src/figs/VindkastVSTotal_trafikk.png")
 
 <p>
 These values are between 0-25, but there is a clear link between high vindkast and low traffic, so by squaring the values of vindkast could help the model understand that higher numbers mean a large descrease in traffic, while lower numbers do not have an effect on traffic.
@@ -420,7 +429,7 @@ Range: N/A
 <p> The reason adding this coloumn doesnt work is, well, if we know how much traffic there is, there is no point in guessing how much traffic there is. 
 </p>
 
-Range: 0/?
+Range: N/A
 
 -----------------------------------
 
@@ -433,7 +442,7 @@ The reason adding this coloumn doesnt work is that it is much harder to train th
 This could also be a big problem because if we guess wrong on the next traffic, that value will be brought with to the next row's guess, and further for ALL the rows, and if that value is wrong, well then ALL the guesses are potentially wrong. 
 </p>
 
-Range: 0/?
+Range: N/A
 
 -----------------------------------
 - *Day in month*
@@ -600,7 +609,7 @@ from ```sklearn.model_selection```
 
 
 
-![attempt1_MSE](figs/MANYMODELS_MSE.png)
+![attempt1_MSE](src/figs/MANYMODELS_MSE.png)
 
 One can see that RandomForestRegressor with n_estimators; 200 is the best model with a RMSE of 25.301.
 
@@ -608,7 +617,7 @@ One can see that RandomForestRegressor with n_estimators; 200 is the best model 
 
 After finding the best model, i tried finding hyper-parameters that worked well
 
-![hyperparam](figs/MSE_hyperparam_models_V1.png)
+![hyperparam](src/figs/MSE_hyperparam_models_V1.png)
 
 Seeminlgy, a higher n_estimators yeiled slightly better results. 
 

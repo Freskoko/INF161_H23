@@ -105,7 +105,7 @@ def feauture_engineer(df: pd.DataFrame) -> pd.DataFrame:
     df["rush_hour"] = (df["hour"].between(7, 9)) | (df["hour"].between(15, 17))
 
     # add when we do not expect a lot of traffic
-    df["sleeptime"] = df["hour"].between(22, 6)
+    df["sleeptime"] = (df["hour"] >= 22) | (df["hour"] < 6)
 
     # df["Vindretning"] is full of values 0-360, transform these to points on a circle
     df["Vindretning_radians"] = np.radians(df["Vindretning"])
