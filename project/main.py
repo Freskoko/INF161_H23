@@ -78,13 +78,12 @@ def main():
 if __name__ == "__main__":
     split_dict, training_df, test_df, validation_df = main()
 
-    model_dict = find_hyper_param(split_dict)
-    # model_dict = train_models(split_dict)
+    train_best_model(split_dict, test_data=True)
     assert False
 
     #:warning: GRAPHING TAKES A WHILE!
 
+    model_dict = find_hyper_param(split_dict)
     graph_all_models(training_df)
-    model_dict = train_models_loop(split_dict)
     model_dict = train_models(split_dict)
     train_best_model(split_dict)

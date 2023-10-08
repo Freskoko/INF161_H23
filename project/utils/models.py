@@ -37,7 +37,6 @@ def train_models(split_dict: dict) -> dict:
     # models are saved as dicts in a list
     models = [
         {"model_type": DummyRegressor, "settings": {}},
-
         {"model_type": Lasso, "settings": {"alpha": 100, "random_state": RANDOM_STATE}},
         {
             "model_type": RandomForestRegressor,
@@ -194,24 +193,29 @@ def find_hyper_param(split_dict: dict) -> dict:
     return model_dict
 
 
-def train_best_model(split_dict: dict) -> None:
+def train_best_model(split_dict: dict, test_data: bool) -> None:
     """
     Trains the model that performed best on validation data
     """
 
+    if test_data:
+        X_chosen = split_dict["x_test"]
+        y_chosen = split_dict["y_test"]
+    else:
+        X_chosen = split_dict["x_val"]
+        y_chosen = split_dict["y_val"]
+
     X_train = split_dict["x_train"]
     y_train = split_dict["y_train"]
-    X_test = split_dict["x_test"]
-    y_test = split_dict["y_test"]
 
     # BEST MODEL:
-    best_model = RandomForestRegressor(n_estimators=151, random_state=RANDOM_STATE)
+    best_model = RandomForestRegressor(n_estimators=200, random_state=RANDOM_STATE)
 
     best_model.fit(X_train, y_train)
 
-    y_test_predicted = best_model.predict(X_test)
+    y_test_predicted = best_model.predict(X_chosen)
 
-    test_mse = mean_squared_error(y_test, y_test_predicted)
+    test_mse = mean_squared_error(y_chosen, y_test_predicted)
     test_rmse = sqrt(test_mse)
 
     print("Test MSE:", test_mse)

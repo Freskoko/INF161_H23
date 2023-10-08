@@ -1,12 +1,27 @@
 # README for INF161 data parsing
 
-***Please open me in markdown formatting (in vscode there is a button in the top right!)***
+***If I'm not in PDF format, please open me in markdown formatting! (in vscode there is a button in the top right.)***
 
 This README pertains to the INF161 project this fall, in creating a model which can guess bike traffic across nygårdsbroen.
+
+### TODO
+
+- fix values in readme that have now been updated
+
+- evulate multiple models
+
+- update data loss parsing section
+
+- predict data for 2023 days 
+
+- create website
+
+
 
 # Data exploration:
 In figs, there are images presenting each of the coloums in the final data frame, plotted against the total amount of traffic.
 
+**SOME OF THE VALUES IN THIS ARE WRONG: THIS IS TO BE FIXED SEE TODO**
 -------------
 ![globalstråling vs traffik](figs/GlobalstralingVSTotal_trafikk.png)
 
@@ -148,6 +163,147 @@ Splitting this variable up will be useful i hope.
 - Remove *Vindstyrke* in favour of *Vindkast*
 - Remove *Vindretning* in favour of *Vindretning_x* and *Vindretning_y* 
 - Most variables here are useful
+
+### Normalized values
+
+
+- *Globalstraling*
+
+<p>
+These values are between 0-1000, and could therefore be normalized to a 0-1 scale without much data loss
+<p>
+
+- *Luftrykk*
+
+<p>
+These values are between 940-1050, and normalizing these values to a 0-1 scale could help the model understand the numbers.
+<p>
+
+- *Solskinnstid*
+
+<p>
+These values are between 0-10, and could therefore be normalized to a 0-1 scale without much data loss
+<p>
+
+- *Vindkast*
+
+["graph"]("figs/VindkastVSTotal_trafikk.png")
+
+<p>
+These values are between 0-25, but there is a clear link between high vindkast and low traffic, so by squaring the values of vindkast could help the model understand that higher numbers mean a large descrease in traffic, while lower numbers do not have an effect on traffic.
+
+### Dropped coloumns
+
+- *Vindstyrke*
+
+<p>
+Vindstyrke and vindkast have a high degree of correlation, and statistically, it is like having the same variable two times. The two variables also have a very similar correlation with traffic amounts. Vindstyrke was dropped, as vindkast had a slightly higher correlation to traffic. 
+<p>
+
+- *Vindretning/Vindretning_radians*
+
+<p>
+These have been transformed to Vindretning_x and Vindretning_y which provide more information about the variables.
+<p>
+
+- *Relativ luftfuktighet*
+
+<p>
+Drop "Relativ luftfuktighet" as this data only exists in 2022 and 2023. While this would be very valuable, its hard to train a dataset with a lot of missing data. 
+<p>
+
+- *Data in traffic files*
+
+``` json
+
+    columns=[
+        "Trafikkregistreringspunkt",
+        "Navn",
+        "Vegreferanse",
+        "Fra",
+        "Til",
+        "Dato",
+        "Fra tidspunkt",
+        "Til tidspunkt",
+        "Dekningsgrad (%)",
+        "Antall timer total",
+        "Antall timer inkludert",
+        "Antall timer ugyldig",
+        "Ikke gyldig lengde",
+        "Lengdekvalitetsgrad (%)",
+        "< 5,6m",
+        ">= 5,6m",
+        "5,6m - 7,6m",
+        "7,6m - 12,5m",
+        "12,5m - 16,0m",
+        ">= 16,0m",
+        "16,0m - 24,0m",
+        ">= 24,0m",
+    ]
+
+```
+
+These coloumns do not really tell us much, and could really just confuse the model. 
+
+
+### Dropped values
+
+- *Globalstråling*
+
+<p> When values above 1000 in **Globalstraling** are dropped, </p>
+114 rows are lost
+
+This value was chosen because values over this are only observed "ved atmosfærenses yttergrense"
+
+[ref]("https://veret.gfi.uib.no/") 
+
+- *Solskinnstid*
+
+<p>
+When values above 10.01 in **Solskinstid** are dropped </p>
+18 rows are lost, this scale is between 0-10
+
+[ref]("https://veret.gfi.uib.no/") 
+
+- *Lufttrykk*
+
+<p>
+When values above 1050 in **Lufttrykk** are dropped </p>
+0 rows are lost.
+
+935 and 1050 are the min/max records of all time. 
+
+[ref]("https://en.wikipedia.org/wiki/List_of_atmospheric_pressure_records_in_Europe") 
+
+
+- *Luftemperatur*
+
+<p>
+When values above 37 in **Lufttemperatur** are dropped </p>
+482 values are lost.
+
+Over 37 degrees is not realistic for norway, as the warmest ever recorded was 35.6 degrees
+
+[ref]("https://no.wikipedia.org/wiki/Norske_v%C3%A6rrekorder") 
+
+- *Vindkast*
+
+<p>
+When values above 65 in **Vindkast** are dropped </p>
+0 values are lost. So no difference.
+
+Over 65m/s is not realistic for norway, as the highest value ever recorded was 64,7m/s
+
+[ref]("https://no.wikipedia.org/wiki/Norske_v%C3%A6rrekorder") 
+
+- *Vindretning*
+
+<p>
+When values above 360 in **Vindretning** are dropped </p>
+--- values are lost.
+
+Since vindretning is measured from 0-360, there is no way a degrees of more than 360 could be measured.
+
 
 
 
@@ -347,6 +503,11 @@ the model should be able to predict fine with some data loss like this.
 ----------------
 
 # Data loss
+
+:warning: **THIS NEEDS TO BE UPDATED SINCE PARSING IS NOW A BIT DIFFERENT**
+
+
+
 **Below is a walkthrough of how the files have been treated, and where data loss comes would come from**
 
 The final *out_file.csv* has 64652 lines of data (before splitting into train,validation and test data)
@@ -413,65 +574,7 @@ This aligns almost quite nicely with our previous estimate of *64652* traffic da
 The discrepency in length comes from severe outliers.
 *65266 - 64652 = 614 lines too many*
 
-When dropping unreasonable values in ```dataframe_handling.py```
-
-### Dropped values
-
-- *Globalstråling*
-
-<p> When values above 1000 in **Globalstraling** are dropped, </p>
-114 rows are lost
-
-This value was chosen because values over this are only observed "ved atmosfærenses yttergrense"
-
-[ref]("https://veret.gfi.uib.no/") 
-
-- *Solskinnstid*
-
-<p>
-When values above 10.01 in **Solskinstid** are dropped </p>
-18 rows are lost, this scale is between 0-10
-
-[ref]("https://veret.gfi.uib.no/") 
-
-- *Lufttrykk*
-
-<p>
-When values above 1050 in **Lufttrykk** are dropped </p>
-0 rows are lost.
-
-935 and 1050 are the min/max records of all time. 
-
-[ref]("https://en.wikipedia.org/wiki/List_of_atmospheric_pressure_records_in_Europe") 
-
-
-- *Luftemperatur*
-
-<p>
-When values above 37 in **Lufttemperatur** are dropped </p>
-482 values are lost.
-
-Over 37 degrees is not realistic for norway, as the warmest ever recorded was 35.6 degrees
-
-[ref]("https://no.wikipedia.org/wiki/Norske_v%C3%A6rrekorder") 
-
-- *Vindkast*
-
-<p>
-When values above 65 in **Vindkast** are dropped </p>
-0 values are lost. So no difference.
-
-Over 65m/s is not realistic for norway, as the highest value ever recorded was 64,7m/s
-
-[ref]("https://no.wikipedia.org/wiki/Norske_v%C3%A6rrekorder") 
-
-- *Vindretning*
-
-<p>
-When values above 360 in **Vindretning** are dropped </p>
---- values are lost.
-
-Since vindretning is measured from 0-360, there is no way a degrees of more than 360 could be measured.
+When dropping unreasonable values in ```dataframe_handling.py```, see above sections for this. 
 
 
 ### Splitting data into train,test,validation
@@ -488,396 +591,96 @@ This was done using ```train_test_split()```
 from ```sklearn.model_selection```
     
 
-### Normalized values
+
+# RESULTS :
+
+**TODO**
+ - Er resultater av tre fundamentalt forskjellige modeller rapportert?
+ - Update graphs to be easier to read
 
 
-- *Globalstraling*
 
-<p>
-These values are between 0-1000, and could therefore be normalized to a 0-1 scale without much data loss
-<p>
+![attempt1_MSE](figs/MANYMODELS_MSE.png)
 
-- *Luftrykk*
+One can see that RandomForestRegressor with n_estimators; 200 is the best model with a RMSE of 25.301.
 
-<p>
-These values are between 940-1050, and normalizing these values to a 0-1 scale could help the model understand the numbers.
-<p>
+---------------------------
 
-- *Solskinnstid*
+After finding the best model, i tried finding hyper-parameters that worked well
 
-<p>
-These values are between 0-10, and could therefore be normalized to a 0-1 scale without much data loss
-<p>
+![hyperparam](figs/MSE_hyperparam_models_V1.png)
 
-- *Vindkast*
+Seeminlgy, a higher n_estimators yeiled slightly better results. 
 
-["graph"]("figs/VindkastVSTotal_trafikk.png")
+This may need to be explored further, but attempts to train past 250 n_estimators results in a slowed console and after a while the text "Killed", so i think that may be a warning. 
 
-<p>
-These values are between 0-25, but there is a clear link between high vindkast and low traffic, so by squaring the values of vindkast could help the model understand that higher numbers mean a large descrease in traffic, while lower numbers do not have an effect on traffic.
 
-### Dropped coloumns
+--------------------------
 
-- *Vindstyrke*
-
-<p>
-Vindstyrke and vindkast have a high degree of correlation, and statistically, it is like having the same variable two times. The two variables also have a very similar correlation with traffic amounts. Vindstyrke was dropped, as vindkast had a slightly higher correlation to traffic. 
-<p>
-
-- *Vindretning/Vindretning_radians*
-
-<p>
-These have been transformed to Vindretning_x and Vindretning_y which provide more information about the variables.
-<p>
-
-- *Relativ luftfuktighet*
-
-<p>
-Drop "Relativ luftfuktighet" as this data only exists in 2022 and 2023. While this would be very valuable, its hard to train a dataset with a lot of missing data. 
-<p>
-
-- *Data in traffic files*
-
-``` json
-
-    columns=[
-        "Trafikkregistreringspunkt",
-        "Navn",
-        "Vegreferanse",
-        "Fra",
-        "Til",
-        "Dato",
-        "Fra tidspunkt",
-        "Til tidspunkt",
-        "Dekningsgrad (%)",
-        "Antall timer total",
-        "Antall timer inkludert",
-        "Antall timer ugyldig",
-        "Ikke gyldig lengde",
-        "Lengdekvalitetsgrad (%)",
-        "< 5,6m",
-        ">= 5,6m",
-        "5,6m - 7,6m",
-        "7,6m - 12,5m",
-        "12,5m - 16,0m",
-        ">= 16,0m",
-        "16,0m - 24,0m",
-        ">= 24,0m",
-    ]
+After finding the best model and seeing how it worked on validation data, we can use the ```best_model.feature_importances_``` ouput to evaluate importance of coloumns.
 
 ```
-
-These coloumns do not really tell us much, and could really just confuse the model. 
-
-
-
-# RESULTS:
-
-### ATTEMPT 1: RandomForestRegressor was best on validation
-
-![attempt1_MSE](figs/MSE_models.png)
-![attempt1_ME](figs/ME_models.png)
-
-**Test MSE: 635.0193488252329**
-**Test RMSE: 25.199590251137675**
-
-### ATTEMPT 2:
-
-#CHANGES: - removed DateFormatted, and normalized some values
-
-![attempt2_MSE](figs/MSE_models_V2.png)
-![attempt2_ME](figs/ME_models_V2.png)
-
-**Test MSE: 635.0630707103542**
-**Test RMSE: 25.20045774803216**
-
-FEATURE IMPORTANCE: RANDOM FOREST REGRESSOR
-
            Feature  Importance
-7             hour    0.560084
-2   Lufttemperatur    0.121082
-16         weekend    0.117478
-15           month    0.057479
-0   Globalstraling    0.039347
-3        Lufttrykk    0.025139
-4         Vindkast    0.020246
-1      Solskinstid    0.011832
-6    Vindretning_y    0.011155
-5    Vindretning_x    0.011079
-17  public_holiday    0.008792
-8         d_Friday    0.007867
-9         d_Monday    0.002490
-12      d_Thursday    0.002128
-13       d_Tuesday    0.001868
-14     d_Wednesday    0.001548
-11        d_Sunday    0.000199
-10      d_Saturday    0.000188
+19       rush_hour    0.327215
+14         weekend    0.183384
+5             hour    0.169680
+2   Lufttemperatur    0.118050
+13           month    0.047983
+0   Globalstraling    0.030485
+3        Lufttrykk    0.023065
+4         Vindkast    0.019096
+21   Vindretning_x    0.016211
+22   Vindretning_y    0.014236
+1      Solskinstid    0.012497
+17          summer    0.012343
+15  public_holiday    0.009316
+6         d_Friday    0.007574
+7         d_Monday    0.002153
+10      d_Thursday    0.002080
+11       d_Tuesday    0.001653
+12     d_Wednesday    0.001210
+18          winter    0.000853
+16         raining    0.000562
+8       d_Saturday    0.000182
+9         d_Sunday    0.000173
+20       sleeptime    0.000000
+```
 
-### ATTEMPT 3:
+##  TEST DATA:
+--------------------------
 
-#CHANGES: VINDKAST EXPOENTIAL / RAIN COL
+After finding the best model, we can check it against test data, and use ```best_model.feature_importances_``` ouput and RMSE to evaluate the model.
 
-**Test MSE: 632.4220936735477**
-**Test RMSE: 25.14800377114549**
+This provides us with this ouput:
 
+```
+Test MSE: 628.8209982433501
+Test RMSE: 25.07630352032273
            Feature  Importance
-7             hour    0.560098
-2   Lufttemperatur    0.121029
-16         weekend    0.117477
-15           month    0.057486
-0   Globalstraling    0.039300
-3        Lufttrykk    0.024802
-4         Vindkast    0.020224
-1      Solskinstid    0.011829
-6    Vindretning_y    0.011102
-5    Vindretning_x    0.011073
-18  public_holiday    0.008797
-8         d_Friday    0.007867
-9         d_Monday    0.002502
-12      d_Thursday    0.002194
-13       d_Tuesday    0.001882
-14     d_Wednesday    0.001514
-17         raining    0.000448
-11        d_Sunday    0.000188
-10      d_Saturday    0.000187
+19       rush_hour    0.327215
+14         weekend    0.183384
+5             hour    0.169680
+2   Lufttemperatur    0.118050
+13           month    0.047983
+0   Globalstraling    0.030485
+3        Lufttrykk    0.023065
+4         Vindkast    0.019096
+21   Vindretning_x    0.016211
+22   Vindretning_y    0.014236
+1      Solskinstid    0.012497
+17          summer    0.012343
+15  public_holiday    0.009316
+6         d_Friday    0.007574
+7         d_Monday    0.002153
+10      d_Thursday    0.002080
+11       d_Tuesday    0.001653
+12     d_Wednesday    0.001210
+18          winter    0.000853
+16         raining    0.000562
+8       d_Saturday    0.000182
+9         d_Sunday    0.000173
+20       sleeptime    0.000000
+```
 
-### ATTEMPT 4:
-
-#CHANGES: REMOVE 
-   d_Friday   
-   d_Monday   
- d_Thursday   
-  d_Tuesday   
-d_Wednesday   
-    raining   
-   d_Sunday   
- d_Saturday   
-
-Test MSE: 677.0847578046513
-Test RMSE: 26.02085236506774
-
-           Feature  Importance
-7             hour    0.560251
-2   Lufttemperatur    0.123484
-9          weekend    0.117491
-8            month    0.058301
-0   Globalstraling    0.042114
-3        Lufttrykk    0.028505
-4         Vindkast    0.023094
-6    Vindretning_y    0.012595
-1      Solskinstid    0.012595
-5    Vindretning_x    0.011986
-11  public_holiday    0.009106
-10         raining    0.000478
-
-
-### ATTEMPT 5:
-
-RUNNING BEST MODEL WITH DIFFERENT n_estimators:
-range(1,2000,50)
-
-151 was best n=estimators
-
-### ATTEMPT 6:
-
-standardscaler
-
-scaler = StandardScaler()
-df[["Globalstraling", 
-    "Lufttrykk",
-    "Solkinstid",
-    "Vindkast"
-        ]] = scaler.fit_transform(df[[
-        "Globalstraling", 
-        "Lufttrykk",
-        "Solskinstid",
-        "Vindkast"
-        ]])
-
-**Test MSE: 632.9224388842421**
-**Test RMSE: 25.157949814804905**
-
-
-           Feature  Importance
-7             hour    0.559959
-2   Lufttemperatur    0.120732
-16         weekend    0.117371
-15           month    0.058155
-0   Globalstraling    0.040058
-3        Lufttrykk    0.025102
-4         Vindkast    0.018137
-1      Solskinstid    0.011853
-5    Vindretning_x    0.011423
-6    Vindretning_y    0.011286
-18  public_holiday    0.008876
-8         d_Friday    0.008008
-9         d_Monday    0.002605
-12      d_Thursday    0.002168
-13       d_Tuesday    0.001929
-14     d_Wednesday    0.001525
-17         raining    0.000439
-10      d_Saturday    0.000192
-11        d_Sunday    0.000182
-
-### ATTEMPT 7:
-
-minmaxscale
-
-    scaler = MinMaxScaler()
-    df[["Globalstraling", 
-        "Lufttrykk",
-        "Solskinstid",
-        "Vindkast"
-
-        ]] = scaler.fit_transform(df[[
-        "Globalstraling", 
-        "Lufttrykk",
-        "Solskinstid",
-        "Vindkast"
-        ]])
-
-**Test MSE: 630.2607723119808**
-**Test RMSE: 25.10499496737613**
-
-           Feature  Importance
-7             hour    0.559972
-2   Lufttemperatur    0.120674
-16         weekend    0.117370
-15           month    0.057724
-0   Globalstraling    0.039476
-3        Lufttrykk    0.025023
-4         Vindkast    0.020328
-1      Solskinstid    0.011739
-5    Vindretning_x    0.011048
-6    Vindretning_y    0.011018
-18  public_holiday    0.008862
-8         d_Friday    0.007860
-9         d_Monday    0.002503
-12      d_Thursday    0.002206
-13       d_Tuesday    0.001902
-14     d_Wednesday    0.001488
-17         raining    0.000437
-10      d_Saturday    0.000185
-11        d_Sunday    0.000185
-
-### ATTEMPT 8: ADDED MORE MODELS
-
-GradientBoostingRegressor
-
-KNeighborsRegressor
-
-![attempt3_MSE](figs/MSE_models_V3.png)
-![attempt3_ME](figs/ME_models_V3.png)
-
-### ATTEMPT 9: 
-
-ADDED RUSH HOUR, SUMMER
-
-vindkast is vindkast **2
-
-Test MSE: 632.407599193798
-Test RMSE: 25.14771558598908
-
-           Feature  Importance
-19       rush_hour    0.328055
-16         weekend    0.183390
-7             hour    0.169753
-2   Lufttemperatur    0.117076
-15           month    0.049614
-0   Globalstraling    0.032174
-3        Lufttrykk    0.025406
-4         Vindkast    0.020498
-1      Solskinstid    0.013090
-18          summer    0.012090
-5    Vindretning_x    0.011510
-6    Vindretning_y    0.010939
-20  public_holiday    0.009407
-8         d_Friday    0.007850
-9         d_Monday    0.002454
-12      d_Thursday    0.002317
-13       d_Tuesday    0.001860
-14     d_Wednesday    0.001442
-17         raining    0.000699
-10      d_Saturday    0.000192
-11        d_Sunday    0.000185
-
-### ATTEMPT 10:
-
-CHANGED SUMMER TO BE SHORTER
-
-Test MSE: 629.7359126745486
-Test RMSE: 25.09453949915297
-           Feature  Importance
-19       rush_hour    0.328055
-16         weekend    0.183387
-7             hour    0.169728
-2   Lufttemperatur    0.117031
-15           month    0.049658
-0   Globalstraling    0.032303
-3        Lufttrykk    0.025368
-4         Vindkast    0.020541
-1      Solskinstid    0.013105
-18          summer    0.012024
-5    Vindretning_x    0.011449
-6    Vindretning_y    0.010956
-20  public_holiday    0.009407
-8         d_Friday    0.007858
-9         d_Monday    0.002472
-12      d_Thursday    0.002318
-13       d_Tuesday    0.001871
-14     d_Wednesday    0.001443
-17         raining    0.000646
-10      d_Saturday    0.000194
-11        d_Sunday    0.000185
-
-### ATTEMPT 11:
-
-CHANGED N_ESTIMATORS TO 200
-
-Test MSE: 629.7531801000669
-Test RMSE: 25.094883544261904
-
-           Feature  Importance
-19       rush_hour    0.327729
-16         weekend    0.183519
-7             hour    0.169785
-2   Lufttemperatur    0.117006
-15           month    0.049490
-0   Globalstraling    0.032485
-3        Lufttrykk    0.025322
-4         Vindkast    0.020434
-1      Solskinstid    0.013225
-18          summer    0.012080
-5    Vindretning_x    0.011444
-6    Vindretning_y    0.010980
-20  public_holiday    0.009454
-8         d_Friday    0.007910
-9         d_Monday    0.002455
-12      d_Thursday    0.002306
-13       d_Tuesday    0.001889
-14     d_Wednesday    0.001458
-17         raining    0.000649
-10      d_Saturday    0.000195
-11        d_Sunday    0.000183
-
-
-
-### ATTEMPT 11:
-
-df["sleeptime"] = df["hour"].between(22,6)
-
-df["winter"] = (df["month"] >= 10) | (df["month"] <= 2)
-
-![attempt8_ME](figs/ME_models_V8.png)
-
-### ATTEMPT 12:
-
-                                          model_name  mse_values
-3  RandomForestRegressor_{'n_estimators': 215, 'r...   25.266064
-2  RandomForestRegressor_{'n_estimators': 190, 'r...   25.268575
-1  RandomForestRegressor_{'n_estimators': 165, 'r...   25.269830
-4  RandomForestRegressor_{'n_estimators': 240, 'r...   25.270180
-0  RandomForestRegressor_{'n_estimators': 140, 'r...   25.270511
-
-
-
+This shows us that the model has a RMSE of
+```25.076``` which is pretty good considerding the ```DummyRegressor``` has a RMSE of ```Test RMSE: 67.007``` on test data! 
