@@ -21,6 +21,7 @@ PWD = Path().absolute()
 
 
 def main():
+    logger.info("Starting parsing ... ")
     # loop over files in local directory
     directory = f"{str(PWD)}/raw_data"
 
@@ -36,7 +37,7 @@ def main():
         if "trafikkdata" in str(filename):
             trafikk_df = treat_trafikk_files(f"{str(directory)}/{filename.name}")
 
-    logger.info("All files looped over")
+    logger.info("All files parsed!")
 
     # concat all the florida df's to one
     big_florida_df = pd.concat(florida_df_list, axis=0)
@@ -66,23 +67,23 @@ def main():
     split_dict, training_df, test_df, validation_df = train_test_split_process(df_final)
     logger.info("Data divided into training,validation and test")
 
+    training_df.to_csv(f"{directory}/main_training_data.csv")
+    test_df.to_csv(f"{directory}/main_test_data.csv")
+    validation_df.to_csv(f"{directory}/main_validation_data.csv")
+    logger.info("Data saved to CSV")
+
     return split_dict, training_df, test_df, validation_df
 
 
 if __name__ == "__main__":
     split_dict, training_df, test_df, validation_df = main()
 
-    directory = f"{str(PWD)}/out"
-    training_df.to_csv(f"{directory}/main_training_data.csv")
-    test_df.to_csv(f"{directory}/main_test_data.csv")
-    validation_df.to_csv(f"{directory}/main_validation_data.csv")
-
     model_dict = find_hyper_param(split_dict)
     assert False
 
     #:warning: GRAPHING TAKES A WHILE!
-    graph_all_models(training_df)
 
+    graph_all_models(training_df)
     model_dict = train_models_loop(split_dict)
     model_dict = train_models(split_dict)
     train_best_model(split_dict)

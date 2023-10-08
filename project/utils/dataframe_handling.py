@@ -1,4 +1,5 @@
 import json
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -7,7 +8,7 @@ from sklearn.discriminant_analysis import StandardScaler
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
 
-DEBUG = False
+DEBUG = True
 
 
 def feauture_engineer(df: pd.DataFrame) -> pd.DataFrame:
@@ -163,7 +164,13 @@ def merge_frames(frames: list) -> pd.DataFrame:
     # to overly rely on values which are there often.
 
     # Drops missing values
+    PWD = Path().absolute()
+    directory = f"{str(PWD)}/out"
+    print("before drop ", len(df_final))
+    df_final.to_csv(f"{directory}/before_drop.csv")
     df_final = df_final.dropna(subset=["Trafikkmengde_Totalt_i_retning_Florida"])
+    print("after drop ", len(df_final))
+    df_final.to_csv(f"{directory}/after_drop.csv")
 
     # finding means of values lead to floating point errors, round to fix these
     df_final = df_final.apply(pd.to_numeric, errors="ignore").round(30)
@@ -182,6 +189,7 @@ def trim_outliers(df: pd.DataFrame) -> pd.DataFrame:
     # dette er innanfor grensene funnet her
     # https://veret.gfi.uib.no/
     df = df[df["Globalstraling"] < 1000]
+    # df = df[df["Globalstraling"] >= 0]
     length_dict["afterGlobal"] = len(df)
 
     # må være fra 0-10
@@ -204,7 +212,6 @@ def trim_outliers(df: pd.DataFrame) -> pd.DataFrame:
     df = df[df["Vindretning"] < 361]
     length_dict["afterVindretning"] = len(df)
 
-    DEBUG = True
     if DEBUG == True:
         print(json.dumps(length_dict, indent=2))
 

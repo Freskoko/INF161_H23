@@ -2,7 +2,7 @@
 
 ***Please open me in markdown formatting (in vscode there is a button in the top right!)***
 
-This README explains issues met, decisons made, and features added, for the entire INF161 project this fall.
+This README pertains to the INF161 project this fall, in creating a model which can guess bike traffic across nygårdsbroen.
 
 # Data exploration:
 In figs, there are images presenting each of the coloums in the final data frame, plotted against the total amount of traffic.

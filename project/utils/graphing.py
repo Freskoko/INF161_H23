@@ -16,7 +16,7 @@ def graph_a_vs_b(df: pd.DataFrame, a: str, b: str, alabel: str, blabel: str) -> 
     """
 
     # see limits on data
-    print(f" fig working on graphing '{a} vs {b}'")
+    logger.info(f" fig working on graphing '{a} vs {b}'")
     print(f"{a} looks like :")
     print(f"max {a} is {max(df[a])}")
     print(f"min {a} is {min(df[a])}")
@@ -41,8 +41,8 @@ def graph_a_vs_b(df: pd.DataFrame, a: str, b: str, alabel: str, blabel: str) -> 
 
     # :warning: clear fig is very important as not clearing will cause many figs to be created ontop of eachother
     plt.clf()
-    print(f"saved fig '{a} VS {b}' in figs")
-    print(f"--- Graph took: {time.time() - start_time} seconds ---")
+    logger.info(f"saved fig '{a} VS {b}' in figs")
+    logger.info(f"--- Graph took: {round(time.time() - start_time,2)} seconds ---")
 
     return
 
@@ -106,13 +106,20 @@ def create_df_matrix(df: pd.DataFrame) -> None:
             "d_Saturday",
             "d_Sunday",
             "public_holiday",
+            "raining",
+            "summer",
+            "winter",
+            "rush_hour",
+            "sleeptime",
             "weekend",
             "month",
             "weekend",
             "hour",
+            "Vindretning_radians",
         ],
         axis=1,
         inplace=False,
+        errors="ignore",
     )
 
     # calculate the covariance matrix
@@ -145,6 +152,8 @@ def create_df_matrix(df: pd.DataFrame) -> None:
 
 def graph_all_models(main_df: pd.DataFrame) -> None:
 
+    logger.info("Graphing all graphs...")
+
     create_df_matrix(main_df)
     graph_a_vs_b(
         main_df, "Globalstraling", "Total_trafikk", "stråling", "antall sykler"
@@ -159,7 +168,7 @@ def graph_all_models(main_df: pd.DataFrame) -> None:
     graph_a_vs_b(main_df, "Vindstyrke", "Total_trafikk", "Vind", "antall sykler")
     graph_a_vs_b(main_df, "Lufttrykk", "Total_trafikk", "hPa", "antall sykler")
     graph_a_vs_b(main_df, "Vindkast", "Total_trafikk", "m/s", "antall sykler")
-    graph_df(main_df)
+    # graph_df(main_df)
 
     logger.info("Finished graphing!")
     return
