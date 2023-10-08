@@ -1,4 +1,5 @@
 import json
+
 import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
@@ -7,6 +8,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
 
 DEBUG = False
+
 
 def feauture_engineer(df: pd.DataFrame) -> pd.DataFrame:
     """
@@ -61,7 +63,7 @@ def feauture_engineer(df: pd.DataFrame) -> pd.DataFrame:
     df["weekend"] = (df.index.weekday >= 5).astype(int)
 
     # THIS COULD NOT BE DONE - Check the README under "Feature engineering"
-    # ------------------    
+    # ------------------
     # add the hour values of the previous row, this can be a good indicator
     # df["Last_Danmarksplass"] = df["Trafikkmengde_Totalt_i_retning_Danmarksplass"].shift(
     # 1
@@ -91,25 +93,25 @@ def feauture_engineer(df: pd.DataFrame) -> pd.DataFrame:
     # add public holiday
     df["public_holiday"] = df.index.strftime("%m-%d").isin(holidays).astype(int)
 
-    #add coloumn for rain if air pressure is higher than 1050 see README
+    # add coloumn for rain if air pressure is higher than 1050 see README
     df["raining"] = df["Lufttrykk"] <= 996
 
-    #add seasons
+    # add seasons
     df["summer"] = (df["month"] > 5) & (df["month"] < 8)
     df["winter"] = (df["month"] >= 10) | (df["month"] <= 2)
 
-    #add when we expect a lot of traffic
-    df["rush_hour"] = ((df["hour"].between(7,9)) | (df["hour"].between(15,17)))
+    # add when we expect a lot of traffic
+    df["rush_hour"] = (df["hour"].between(7, 9)) | (df["hour"].between(15, 17))
 
-    #add when we do not expect a lot of traffic
-    df["sleeptime"] = df["hour"].between(22,6)
+    # add when we do not expect a lot of traffic
+    df["sleeptime"] = df["hour"].between(22, 6)
 
     # df["Vindretning"] is full of values 0-360, transform these to points on a circle
     df["Vindretning_radians"] = np.radians(df["Vindretning"])
     df["Vindretning_x"] = np.cos(df["Vindretning_radians"])
     df["Vindretning_y"] = np.sin(df["Vindretning_radians"])
 
-    #we cant train where there are no traffic values
+    # we cant train where there are no traffic values
     df = df.dropna(subset=["Trafikkmengde_Totalt_i_retning_Florida"])
 
     # combine the two traffic cols
@@ -129,7 +131,7 @@ def feauture_engineer(df: pd.DataFrame) -> pd.DataFrame:
     # total is found, these two are not needed
 
     # change all values of TRUE in all rows to 1 and FALSE to 0
-    # models need NUMERIC data 
+    # models need NUMERIC data
     df = df.replace({True: 1, False: 0})
 
     return df
@@ -137,11 +139,10 @@ def feauture_engineer(df: pd.DataFrame) -> pd.DataFrame:
 
 def merge_frames(frames: list) -> pd.DataFrame:
     """
-    Given a list of dataframes, merges the frames to one large dataframe, given that the 
+    Given a list of dataframes, merges the frames to one large dataframe, given that the
     index is a date, and the same across all dataframes
 
     """
-
 
     # first DataFrame
     df_final = frames[0]
@@ -176,19 +177,19 @@ def trim_outliers(df: pd.DataFrame) -> pd.DataFrame:
 
     What values are considered abnormal are covered in the README under "Dropped values"
     """
-    length_dict = {"before":len(df)}
+    length_dict = {"before": len(df)}
 
     # dette er innanfor grensene funnet her
-    # https://veret.gfi.uib.no/ 
-    df = df[df["Globalstraling"] < 1000]  
+    # https://veret.gfi.uib.no/
+    df = df[df["Globalstraling"] < 1000]
     length_dict["afterGlobal"] = len(df)
 
     # må være fra 0-10
-    df = df[df["Solskinstid"] < 10.01]  
+    df = df[df["Solskinstid"] < 10.01]
     length_dict["afterSolskinn"] = len(df)
 
     # må være under 50
-    df = df[df["Lufttemperatur"] < 50]  
+    df = df[df["Lufttemperatur"] < 50]
     length_dict["afterLufttemp"] = len(df)
 
     # må være mellom 935 og 1050, det er max og min
@@ -205,9 +206,10 @@ def trim_outliers(df: pd.DataFrame) -> pd.DataFrame:
 
     DEBUG = True
     if DEBUG == True:
-        print(json.dumps(length_dict,indent=2))
+        print(json.dumps(length_dict, indent=2))
 
     return df
+
 
 def normalize_cols(df: pd.DataFrame) -> pd.DataFrame:
     """
@@ -217,43 +219,44 @@ def normalize_cols(df: pd.DataFrame) -> pd.DataFrame:
     Normalized values are covered in the README under "Normalized values"
     """
 
-    #normalize between 0-1, 
+    # normalize between 0-1,
     scaler = MinMaxScaler()
-    df[["Globalstraling", 
-        "Lufttrykk",
-        "Solskinstid",
+    df[["Globalstraling", "Lufttrykk", "Solskinstid",]] = scaler.fit_transform(
+        df[
+            [
+                "Globalstraling",
+                "Lufttrykk",
+                "Solskinstid",
+            ]
+        ]
+    )
 
-        ]] = scaler.fit_transform(df[[
-        "Globalstraling", 
-        "Lufttrykk",
-        "Solskinstid",
-        ]])
-
-    #change vindkast to be an exponential scale
-    df["Vindkast"] = df["Vindkast"]**2
+    # change vindkast to be an exponential scale
+    df["Vindkast"] = df["Vindkast"] ** 2
 
     return df
 
 
-
 def drop_uneeded_cols(df: pd.DataFrame) -> pd.DataFrame:
     """
-    Given a dataframe, drops values deemed not needed, as these may just provide noise for the model, 
-    or their values are already represented as another coloumn 
+    Given a dataframe, drops values deemed not needed, as these may just provide noise for the model,
+    or their values are already represented as another coloumn
 
     Dropped values are covered in the README under "Dropped coloumns"
     """
 
     df.drop(["Vindstyrke", "Vindretning", "Vindretning_radians"], axis=1, inplace=True)
-    
-    # Drop "Relativ luftfuktighet" as this data only exists in 2022 and 2023. 
+
+    # Drop "Relativ luftfuktighet" as this data only exists in 2022 and 2023.
     # errors="ignore" as most of the data (back to 2015) will not have this coloumn
     df = df.drop(columns=["Relativ luftfuktighet"], errors="ignore")
 
     return df
 
 
-def train_test_split_process(df: pd.DataFrame) -> (dict, pd.DataFrame, pd.DataFrame, pd.DataFrame): #fix
+def train_test_split_process(
+    df: pd.DataFrame,
+) -> (dict, pd.DataFrame, pd.DataFrame, pd.DataFrame):  # fix
     """
     Given a df, data is split into training, test and validation.
 
@@ -270,13 +273,13 @@ def train_test_split_process(df: pd.DataFrame) -> (dict, pd.DataFrame, pd.DataFr
 
     y = df["Total_trafikk"]
     x = df.drop(["Total_trafikk"], axis=1)
-    
+
     # vi gjør at 70% blir treningsdata
     x_train, x_val, y_train, y_val = train_test_split(
         x, y, shuffle=False, test_size=0.3
     )
 
-    # deler opp 30% som var validation til 15% val og 15% test 
+    # deler opp 30% som var validation til 15% val og 15% test
     x_val, x_test, y_val, y_test = train_test_split(
         x_val, y_val, shuffle=False, test_size=0.5
     )

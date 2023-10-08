@@ -78,7 +78,7 @@ def treat_trafikk_files(filename: str) -> pd.DataFrame:
     # replace " " in 'Felt' values with "_" to avoid errors
     df["Felt"] = df["Felt"].str.replace(" ", "_")
 
-    #dropping cols - see README on "Dropped coloumns"
+    # dropping cols - see README on "Dropped coloumns"
     df = df.drop(
         columns=[
             "Trafikkregistreringspunkt",
@@ -104,7 +104,7 @@ def treat_trafikk_files(filename: str) -> pd.DataFrame:
             "16,0m - 24,0m",
             ">= 24,0m",
         ]
-    )  
+    )
 
     # drop all rows where the coloum "Felt" != "Totalt i retning Danmarksplass" or "Totalt i retning Florida"
     # the two other values for felt are "1" and "2" and are the same as the "Totalt ... Danmarkplass" and  "Totalt ... Florida"

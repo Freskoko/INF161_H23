@@ -1,6 +1,9 @@
 import os
 from pathlib import Path
+
 import pandas as pd
+from loguru import logger
+
 from utils.dataframe_handling import (
     drop_uneeded_cols,
     feauture_engineer,
@@ -11,8 +14,7 @@ from utils.dataframe_handling import (
 )
 from utils.file_parsing import treat_florida_files, treat_trafikk_files
 from utils.graphing import graph_all_models, graph_df
-from utils.models import train_best_model, train_models, find_hyper_param
-from loguru import logger
+from utils.models import find_hyper_param, train_best_model, train_models
 
 # get current filepath to use when opening/saving files
 PWD = Path().absolute()
@@ -52,12 +54,12 @@ def main():
     df_final = feauture_engineer(df_final)
     logger.info("Features engineered")
 
-    #normalize coloumns from 0-1 or square coloumns^2
+    # normalize coloumns from 0-1 or square coloumns^2
     df_final = normalize_cols(df_final)
     logger.info("Coloumns normalized")
 
-    #drop coloumns which are not needed (noise)
-    df_final = drop_uneeded_cols(df_final) 
+    # drop coloumns which are not needed (noise)
+    df_final = drop_uneeded_cols(df_final)
     logger.info("Uneeded cols dropped")
 
     # divide data into training,test and validation
@@ -70,7 +72,7 @@ def main():
 if __name__ == "__main__":
     split_dict, training_df, test_df, validation_df = main()
 
-    directory = f"{str(PWD)}/out" 
+    directory = f"{str(PWD)}/out"
     training_df.to_csv(f"{directory}/main_training_data.csv")
     test_df.to_csv(f"{directory}/main_test_data.csv")
     validation_df.to_csv(f"{directory}/main_validation_data.csv")
@@ -80,12 +82,7 @@ if __name__ == "__main__":
 
     #:warning: GRAPHING TAKES A WHILE!
     graph_all_models(training_df)
-    
+
     model_dict = train_models_loop(split_dict)
     model_dict = train_models(split_dict)
     train_best_model(split_dict)
-
-    
-    
-
-

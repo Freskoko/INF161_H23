@@ -1,10 +1,10 @@
 import json
 from math import sqrt
 from pathlib import Path
-from loguru import logger
 
 import pandas as pd
 import plotly.express as px
+from loguru import logger
 from sklearn.dummy import DummyRegressor
 from sklearn.ensemble import GradientBoostingRegressor, RandomForestRegressor
 from sklearn.gaussian_process import GaussianProcessRegressor
@@ -24,6 +24,7 @@ training_df = pd.read_csv(f"{directory}/main_training_data.csv")
 test_df = pd.read_csv(f"{directory}/main_test_data.csv")
 validation_df = pd.read_csv(f"{directory}/main_validation_data.csv")
 
+
 def train_models(split_dict: dict) -> dict:
     """
     Trains a variety of models on test data, and checks their MSE on validation data
@@ -34,98 +35,51 @@ def train_models(split_dict: dict) -> dict:
     X_val = split_dict["x_val"]
     y_val = split_dict["y_val"]
 
-    #models are saved as dicts in a list
+    # models are saved as dicts in a list
     models = [
-
+        {"model_type": DummyRegressor, "settings": {}},
         {
-            "model_type": DummyRegressor,
-            "settings": {}
+            "model_type": GaussianProcessRegressor,
+            "settings": {"alpha": 300, "random_state": RANDOM_STATE},
         },
-
-        {
-            "model_type": GaussianProcessRegressor, 
-            "settings": {"alpha": 300, "random_state":RANDOM_STATE}
-        },
-
-        {
-            "model_type": LogisticRegression, 
-            "settings": {}
-        },
-
-        {
-            "model_type": Lasso, 
-            "settings": {"alpha": 300, "random_state": RANDOM_STATE}
-        },
-        
+        {"model_type": LogisticRegression, "settings": {}},
+        {"model_type": Lasso, "settings": {"alpha": 300, "random_state": RANDOM_STATE}},
         {
             "model_type": RandomForestRegressor,
             "settings": {"n_estimators": 100, "random_state": RANDOM_STATE},
-        }, 
-
+        },
         {
             "model_type": ElasticNet,
             "settings": {"alpha": 1500, "random_state": RANDOM_STATE},
         },
-
+        {"model_type": SVR, "settings": {"degree": 2}},
+        {"model_type": SVC, "settings": {}},
         {
-            "model_type": SVR, 
-            "settings": {"degree": 2}
+            "model_type": GradientBoostingRegressor,
+            "settings": {
+                "n_estimators": 50,
+                "learning_rate": 0.1,
+                "random_state": RANDOM_STATE,
+            },
         },
-
-        {
-            "model_type": SVC, 
-            "settings": {}
-        },
-
-        {
-            "model_type": GradientBoostingRegressor, 
-            "settings": {"n_estimators": 50, "learning_rate": 0.1, "random_state": RANDOM_STATE}
-        },
-
         {
             "model_type": RandomForestRegressor,
             "settings": {"n_estimators": 100, "random_state": RANDOM_STATE},
         },
-
         {
             "model_type": RandomForestRegressor,
             "settings": {"n_estimators": 151, "random_state": RANDOM_STATE},
         },
-
         {
             "model_type": RandomForestRegressor,
             "settings": {"n_estimators": 200, "random_state": RANDOM_STATE},
         },
-        
-        {
-            "model_type": KNeighborsRegressor, 
-            "settings": {"n_neighbors": 5}
-        },
-
-        {
-            "model_type": KNeighborsRegressor, 
-            "settings": {"n_neighbors": 50}
-        },
-
-        {
-            "model_type": KNeighborsRegressor, 
-            "settings": {"n_neighbors": 100}
-        },
-
-        {
-            "model_type":DecisionTreeRegressor,
-            "settings":{"max_depth":12}
-        },
-
-        {
-            "model_type":DecisionTreeRegressor,
-            "settings":{"max_depth":50}
-        },
-
-        {
-            "model_type":DecisionTreeRegressor,
-            "settings":{"max_depth":100}
-        }
+        {"model_type": KNeighborsRegressor, "settings": {"n_neighbors": 5}},
+        {"model_type": KNeighborsRegressor, "settings": {"n_neighbors": 50}},
+        {"model_type": KNeighborsRegressor, "settings": {"n_neighbors": 100}},
+        {"model_type": DecisionTreeRegressor, "settings": {"max_depth": 12}},
+        {"model_type": DecisionTreeRegressor, "settings": {"max_depth": 50}},
+        {"model_type": DecisionTreeRegressor, "settings": {"max_depth": 100}},
     ]
 
     model_strings = []
@@ -133,11 +87,13 @@ def train_models(split_dict: dict) -> dict:
     clf_vals = []
 
     for mod in models:
-        name = mod['model_type'].__name__
-        settings = mod['settings']
+        name = mod["model_type"].__name__
+        settings = mod["settings"]
 
         logger.info(f"Training model type: {name}_{settings}")
-        clf = mod["model_type"](**mod["settings"])  # henter ut settings her med unpacking
+        clf = mod["model_type"](
+            **mod["settings"]
+        )  # henter ut settings her med unpacking
         clf.fit(X_train, y_train)
 
         y_predicted = clf.predict(X_val)
@@ -148,11 +104,10 @@ def train_models(split_dict: dict) -> dict:
         model_strings.append(f"{name}_{settings}")
         clf_vals.append(clf)
 
-
     data_models = pd.DataFrame(
         {
             "model_name": model_strings,
-            "mse_values": [sqrt(i) for i in mse_values_models]
+            "mse_values": [sqrt(i) for i in mse_values_models],
         }
     )
 
@@ -162,9 +117,9 @@ def train_models(split_dict: dict) -> dict:
         y="mse_values",
         title="MSE values for different models",
         labels={"x": "Model", "y": "Mean Error"},
-        text=data_models['mse_values'].round(3)
+        text=data_models["mse_values"].round(3),
     )
-    fig.update_traces(textposition='auto')
+    fig.update_traces(textposition="auto")
 
     fig.write_image(f"{PWD}/figs/MSE_models_V10.png")
 
@@ -173,6 +128,7 @@ def train_models(split_dict: dict) -> dict:
     logger.info("Done training a variety of models!")
 
     return model_dict
+
 
 def find_hyper_param(split_dict: dict) -> dict:
     """
@@ -186,10 +142,10 @@ def find_hyper_param(split_dict: dict) -> dict:
 
     models = []
 
-    for i in range(130,201,10):
+    for i in range(130, 201, 10):
         model = {
-        "model_type": RandomForestRegressor,
-        "settings": {"n_estimators": i, "random_state": RANDOM_STATE},
+            "model_type": RandomForestRegressor,
+            "settings": {"n_estimators": i, "random_state": RANDOM_STATE},
         }
         models.append(model)
 
@@ -198,8 +154,8 @@ def find_hyper_param(split_dict: dict) -> dict:
     clf_vals = []
 
     for mod in models:
-        name = mod['model_type'].__name__
-        settings = mod['settings']
+        name = mod["model_type"].__name__
+        settings = mod["settings"]
 
         logger.info(f"Training model type: {name}_{settings}")
         clf = mod["model_type"](**mod["settings"])  # henter ut settings her
@@ -214,15 +170,14 @@ def find_hyper_param(split_dict: dict) -> dict:
         model_strings.append(f"{name}_{settings}")
         clf_vals.append(clf)
 
-
     data_models = pd.DataFrame(
         {
             "model_name": model_strings,
-            "mse_values": [sqrt(i) for i in mse_values_models]
+            "mse_values": [sqrt(i) for i in mse_values_models],
         }
     )
 
-    print(data_models.sort_values(by='mse_values'))
+    print(data_models.sort_values(by="mse_values"))
 
     fig = px.bar(
         data_models,
@@ -230,9 +185,9 @@ def find_hyper_param(split_dict: dict) -> dict:
         y="mse_values",
         title="MSE values for different models",
         labels={"x": "Model", "y": "Mean Error"},
-        text=data_models['mse_values'].round(3)
+        text=data_models["mse_values"].round(3),
     )
-    fig.update_traces(textposition='auto')
+    fig.update_traces(textposition="auto")
 
     fig.write_image(f"{PWD}/figs/MSE_hyperparam_models_V1.png")
 
@@ -241,7 +196,6 @@ def find_hyper_param(split_dict: dict) -> dict:
     model_dict = dict(zip(model_strings, clf_vals))
 
     return model_dict
-
 
 
 def train_best_model(split_dict: dict) -> None:
@@ -254,9 +208,9 @@ def train_best_model(split_dict: dict) -> None:
     X_test = split_dict["x_test"]
     y_test = split_dict["y_test"]
 
-    #BEST MODEL:
+    # BEST MODEL:
     best_model = RandomForestRegressor(n_estimators=151, random_state=RANDOM_STATE)
-    
+
     best_model.fit(X_train, y_train)
 
     y_test_predicted = best_model.predict(X_test)
@@ -267,9 +221,8 @@ def train_best_model(split_dict: dict) -> None:
     print("Test MSE:", test_mse)
     print("Test RMSE:", test_rmse)
 
-    importance_df = pd.DataFrame({
-        'Feature': X_train.columns,
-        'Importance': best_model.feature_importances_
-    })
+    importance_df = pd.DataFrame(
+        {"Feature": X_train.columns, "Importance": best_model.feature_importances_}
+    )
 
-    print(importance_df.sort_values(by='Importance', ascending=False))
+    print(importance_df.sort_values(by="Importance", ascending=False))

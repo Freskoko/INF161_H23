@@ -1,13 +1,14 @@
 import time
-from loguru import logger
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
+from loguru import logger
 from scipy.stats import spearmanr
 
-def graph_a_vs_b(df: pd.DataFrame, a:str , b:str , alabel: str, blabel: str) -> None:
+
+def graph_a_vs_b(df: pd.DataFrame, a: str, b: str, alabel: str, blabel: str) -> None:
     """
     General function to plot two items in a dataframe against eachother
 
@@ -30,13 +31,11 @@ def graph_a_vs_b(df: pd.DataFrame, a:str , b:str , alabel: str, blabel: str) -> 
     plt.ylabel(f"{b} ({blabel})")
     plt.suptitle(f"{a} vs {b} ")
 
-    #Calculate spearmann/pearson correlation to see if trends observed visually also can be seen statistically
-    pear  = round(pearson_r_corr(df[a],df[b]),4)
-    spear = round(spearman_rho_corr(df[a],df[b]),4)
+    # Calculate spearmann/pearson correlation to see if trends observed visually also can be seen statistically
+    pear = round(pearson_r_corr(df[a], df[b]), 4)
+    spear = round(spearman_rho_corr(df[a], df[b]), 4)
 
-    plt.title(
-        f"""pearson_corr = {pear} spearmann_corr = {spear}"""
-    )
+    plt.title(f"""pearson_corr = {pear} spearmann_corr = {spear}""")
     plt.grid(True)
     plt.savefig(f"figs/{a}VS{b}")
 
@@ -52,6 +51,7 @@ def pearson_r_corr(a: float, b: float) -> float:
     corr = np.corrcoef(a, b)[0, 1]
     return corr
 
+
 def spearman_rho_corr(a: float, b: float) -> float:
     corr, _ = spearmanr(a, b)
     return corr
@@ -62,7 +62,7 @@ def graph_df(df: pd.DataFrame) -> None:
     Graphs Trafikkmengde_Totalt_i_retning_Danmarksplass vs Traffic towards Danmarksplass.
 
     This is to visualize how well the two lanes correlate.
-    
+
     """
     plt.clf()
     plt.figure(figsize=(15, 7))
@@ -124,7 +124,9 @@ def create_df_matrix(df: pd.DataFrame) -> None:
     )
 
     plt.figure(figsize=(16, 16))
-    sns.heatmap(cov_matrix_normalized, annot=True, cmap="RdBu", vmin=-1, vmax=1, center=0)
+    sns.heatmap(
+        cov_matrix_normalized, annot=True, cmap="RdBu", vmin=-1, vmax=1, center=0
+    )
     plt.title("Covariance Matrix Heatmap")
     plt.savefig("figs/covv_matrix.png")
 
@@ -144,16 +146,20 @@ def create_df_matrix(df: pd.DataFrame) -> None:
 def graph_all_models(main_df: pd.DataFrame) -> None:
 
     create_df_matrix(main_df)
-    graph_a_vs_b(main_df, "Globalstraling", "Total_trafikk","stråling"      , "antall sykler")
-    graph_a_vs_b(main_df, "Solskinstid", "Total_trafikk"   ,"solskinn"      , "antall sykler")
-    graph_a_vs_b(main_df, "Lufttemperatur", "Total_trafikk","grader celcius", "antall sykler")
-    graph_a_vs_b(main_df, "Vindretning_x", "Total_trafikk"   , "Grader"       , "antall sykler")
-    graph_a_vs_b(main_df, "Vindretning_y", "Total_trafikk"   , "Grader"       , "antall sykler")
-    graph_a_vs_b(main_df, "Vindretning", "Total_trafikk"   , "Grader"       , "antall sykler")
-    graph_a_vs_b(main_df, "Vindstyrke", "Total_trafikk"    , "Vind"         , "antall sykler")
-    graph_a_vs_b(main_df, "Lufttrykk", "Total_trafikk"     ,"hPa"           , "antall sykler")
-    graph_a_vs_b(main_df, "Vindkast", "Total_trafikk"      ,"m/s"           , "antall sykler")
+    graph_a_vs_b(
+        main_df, "Globalstraling", "Total_trafikk", "stråling", "antall sykler"
+    )
+    graph_a_vs_b(main_df, "Solskinstid", "Total_trafikk", "solskinn", "antall sykler")
+    graph_a_vs_b(
+        main_df, "Lufttemperatur", "Total_trafikk", "grader celcius", "antall sykler"
+    )
+    graph_a_vs_b(main_df, "Vindretning_x", "Total_trafikk", "Grader", "antall sykler")
+    graph_a_vs_b(main_df, "Vindretning_y", "Total_trafikk", "Grader", "antall sykler")
+    graph_a_vs_b(main_df, "Vindretning", "Total_trafikk", "Grader", "antall sykler")
+    graph_a_vs_b(main_df, "Vindstyrke", "Total_trafikk", "Vind", "antall sykler")
+    graph_a_vs_b(main_df, "Lufttrykk", "Total_trafikk", "hPa", "antall sykler")
+    graph_a_vs_b(main_df, "Vindkast", "Total_trafikk", "m/s", "antall sykler")
     graph_df(main_df)
-    
+
     logger.info("Finished graphing!")
     return
