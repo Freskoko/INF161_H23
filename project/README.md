@@ -77,7 +77,6 @@ The spearmann correlation value of *0.3139* is a good sign, and the spearmann co
 ![Vindkast vs traffik](src/figs/VindkastVSTotal_trafikk.png)
 
 
-TODO: maybe expotnailly transofrm the data (opposite of log transform)
 
 
 Looking at the *Vindkast vs Total_trafikk*  graph above, it is clear that there is a strong correlation between the two. At values between 0-10, there is not much of a difference, but past 15, the increase in wind clearly causes a drop in traffic. 
@@ -130,6 +129,8 @@ Both of the statistical tests back this up aswell, having high values of:
 pearson = *0.0407*
 spearmann = *0.8269
 It is for this reason i have chosen to combine the two variables into one, as a "total traffic variable".
+
+It can aslo be seen that there was a peak in 2017, due to a large bicycle competion happening that year. This would lead to a large amount of outliers. The solution to this is removing data which sits in the 99th percentile. The model does not need to be good at guessing when the next large scale bicycling competiton is, it is more about day to day cycling. 
 
 
 -------------
@@ -194,12 +195,12 @@ These values are between 940-1050, and normalizing these values to a 0-1 scale c
 These values are between 0-10, and could therefore be normalized to a 0-1 scale without much data loss
 <p>
 
-- *Vindkast*
+<!-- - *Vindkast*
 
 ["graph"]("src/figs/VindkastVSTotal_trafikk.png")
 
 <p>
-These values are between 0-25, but there is a clear link between high vindkast and low traffic, so by squaring the values of vindkast could help the model understand that higher numbers mean a large descrease in traffic, while lower numbers do not have an effect on traffic.
+These values are between 0-25, but there is a clear link between high vindkast and low traffic, so by squaring the values of vindkast could help the model understand that higher numbers mean a large descrease in traffic, while lower numbers do not have an effect on traffic. -->
 
 ### Dropped coloumns
 

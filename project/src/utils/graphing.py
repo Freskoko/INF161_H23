@@ -150,6 +150,10 @@ def create_df_matrix(df: pd.DataFrame) -> None:
     return
 
 
+# removed vinkast ** 2
+# add quantile
+
+
 def graph_all_models(main_df: pd.DataFrame) -> None:
 
     logger.info("Graphing all graphs...")

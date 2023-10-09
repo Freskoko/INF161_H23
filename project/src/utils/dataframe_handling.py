@@ -220,8 +220,7 @@ def trim_outliers(df: pd.DataFrame) -> pd.DataFrame:
 
 def normalize_cols(df: pd.DataFrame) -> pd.DataFrame:
     """
-    Given a daaframe, normalizes certain values to a 0-1 scale
-    Other values are normalized differently, to an exponential scale
+    Given a dataframe, normalizes certain values to a 0-1 scale
 
     Normalized values are covered in the README under "Normalized values"
     """
@@ -238,8 +237,12 @@ def normalize_cols(df: pd.DataFrame) -> pd.DataFrame:
         ]
     )
 
-    # change vindkast to be an exponential scale
-    df["Vindkast"] = df["Vindkast"] ** 2
+    print(len(df))
+
+    quant = df["Total_trafikk"].quantile(0.99)
+    df = df[df["Total_trafikk"] <= quant]
+
+    print(len(df))
 
     return df
 

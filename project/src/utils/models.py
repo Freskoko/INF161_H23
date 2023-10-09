@@ -195,7 +195,7 @@ def find_hyper_param(split_dict: dict) -> dict:
 
 def train_best_model(split_dict: dict, test_data: bool) -> None:
     """
-    Trains the model that performed best on validation data
+    Trains the model that performed best on validation/test data
     """
 
     if test_data:
@@ -209,7 +209,7 @@ def train_best_model(split_dict: dict, test_data: bool) -> None:
     y_train = split_dict["y_train"]
 
     # BEST MODEL:
-    best_model = RandomForestRegressor(n_estimators=200, random_state=RANDOM_STATE)
+    best_model = RandomForestRegressor(n_estimators=250, random_state=RANDOM_STATE)
 
     best_model.fit(X_train, y_train)
 
@@ -218,8 +218,9 @@ def train_best_model(split_dict: dict, test_data: bool) -> None:
     test_mse = mean_squared_error(y_chosen, y_test_predicted)
     test_rmse = sqrt(test_mse)
 
-    print("Test MSE:", test_mse)
-    print("Test RMSE:", test_rmse)
+    print(f"Model for test data = {test_data}")
+    print("MSE:", test_mse)
+    print("RMSE:", test_rmse)
 
     importance_df = pd.DataFrame(
         {"Feature": X_train.columns, "Importance": best_model.feature_importances_}
