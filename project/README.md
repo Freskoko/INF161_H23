@@ -26,6 +26,12 @@ This README pertains to the INF161 project this fall, in creating a model which 
 - FEATURES TO ADD: 
   - good weather and weekend
 
+- Graf over måned og traffic
+
+- Data loss update
+   - X_train.isna().sum()
+   - use KNN maybe to fill inn where values are NaN
+
 
 # Data exploration:
 In src/figs, there are images presenting each of the coloums in the final data frame, plotted against the total amount of traffic.
