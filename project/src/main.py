@@ -3,6 +3,7 @@ from pathlib import Path
 
 import pandas as pd
 from loguru import logger
+from sklearn.ensemble import RandomForestRegressor
 
 from utils.dataframe_handling import (
     drop_uneeded_cols,
@@ -20,6 +21,8 @@ from utils.models import find_hyper_param, train_best_model, train_models
 # get current filepath to use when opening/saving files
 PWD = Path().absolute()
 GRAPHING = False
+RANDOM_STATE = 2
+
 
 def main():
     logger.info("Starting parsing ... ")
@@ -48,27 +51,26 @@ def main():
     df_2023, df_final = merge_frames([big_florida_df, trafikk_df])
     logger.info("All files looped over")
 
-
-    #--------- DO RESEARCH HERE, THEN ADD STUFF AND GRAPH AFTER AGAIN
+    # --------- DO RESEARCH HERE, THEN ADD STUFF AND GRAPH AFTER AGAIN
 
     split_dict, training_df, test_df, validation_df = train_test_split_process(df_final)
     logger.info("Data divided into training,validation and test")
 
     if GRAPHING:
-        graph_all_models(training_df,pre_change=True)
+        graph_all_models(training_df, pre_change=True)
         logger.info("Graphed all models PRECHANGE")
 
-    #--------- DONE RESEARCH
+    # --------- DONE RESEARCH
 
     # remove weird outliers like 2000 globalstråling
 
-    # bestKNN = find_best_KNN #TODO
-
-    df_final = trim_transform_outliers(df_final)
+    logger.info("Applying KNN imputer on missing data, and removing outliers..")
+    logger.info("This could take a while...")
+    df_final = trim_transform_outliers(df_final, False)
     logger.info("Outliers trimmed")
 
     # add important features to help the model
-    df_final = feauture_engineer(df_final)
+    df_final = feauture_engineer(df_final, False)
     logger.info("Features engineered")
 
     # normalize coloumns from 0-1 or square coloumns^2
@@ -77,7 +79,7 @@ def main():
 
     # drop coloumns which are not needed (noise)
     df_final = drop_uneeded_cols(df_final)
-    logger.info("Uneeded cols dropped") 
+    logger.info("Uneeded cols dropped")
 
     # divide data into training,test and validation
     split_dict, training_df, test_df, validation_df = train_test_split_process(df_final)
@@ -89,23 +91,30 @@ def main():
     logger.info("Data saved to CSV")
 
     if GRAPHING:
-        graph_all_models(training_df,pre_change=False)
+        graph_all_models(training_df, pre_change=False)
         logger.info("Graph all models POSTCHANGE")
 
-    model_dict = train_models(split_dict)
-    best_model = find_hyper_param(split_dict)
-    best_model = train_best_model(split_dict, test_data=False)
+    # model_dict = train_models(split_dict)
+    # best_model = find_hyper_param(split_dict)
+    # train_best_model(split_dict, test_data=False)
 
-    best_model_check = train_best_model(split_dict, test_data=True)
-    
-    df_with_values = treat_2023_file(df_2023,best_model)
+    # train_best_model(split_dict, test_data=True)
 
-    assert False
+    logger.info("Treating 2023 files")
+
+    # BEST MODEL:
+    best_model = RandomForestRegressor(n_estimators=250, random_state=RANDOM_STATE)
+
+    X_train = split_dict["x_train"]
+    y_train = split_dict["y_train"]
+
+    best_model.fit(X_train, y_train)
+    df_with_values = treat_2023_file(df_2023, best_model)
+
+    # assert False
 
     return split_dict, training_df, test_df, validation_df
 
 
 if __name__ == "__main__":
     split_dict, training_df, test_df, validation_df = main()
-    
-

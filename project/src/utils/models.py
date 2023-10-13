@@ -1,8 +1,8 @@
 import json
 from math import sqrt
 from pathlib import Path
-import numpy as np
 
+import numpy as np
 import pandas as pd
 import plotly.express as px
 from loguru import logger
@@ -119,14 +119,15 @@ def train_models(split_dict: dict) -> dict:
 
     logger.info("Done training a variety of models!")
 
-    model_dict = dict(zip(model_strings, clf_vals))
-    min_rmse_index = np.argmin(clf_vals)
+    # #--
+    # min_rmse = min([sqrt(i) for i in mse_values_models])
 
-    # Use this index to find the corresponding model
-    best_model = model_strings[min_rmse_index]
-    logger.info(f"Best model is {best_model} with value {min_rmse_index}")
+    # print(f"Models = {json.dumps(model_dict,indent=2)}")
 
-    return best_model,model_dict
+    # #--
+    # logger.info(f"Best model is {best_model} with value {min_rmse_index}")
+
+    return "best_model"
 
 
 def find_hyper_param(split_dict: dict) -> dict:
@@ -141,7 +142,7 @@ def find_hyper_param(split_dict: dict) -> dict:
 
     models = []
 
-    for i in range(1, 351, 50):
+    for i in range(1, 301, 50):
         if i == 0:
             i = 1
         model = {
@@ -194,16 +195,17 @@ def find_hyper_param(split_dict: dict) -> dict:
 
     logger.info("Done training hyperparameter models!")
 
-    model_dict = dict(zip(model_strings, clf_vals))
+    # model_dict = dict(zip(model_strings, clf_vals))
 
-    min_rmse_index = np.argmin(clf_vals)
-    best_model = model_strings[min_rmse_index]
+    # min_rmse_index = min(clf_vals)
+    # best_model = model_strings[min_rmse_index]
 
-    logger.info(f"Best model is {best_model} with value {min_rmse_index}")
+    # print(f"Models = {json.dumps(model_dict,indent=2)}")
+    # logger.info(f"Best model is {best_model} with value {min_rmse_index}")
 
-    #Train best model again
+    # Train best model again
 
-    best_model = RandomForestRegressor(n_estimators= 200, random_state= RANDOM_STATE)
+    best_model = RandomForestRegressor(n_estimators=200, random_state=RANDOM_STATE)
     best_model.fit(X_train, y_train)
 
     return best_model

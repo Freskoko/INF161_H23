@@ -1,5 +1,5 @@
-from pathlib import Path
 import time
+from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -12,7 +12,10 @@ from scipy.stats import spearmanr
 PWD = Path().absolute()
 PWD = f"{PWD}/src"
 
-def graph_a_vs_b(titletext:str, df: pd.DataFrame, a: str, b: str, alabel: str, blabel: str) -> None:
+
+def graph_a_vs_b(
+    titletext: str, df: pd.DataFrame, a: str, b: str, alabel: str, blabel: str
+) -> None:
     """
     General function to plot two items in a dataframe against eachother
 
@@ -163,27 +166,66 @@ def graph_all_models(main_df: pd.DataFrame, pre_change: bool) -> None:
     logger.info("Graphing all graphs...")
 
     if pre_change:
-        titletext="PRE_CHANGES"
+        titletext = "PRE_CHANGES"
     else:
-        titletext="POST_CHANGES"
+        titletext = "POST_CHANGES"
 
-    create_df_matrix(titletext,main_df)
+    create_df_matrix(titletext, main_df)
     graph_a_vs_b(
-        titletext, main_df, "Globalstraling", "Total_trafikk", "stråling", "antall sykler"
+        titletext,
+        main_df,
+        "Globalstraling",
+        "Total_trafikk",
+        "stråling",
+        "antall sykler",
     )
-    graph_a_vs_b(titletext,main_df, "Solskinstid", "Total_trafikk", "solskinn", "antall sykler")
     graph_a_vs_b(
-        titletext, main_df, "Lufttemperatur", "Total_trafikk", "grader celcius", "antall sykler"
+        titletext, main_df, "Solskinstid", "Total_trafikk", "solskinn", "antall sykler"
+    )
+    graph_a_vs_b(
+        titletext,
+        main_df,
+        "Lufttemperatur",
+        "Total_trafikk",
+        "grader celcius",
+        "antall sykler",
     )
 
     if not pre_change:
-        graph_a_vs_b(titletext, main_df, "Vindretning_x", "Total_trafikk", "Grader", "antall sykler")
-        graph_a_vs_b(titletext, main_df, "Vindretning_y", "Total_trafikk", "Grader", "antall sykler")
+        graph_a_vs_b(
+            titletext,
+            main_df,
+            "Vindretning_x",
+            "Total_trafikk",
+            "Grader",
+            "antall sykler",
+        )
+        graph_a_vs_b(
+            titletext,
+            main_df,
+            "Vindretning_y",
+            "Total_trafikk",
+            "Grader",
+            "antall sykler",
+        )
     if pre_change:
-        graph_a_vs_b(titletext, main_df, "Vindretning", "Total_trafikk", "Grader", "antall sykler")
-        graph_a_vs_b(titletext, main_df, "Vindstyrke", "Total_trafikk", "Vind", "antall sykler")
-    graph_a_vs_b(titletext, main_df, "Lufttrykk", "Total_trafikk", "hPa", "antall sykler")
-    graph_a_vs_b(titletext, main_df, "Vindkast", "Total_trafikk", "m/s", "antall sykler")
+        graph_a_vs_b(
+            titletext,
+            main_df,
+            "Vindretning",
+            "Total_trafikk",
+            "Grader",
+            "antall sykler",
+        )
+        graph_a_vs_b(
+            titletext, main_df, "Vindstyrke", "Total_trafikk", "Vind", "antall sykler"
+        )
+    graph_a_vs_b(
+        titletext, main_df, "Lufttrykk", "Total_trafikk", "hPa", "antall sykler"
+    )
+    graph_a_vs_b(
+        titletext, main_df, "Vindkast", "Total_trafikk", "m/s", "antall sykler"
+    )
     # graph_df(main_df)
 
     logger.info("Finished graphing!")
