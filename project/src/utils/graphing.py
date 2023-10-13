@@ -1,3 +1,4 @@
+from pathlib import Path
 import time
 
 import matplotlib.pyplot as plt
@@ -7,8 +8,11 @@ import seaborn as sns
 from loguru import logger
 from scipy.stats import spearmanr
 
+# get current filepath to use when opening/saving files
+PWD = Path().absolute()
+PWD = f"{PWD}/src"
 
-def graph_a_vs_b(df: pd.DataFrame, a: str, b: str, alabel: str, blabel: str) -> None:
+def graph_a_vs_b(titletext:str, df: pd.DataFrame, a: str, b: str, alabel: str, blabel: str) -> None:
     """
     General function to plot two items in a dataframe against eachother
 
@@ -35,13 +39,13 @@ def graph_a_vs_b(df: pd.DataFrame, a: str, b: str, alabel: str, blabel: str) -> 
     pear = round(pearson_r_corr(df[a], df[b]), 4)
     spear = round(spearman_rho_corr(df[a], df[b]), 4)
 
-    plt.title(f"""pearson_corr = {pear} spearmann_corr = {spear}""")
+    plt.title(f"""pearson_corr = {pear} spearmann_corr = {spear} {titletext}""")
     plt.grid(True)
-    plt.savefig(f"figs/{a}VS{b}")
+    plt.savefig(f"{PWD}/figs_new/{a}VS{b}_{titletext}")
 
     # :warning: clear fig is very important as not clearing will cause many figs to be created ontop of eachother
     plt.clf()
-    logger.info(f"saved fig '{a} VS {b}' in figs")
+    logger.info(f"saved fig '{a} VS {b}' in figs_new")
     logger.info(f"--- Graph took: {round(time.time() - start_time,2)} seconds ---")
 
     return
@@ -86,11 +90,11 @@ def graph_df(df: pd.DataFrame) -> None:
     )
     plt.grid(True)
     plt.legend()
-    plt.savefig(f"figs/timeVStrafficBoth.png")
+    plt.savefig(f"{PWD}/figs_new/timeVStrafficBoth.png")
     return None
 
 
-def create_df_matrix(df: pd.DataFrame) -> None:
+def create_df_matrix(titletext: str, df: pd.DataFrame) -> None:
     """
     Function to create a covariance and correlation matrix for values in a dataframe
     """
@@ -134,8 +138,8 @@ def create_df_matrix(df: pd.DataFrame) -> None:
     sns.heatmap(
         cov_matrix_normalized, annot=True, cmap="RdBu", vmin=-1, vmax=1, center=0
     )
-    plt.title("Covariance Matrix Heatmap")
-    plt.savefig("figs/covv_matrix.png")
+    plt.title(f"Covariance Matrix Heatmap {titletext}")
+    plt.savefig(f"{PWD}/figs_new/covv_matrix_{titletext}.png")
 
     plt.clf()
 
@@ -144,8 +148,8 @@ def create_df_matrix(df: pd.DataFrame) -> None:
 
     plt.figure(figsize=(16, 16))
     sns.heatmap(corr_matrix, annot=True, cmap="RdBu", vmin=-1, vmax=1, center=0)
-    plt.title("Correlation Matrix Heatmap")
-    plt.savefig("figs/corr_matrix.png")
+    plt.title(f"Correlation Matrix Heatmap {titletext}")
+    plt.savefig(f"{PWD}/figs_new/corr_matrix_{titletext}.png")
 
     return
 
@@ -154,24 +158,32 @@ def create_df_matrix(df: pd.DataFrame) -> None:
 # add quantile
 
 
-def graph_all_models(main_df: pd.DataFrame) -> None:
+def graph_all_models(main_df: pd.DataFrame, pre_change: bool) -> None:
 
     logger.info("Graphing all graphs...")
 
-    create_df_matrix(main_df)
+    if pre_change:
+        titletext="PRE_CHANGES"
+    else:
+        titletext="POST_CHANGES"
+
+    create_df_matrix(titletext,main_df)
     graph_a_vs_b(
-        main_df, "Globalstraling", "Total_trafikk", "stråling", "antall sykler"
+        titletext, main_df, "Globalstraling", "Total_trafikk", "stråling", "antall sykler"
     )
-    graph_a_vs_b(main_df, "Solskinstid", "Total_trafikk", "solskinn", "antall sykler")
+    graph_a_vs_b(titletext,main_df, "Solskinstid", "Total_trafikk", "solskinn", "antall sykler")
     graph_a_vs_b(
-        main_df, "Lufttemperatur", "Total_trafikk", "grader celcius", "antall sykler"
+        titletext, main_df, "Lufttemperatur", "Total_trafikk", "grader celcius", "antall sykler"
     )
-    graph_a_vs_b(main_df, "Vindretning_x", "Total_trafikk", "Grader", "antall sykler")
-    graph_a_vs_b(main_df, "Vindretning_y", "Total_trafikk", "Grader", "antall sykler")
-    graph_a_vs_b(main_df, "Vindretning", "Total_trafikk", "Grader", "antall sykler")
-    graph_a_vs_b(main_df, "Vindstyrke", "Total_trafikk", "Vind", "antall sykler")
-    graph_a_vs_b(main_df, "Lufttrykk", "Total_trafikk", "hPa", "antall sykler")
-    graph_a_vs_b(main_df, "Vindkast", "Total_trafikk", "m/s", "antall sykler")
+
+    if not pre_change:
+        graph_a_vs_b(titletext, main_df, "Vindretning_x", "Total_trafikk", "Grader", "antall sykler")
+        graph_a_vs_b(titletext, main_df, "Vindretning_y", "Total_trafikk", "Grader", "antall sykler")
+    if pre_change:
+        graph_a_vs_b(titletext, main_df, "Vindretning", "Total_trafikk", "Grader", "antall sykler")
+        graph_a_vs_b(titletext, main_df, "Vindstyrke", "Total_trafikk", "Vind", "antall sykler")
+    graph_a_vs_b(titletext, main_df, "Lufttrykk", "Total_trafikk", "hPa", "antall sykler")
+    graph_a_vs_b(titletext, main_df, "Vindkast", "Total_trafikk", "m/s", "antall sykler")
     # graph_df(main_df)
 
     logger.info("Finished graphing!")

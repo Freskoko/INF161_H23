@@ -1,10 +1,13 @@
 import json
 from pathlib import Path
+from loguru import logger
 
 import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
 from sklearn.discriminant_analysis import StandardScaler
+from sklearn.impute import KNNImputer
+from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
 
@@ -113,22 +116,7 @@ def feauture_engineer(df: pd.DataFrame) -> pd.DataFrame:
     df["Vindretning_y"] = np.sin(df["Vindretning_radians"])
 
     # we cant train where there are no traffic values
-    df = df.dropna(subset=["Trafikkmengde_Totalt_i_retning_Florida"])
-
-    # combine the two traffic cols
-    df["Total_trafikk"] = (
-        df["Trafikkmengde_Totalt_i_retning_Florida"]
-        + df["Trafikkmengde_Totalt_i_retning_Danmarksplass"]
-    )
-
-    df = df.drop(
-        labels=[
-            "Trafikkmengde_Totalt_i_retning_Florida",
-            "Trafikkmengde_Totalt_i_retning_Danmarksplass",
-        ],
-        axis=1,
-        inplace=False,
-    )
+    df = df.dropna(subset=["Total_trafikk"])
     # total is found, these two are not needed
 
     # change all values of TRUE in all rows to 1 and FALSE to 0
@@ -165,9 +153,17 @@ def merge_frames(frames: list) -> pd.DataFrame:
 
     # Drops missing values
     PWD = Path().absolute()
-    directory = f"{str(PWD)}/out"
+    directory = f"{str(PWD)}/src/out"
     print("before drop ", len(df_final))
     df_final.to_csv(f"{directory}/before_drop.csv")
+
+    
+    print(df_final)
+    df_2023 = df_2023 = df_final.loc['2023-01-01':'2023-12-31']
+    df_2023.to_csv(f"{directory}/2023data.csv")
+    #get where index is between 2023-01-01 00:00:00 and 2023-12-31 00:00:00
+
+
     df_final = df_final.dropna(subset=["Trafikkmengde_Totalt_i_retning_Florida"])
     print("after drop ", len(df_final))
     df_final.to_csv(f"{directory}/after_drop.csv")
@@ -175,16 +171,52 @@ def merge_frames(frames: list) -> pd.DataFrame:
     # finding means of values lead to floating point errors, round to fix these
     df_final = df_final.apply(pd.to_numeric, errors="ignore").round(30)
 
-    return df_final
+    # combine the two traffic cols
+    df_final["Total_trafikk"] = (
+        df_final["Trafikkmengde_Totalt_i_retning_Florida"]
+        + df_final["Trafikkmengde_Totalt_i_retning_Danmarksplass"]
+    )
+
+    df_final = df_final.drop(
+        labels=[
+            "Trafikkmengde_Totalt_i_retning_Florida",
+            "Trafikkmengde_Totalt_i_retning_Danmarksplass",
+        ],
+        axis=1,
+        inplace=False,
+    )
+    
+    return df_2023, df_final
 
 
-def trim_outliers(df: pd.DataFrame) -> pd.DataFrame:
+def trim_transform_outliers(df: pd.DataFrame) -> pd.DataFrame:
     """
     Given a dataframe, trims values in the dataframe that are considered abnormal.
 
     What values are considered abnormal are covered in the README under "Dropped values"
     """
     length_dict = {"before": len(df)}
+
+    #-----------------------
+    #instead of trimming values that are weird, lets try to do KNN network to find replacment values
+
+    df = df.replace(99999, np.nan)
+
+    num_nan = df.isna().sum()
+    print(num_nan)
+
+    # Initialize KNNImputer
+    imputer = KNNImputer(n_neighbors=3,weights="distance") # You can adjust the 'n_neighbors' parameter based on your specific case
+
+    # Apply the imputer to the dataframe    
+    df_no_traffic = df.drop(columns=["Total_trafikk"])
+    df_imputed = imputer.fit_transform(df_no_traffic)
+
+    # The result is a numpy array. We will convert it back to a pandas dataframe
+    df_fixed = pd.DataFrame(df_imputed, columns=df.columns, index=df.index)
+
+    df = df_fixed
+    #------------------------
 
     # dette er innanfor grensene funnet her
     # https://veret.gfi.uib.no/
@@ -218,6 +250,37 @@ def trim_outliers(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
+def find_best_datafixer(df):
+    #instead of trimming values that are weird, lets try to do KNN network to find replacment values
+
+    #OK WE DONT DO TEST TRAIN SPLIT HERE -> ONLY USE TRAINING DATA
+
+    df = df.replace(99999, np.nan)
+
+    num_nan = df.isna().sum()
+    print(num_nan)
+
+    from sklearn.impute import KNNImputer
+
+    # Initialize KNNImputer
+
+    #TODO FIND OUT ABOUT THIS 
+
+    Y = df
+    X = df["no_traffic???"]
+    for i in range(1,25):
+        imputer = KNNImputer(n_neighbors=i,weights="distance")
+        imputer.fit(X,Y)
+        # imputer.predict(df_no_traffic)
+        # rmse = mean_squared_error(,pred,squared=False)
+        # df_imputed = imputer.fit_transform(df_no_traffic)
+        
+
+    # df_fixed = pd.DataFrame(df_imputed, columns=df.columns, index=df.index)
+
+    # df = df_fixed
+
+
 def normalize_cols(df: pd.DataFrame) -> pd.DataFrame:
     """
     Given a dataframe, normalizes certain values to a 0-1 scale
@@ -226,16 +289,16 @@ def normalize_cols(df: pd.DataFrame) -> pd.DataFrame:
     """
 
     # normalize between 0-1,
-    scaler = MinMaxScaler()
-    df[["Globalstraling", "Lufttrykk", "Solskinstid",]] = scaler.fit_transform(
-        df[
-            [
-                "Globalstraling",
-                "Lufttrykk",
-                "Solskinstid",
-            ]
-        ]
-    )
+    # scaler = MinMaxScaler()
+    # df[["Globalstraling", "Lufttrykk", "Solskinstid",]] = scaler.fit_transform(
+    #     df[
+    #         [
+    #             "Globalstraling",
+    #             "Lufttrykk",
+    #             "Solskinstid",
+    #         ]
+    #     ]
+    # )
 
     print(len(df))
 
@@ -245,6 +308,8 @@ def normalize_cols(df: pd.DataFrame) -> pd.DataFrame:
     print(len(df))
 
     return df
+
+
 
 
 def drop_uneeded_cols(df: pd.DataFrame) -> pd.DataFrame:
@@ -280,7 +345,7 @@ def train_test_split_process(
 
     df = df.reset_index()
     df = df.drop(["DateFormatted"], axis=1)
-
+    
     y = df["Total_trafikk"]
     x = df.drop(["Total_trafikk"], axis=1)
 
@@ -309,3 +374,36 @@ def train_test_split_process(
     }
 
     return split_dict, training_df, test_df, validation_df
+
+def treat_2023_file(df,model):
+
+    imputer = KNNImputer(n_neighbors=3) # You can adjust the 'n_neighbors' parameter based on your specific case
+
+    # Apply the imputer to the dataframe
+    df_imputed = imputer.fit_transform(df)
+
+    # The result is a numpy array. We will convert it back to a pandas dataframe
+    df_fixed = pd.DataFrame(df_imputed, columns=df.columns, index=df.index)
+
+    # add important features to help the model
+    df_final = feauture_engineer(df_fixed)
+    logger.info("Features engineered")
+
+    # normalize coloumns from 0-1 or square coloumns^2
+    df_final = normalize_cols(df_final)
+    logger.info("Coloumns normalized")
+
+    # drop coloumns which are not needed (noise)
+    df_final = drop_uneeded_cols(df_final)
+    logger.info("Uneeded cols dropped") 
+
+    df = df.drop(columns=["Trafikkmengde_Totalt_i_retning_Danmarksplass","Trafikkmengde_Totalt_i_retning_Florida"])
+
+    df_final["Total_trafikk"] = model.predict(df)
+    
+    print("SUPER FINAL DF:")
+    print(df_final)
+
+    df_final.to_csv("src/out/2023FIXEDDATA.csv")
+
+    return df_final

@@ -133,7 +133,7 @@ def treat_trafikk_files(filename: str) -> pd.DataFrame:
         result_df = result_df.join(felt_df)
 
     # save to csv
-    directory = f"{str(PWD)}/out"
+    directory = f"{str(PWD)}/src/out"
     result_df.to_csv(f"{directory}/check_traffic.csv")
 
     return result_df
