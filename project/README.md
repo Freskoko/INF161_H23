@@ -1,9 +1,3 @@
-# README for INF161 data parsing
-
-***If I'm not in PDF format, please open me in markdown formatting! (in vscode there is a button in the top right.)***
-
-This README pertains to the INF161 project this fall, in creating a model which can guess bike traffic across nygårdsbroen.
-
 ### TODO
 
 ### REPORT
@@ -17,8 +11,6 @@ This README pertains to the INF161 project this fall, in creating a model which 
 
 ### CODE
 
-- create website
-
 - cleanup files that may not be used
 
 - conda and lock file
@@ -26,53 +18,150 @@ This README pertains to the INF161 project this fall, in creating a model which 
 - Graf over måned og traffic
 
 
+# Report for INF161 cycle traffic project
+
+***If I'm not in PDF format, please open me in markdown formatting! (in vscode there is a button in the top right.)***
+
+*Henrik Brøgger*
+
+This report pertains to the INF161 project this fall, in creating a model which can guess bike traffic across nygårdsbroen.
+
+### Index:
+
+- Data Exploration
+- Removed data / Data loss
+- Feature engineering
+- Issues/Choices
+- Data exploration post processing
+- Model choice and evaluation
+- Results
+- Conclusion
+
 
 
 # Data exploration:
-In src/figs, there are images presenting each of the coloums in the final data frame, plotted against the total amount of traffic.
+In src/figs #todo , there are images presenting each of the coloums in the final data frame, plotted against the total amount of traffic. This part of the report explores these figures.
 
-**SOME OF THE VALUES IN THIS ARE WRONG: THIS IS TO BE FIXED SEE TODO**
--------------
-![globalstråling vs traffik](src/figs/GlobalstralingVSTotal_trafikk.png)
+Data is observed using spearmann and pearson correlation.
 
-Looking at the *Globalstråling vs Total_trafikk* graph above, it is clear that there is some correlation between the two. The higher the "globalstråling", the less traffic, perhaps as 
-the weather is better, more people walk?
-
-With a pearson corr value of *0.2858*, this is not very strong, but can still be an indiactor of correlation.
-The spearmann correlation value of *0.4472* is a good sign, and the spearmann data fits especially well since this data is monotonic.
-
-This will be an important variable to use when making a model.
 
 -------------
-![lufttemperatur vs traffik](src/figs/LufttemperaturVSTotal_trafikk.png)
 
-Looking at the *Lufttemperatur vs Total_trafikk* graph above, it is clear that there is a clear correlation between the two. The higher the "lufttemperatur", the more traffic as a result. 
+### Globalstråling
 
-With a pearson corr value of *0.2634*, this is not very strong, but can still be an indiactor of correlation.
-The spearmann correlation value of *0.3124* is an OK sign, but the spearmann corr may not be as good of an indicator as the pearson corr since this data is not monotonic.
+**Raw-observation**
 
-This will be an important variable to use when making a model.
+![globalstråling vs traffik](src/figs_new/GlobalstralingVSTotal_trafikk_PRE_CHANGES.png)
+
+Looking at the figure above , it is clear that the data contains outliers, as a the amount of global radation cannot exceed many thousands. #TODO REFRENCE
+
+**Post-processing**
+
+![globalstråling vs traffik](src/figs_new/GlobalstralingVSTotal_trafikk_POST_CHANGES.png)
+
+After processing this data, treating outliers, one can see that the data sits between values of 0-900.
+
+It is clear that there is some correlation between globalstråling and cycle-traffic. 
+
+There seems to be little difference in correlation when globalstråling lies between 0-400, but in values over this, and especially over 600, traffic decreases. 
+
+With a pearson corr value of *0.2985*, this is decently strong, but can still be a good indicator of correlation.
+
+The spearmann correlation value of *0.4716* is a good sign. Due to the nature of the data "jumping"  up and down, (meaning that that for one given globalstråling `n`, it can have values a 300, while `n+1` has 150, and `n+2` has 300 again). The spearmann value may not be as useful here, as it is most useful when observing monotonic data.
 
 -------------
-![lufttrykk vs traffik](src/figs/LufttrykkVSTotal_trafikk.png)
 
-Looking at the *Lufttrykk vs Total_trafikk* graph above, it is clear that there is a strong correlation between the two. It seems that a "middle" or average luft-trykk results in more traffic, but too high or too low, results in less traffic.
+### Lufttemperatur
 
-With a pearson corr value of *0.0534*, this is not very strong at all, despite what it may seem at first look.
-The spearmann correlation value of *0.0499* is an also a bad sign, but the spearmann corr may not be as good of an indicator as the pearson corr since this data is not monotonic.
+**Raw-observation**
 
-This will be an important variable to use when predicting.
+![lufttemp vs traffik](src/figs_new/LufttemperaturVSTotal_trafikk_PRE_CHANGES.png)
+
+Looking at the figure above , it is clear that the data contains outliers, and the data seems to pool weirdly around certain values. This needs to be adjusted for. 
+
+**Post-processing**
+
+![lufttemp vs traffik](src/figs_new/LufttemperaturVSTotal_trafikk_POST_CHANGES.png)
+
+After processing this data, treating outliers, one can see that the data sits between values of -10-32.
+
+It is clear that there is some correlation between temperature and cycle-traffic. 
+
+There seems to be little difference in correlation when lufttemperatur lies between 3-20, but in values over 20, and values under 3, traffic decreases. 
+
+With a pearson corr value of *0.2783*, this decently strong, but can still be a good indicator of correlation.
+
+The spearmann correlation value of *0.3405* is a good sign. However, this data is not monotic, as it goes up, then down later. This means that the spearmann correlation cannot be trusted to a large extent.
 
 -------------
-![Solskinstid vs traffik](src/src/figs/SolskinstidVSTotal_trafikk.png)
 
-Looking at the *Solskinstid vs Total_trafikk* graph above, it is hard to say if there is a clear correlation between the two.
-It seems that when solskinstid = 0, there is a lot of traffic, which sound a bit unrealsitic?
-If there is a lot of sun, there is more traffic, but there is not a clear correlation.
-This will be an OK variable to use when predicting.
-With a pearson corr value of *0.2398*, this is alright, despite what it may seem at first look.
-It seems like the decrease in cyclicsts in regard to weather is very minimal.
-The spearmann correlation value of *0.3139* is a good sign, and the spearmann corr may be a good of an indicator as the pearson corr since this data is monotonic.
+### Lufttrykk
+
+**Raw-observation**
+
+![lufttrykk vs traffik](src/figs_new/LufttrykkVSTotal_trafikk_PRE_CHANGES.png)
+
+Looking at the figure above , it is clear that the data contains outliers, and the data seems to pool weirdly around certain values. This needs to be adjusted for. 
+
+**Post-processing**
+
+![lufttrykk vs traffik](src/figs_new/LufttrykkVSTotal_trafikk_POST_CHANGES.png)
+
+Looking at the *Lufttrykk vs Total_trafikk* graph above, it may seem like there is a correlation between the two. It seems that values around 980-1020 provide around the same amount of cyclists. Values higher than 1020 and lower than 980 causes a drop off inn traffic.
+
+With a pearson corr value of *0.0714*, this is not very strong at all, despite what it may seem at first look.
+The spearmann correlation value of *0.0818* is also a bad sign, but the spearmann corr may not be as good of an indicator as the pearson corr since this data is not monotonic.
+
+-------------
+
+### Solskinnstid
+
+**Raw-observation**
+
+![solskinn vs traffik](src/figs_new/SolskinstidVSTotal_trafikk_PRE_CHANGES.png)
+
+Looking at the figure above , it is clear that the data contains outliers, and the data seems to pool weirdly around certain values. This needs to be adjusted for. 
+
+**Post-processing**
+
+![solskinn vs traffik](src/figs_new/SolskinstidVSTotal_trafikk_POST_CHANGES.png)
+
+Looking at the *Solskinn vs Total_trafikk* graph above, it may be hard to spot a correlation between the two. It seems that solskinnstid does not effect the amount of cyclists. 
+
+However, with a pearson corr value of *0.2623*, this indicates atleast a casual correlation. This data will still be useful.
+The spearmann correlation value of *0.3616*  is ok, but the spearmann corr may not be as good of an indicator as the pearson corr since this data is not monotonic.
+
+-------------
+
+### Vindkast LEFT OFF HERE
+
+**Raw-observation**
+
+![vindkast vs traffik](src/figs_new/VindkastVSTotal_trafikk_PRE_CHANGES.png)
+
+Looking at the figure above , it is clear that the data contains outliers, and the data seems to pool weirdly around certain values. This needs to be adjusted for. 
+
+**Post-processing**
+
+![vindkast vs traffik](src/figs_new/VindkastVSTotal_trafikk_POST_CHANGES.png)
+
+Looking at the *Vindkast vs Total_trafikk* graph above, it may be hard to spot a correlation between the two. It seems that solskinnstid does not effect the amount of cyclists. 
+
+However, with a pearson corr value of *0.2623*, this indicates atleast a casual correlation. This data will still be useful.
+The spearmann correlation value of *0.3616*  is ok, but the spearmann corr may not be as good of an indicator as the pearson corr since this data is not monotonic.
+
+
+-----------------
+
+----------------
+
+--------------------
+
+------------------
+
+
+
+
 
 -------------
 ![Vindkast vs traffik](src/figs/VindkastVSTotal_trafikk.png)
@@ -587,20 +676,6 @@ The discrepency in length comes from severe outliers.
 
 When dropping unreasonable values in ```dataframe_handling.py```, see above sections for this. 
 
-
-### Splitting data into train,test,validation
-
-Data was split like this:
-
-type      |percent of wholedata| 
-----------|--------------------|
-training  | 70%                |
-test      | 15%                |
-validation| 15%                |
-
-This was done using ```train_test_split()```
-from ```sklearn.model_selection```
-    
 
 
 # RESULTS :
