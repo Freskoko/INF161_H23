@@ -4,16 +4,10 @@ from pathlib import Path
 import pandas as pd
 from loguru import logger
 from sklearn.ensemble import RandomForestRegressor
-
-from utils.dataframe_handling import (
-    drop_uneeded_cols,
-    feauture_engineer,
-    merge_frames,
-    normalize_cols,
-    train_test_split_process,
-    treat_2023_file,
-    trim_transform_outliers,
-)
+from utils.dataframe_handling import (drop_uneeded_cols, feauture_engineer,
+                                      merge_frames, normalize_cols,
+                                      train_test_split_process,
+                                      treat_2023_file, trim_transform_outliers)
 from utils.file_parsing import treat_florida_files, treat_trafikk_files
 from utils.graphing import graph_all_models, graph_df
 from utils.models import find_hyper_param, train_best_model, train_models
@@ -94,11 +88,11 @@ def main():
         graph_all_models(training_df, pre_change=False)
         logger.info("Graph all models POSTCHANGE")
 
-    # model_dict = train_models(split_dict)
-    # best_model = find_hyper_param(split_dict)
-    # train_best_model(split_dict, test_data=False)
+    model_dict = train_models(split_dict)
+    best_model = find_hyper_param(split_dict)
+    train_best_model(split_dict, test_data=False)
 
-    # train_best_model(split_dict, test_data=True)
+    train_best_model(split_dict, test_data=True)
 
     logger.info("Treating 2023 files")
 
@@ -110,8 +104,6 @@ def main():
 
     best_model.fit(X_train, y_train)
     df_with_values = treat_2023_file(df_2023, best_model)
-
-    # assert False
 
     return split_dict, training_df, test_df, validation_df
 

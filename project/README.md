@@ -11,6 +11,8 @@ This README pertains to the INF161 project this fall, in creating a model which 
 - fix values in readme that have now been updated
 - update data loss parsing section
 
+- evulate multiple models
+
 - RUN AGAIN
 
 ### CODE
@@ -23,7 +25,6 @@ This README pertains to the INF161 project this fall, in creating a model which 
 
 - Graf over måned og traffic
 
-- evulate multiple models
 
 
 
