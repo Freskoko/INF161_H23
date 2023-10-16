@@ -194,75 +194,73 @@ def trim_transform_outliers(df: pd.DataFrame, data2023: bool) -> pd.DataFrame:
 
     What values are considered abnormal are covered in the README under "Dropped values"
     """
+
+    # Transform malformed data to NaN.
     length_dict = {"before": len(df)}
 
-    # -----------------------
-    # TODO FIX THIS
-    # Replace values of 99999 as NaN
+    length_dict["afterGlobal"] = len(df)
+
+    # df["Globalstraling"] values above 1000 and below 0 are set to NaN
+    df["Globalstraling"] = np.where(
+        (df["Globalstraling"] < 0) | (df["Globalstraling"] >= 1000),
+        np.nan,
+        df["Globalstraling"],
+    )
+
+    # df["Solskinstid"] values above 10.01 are set to NaN
+    df["Solskinstid"] = np.where(df["Solskinstid"] >= 10.01, np.nan, df["Solskinstid"])
+    length_dict["afterSolskinn"] = len(df)
+
+    # df["Lufttemperatur"] values above 50 are set to NaN
+    df["Lufttemperatur"] = np.where(
+        df["Lufttemperatur"] >= 50, np.nan, df["Lufttemperatur"]
+    )
+    length_dict["afterLufttemp"] = len(df)
+
+    # df["Lufttrykk"] values above 1050 are set to NaN
+    df["Lufttrykk"] = np.where(df["Lufttrykk"] >= 1050, np.nan, df["Lufttrykk"])
+    length_dict["afterLufttrykk"] = len(df)
+
+    # df["Vindkast"] values above 65 are set to NaN
+    df["Vindkast"] = np.where(df["Vindkast"] >= 65, np.nan, df["Vindkast"])
+    length_dict["afterVindkast"] = len(df)
+
+    # df["Vindretning"] values above 360 are set to NaN
+    df["Vindretning"] = np.where(df["Vindretning"] >= 361, np.nan, df["Vindretning"])
+    length_dict["afterVindretning"] = len(df)
+
+    if DEBUG == True:
+        print(json.dumps(length_dict, indent=2))
+
     df = df.replace(99999, np.nan)
 
-    # Provide summary of NaNs in the DataFrame
+    # observe NaN
     num_nan = df.isna().sum()
     print(f"Number of NaNs in each column:\n{num_nan}")
 
     if not data2023:
-        # Reserve the 'Total_trafikk' column, it will not used for imputation
+        # reserve the "Total_trafikk" column, it will not used for imputation
         total_traffic_series = df["Total_trafikk"]
 
-        # Drop the 'Total_trafikk' column from the main DataFrame
+        # drop the "Total_trafikk" column from the main DataFrame
         df_no_traffic = df.drop(columns=["Total_trafikk"])
 
     if data2023:
         df_no_traffic = df
 
-    # Initialize KNNImputer
     imputer = KNNImputer(n_neighbors=3, weights="distance")
 
-    # Fit & transform the DataFrame
+    # do transformations
     df_imputed = imputer.fit_transform(df_no_traffic)
 
-    # Convert the result from numpy array back to DataFrame
     df_fixed = pd.DataFrame(
         df_imputed, columns=df_no_traffic.columns, index=df_no_traffic.index
     )
 
     if not data2023:
-        # Add the 'Total_trafikk' column back to the DataFrame
         df_fixed = pd.concat([df_fixed, total_traffic_series], axis=1)
 
-    # Update DataFrame
     df = df_fixed
-    # ------------------------
-
-    if data2023 == False:
-        # dette er innanfor grensene funnet her
-        # https://veret.gfi.uib.no/
-        df = df[df["Globalstraling"] < 1000]
-        # df = df[df["Globalstraling"] >= 0]
-        length_dict["afterGlobal"] = len(df)
-
-        # må være fra 0-10
-        df = df[df["Solskinstid"] < 10.01]
-        length_dict["afterSolskinn"] = len(df)
-
-        # må være under 50
-        df = df[df["Lufttemperatur"] < 50]
-        length_dict["afterLufttemp"] = len(df)
-
-        # må være mellom 935 og 1050, det er max og min
-        # verdien of all time
-        df = df[(df["Lufttrykk"] < 1050)]
-        length_dict["afterLufttrykk"] = len(df)
-
-        # må være mindre en 65
-        df = df[(df["Vindkast"] < 65)]
-        length_dict["afterVindkast"] = len(df)
-
-        df = df[df["Vindretning"] < 361]
-        length_dict["afterVindretning"] = len(df)
-
-        if DEBUG == True:
-            print(json.dumps(length_dict, indent=2))
 
     return df
 

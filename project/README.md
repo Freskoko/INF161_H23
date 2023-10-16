@@ -13,10 +13,9 @@
 
 - cleanup files that may not be used
 
+- cleanup
+
 - conda and lock file
-
-- Graf over måned og traffic
-
 
 # Report for INF161 cycle traffic project
 
@@ -133,7 +132,7 @@ The spearmann correlation value of *0.3616*  is ok, but the spearmann corr may n
 
 -------------
 
-### Vindkast LEFT OFF HERE
+### Vindkast 
 
 **Raw-observation**
 
@@ -145,152 +144,108 @@ Looking at the figure above , it is clear that the data contains outliers, and t
 
 ![vindkast vs traffik](src/figs_new/VindkastVSTotal_trafikk_POST_CHANGES.png)
 
-Looking at the *Vindkast vs Total_trafikk* graph above, it may be hard to spot a correlation between the two. It seems that solskinnstid does not effect the amount of cyclists. 
+Looking at the *Vindkast vs Total_trafikk* graph above, it is clear that vindkast has a correlation with cycle traffic.
+Values bteween 0-15 dont seem to effect traffic, but values above 15 m/s indicate strong winds and therefore we see a drop in traffic at these values.
 
-However, with a pearson corr value of *0.2623*, this indicates atleast a casual correlation. This data will still be useful.
-The spearmann correlation value of *0.3616*  is ok, but the spearmann corr may not be as good of an indicator as the pearson corr since this data is not monotonic.
-
-
------------------
-
-----------------
-
---------------------
-
-------------------
-
-
-
-
+However, with a pearson corr value of *0.0347*, this indicates quite a weak corrrelation. This data will still be useful.
+The spearmann correlation value of *0.109*  is ok, and since this data portrays as somewhat monotonic, could tell us some correlation is present.
 
 -------------
-![Vindkast vs traffik](src/figs/VindkastVSTotal_trafikk.png)
 
+### Vindretning
 
+**Raw-observation**
 
+![vindretning vs traffik](src/figs_new/VindretningVSTotal_trafikk_PRE_CHANGES.png)
 
-Looking at the *Vindkast vs Total_trafikk*  graph above, it is clear that there is a strong correlation between the two. At values between 0-10, there is not much of a difference, but past 15, the increase in wind clearly causes a drop in traffic. 
+Looking at the figure above , it is clear that the data contains outliers, and the data seems to pool weirdly around certain values. This needs to be adjusted for. 
 
-With a pearson corr value of *0.0288*, this is not very strong at all.
-The spearmann correlation value of *0.1023* is a little better, but the spearmann corr may not be as good of an indicator as the pearson corr since this data is not monotonic.
+**Post-processing**
 
-This will be an OK variable to use when predicting.
-
--------------
 ![Vindretning vs traffik](src/figs/VindretningVSTotal_trafikk.png)
-![Vindretning vs traffik](src/figs/Vindretning_xVSTotal_trafikk.png)
-![Vindretning vs traffik](src/figs/Vindretning_yVSTotal_trafikk.png)
 
 Looking at the *Vindretning vs Total_trafikk*  graph above, it is up for argument if there is a strong correlation between the two, but there is some data that can be useful.
-It seems that between x=100-350 values are pretty much consistent, however a drop is seen at around 250. Values between 100-0 are also very very low, and could be reflective of something else?
+It seems that between x=100-350 values are pretty much consistent, however a drop is seen at around 250. Values between 100-0 are also very very low, and could be reflective of something else? Vindretning and traffic seem to be correlated, but these vindretning values can be further processed, to try to extract further data from the wind.  
 
-With a pearson corr value of *0.0898*, this is quite weak.
-The spearmann correlation value of *0.1385 is a little better, but the spearmann corr may not be as good of an indicator as the pearson corr since this data is not monotonic, and goes up and down several times.
+![vindretning vs traffik](src/figs_new/Vindretning_xVSTotal_trafikk_POST_CHANGES.png)
 
-This will be an OK variable to use when predicting.
+![vindretning vs traffik](src/figs_new/Vindretning_yVSTotal_trafikk_POST_CHANGES.png)
 
-It is important to note that the *Vindretning* Variable has values between 0-360, and if we were to calculate the mean of the 6 values per hour, and *Vindretning* looked like this : [0,0,0,0,0,365] we would end up with a value way higher than the most common value, 0. 
-Therefore, first the corresponding points on a circle from the degrees were added to the data frame
-*Vindretning_x* and
-*Vindretning_y*, then the average of these were computed, and transformed back into degrees.
+This data has been transformed quite a bit. Vindretning was originally a number between 0-360, and has transformed to two values. The degrees (0-360) can be imagined as points on a unit circle. 
+Converting this point to two sperate values, x and y reveal more about the nature of the wind. Originally only the wind direction was known, but now the wind x and y directions are known, or atleast simulated.
 
-It is probably better to use *Vindretning_x* and *Vindretning_y* as two different variables, instead of just *Vindretning*, since by looking at their graphs, one can see that *Vindretning_x* has a positive pearson corr of 0.0925, and a positive spearmann_corr of 0.0832.
+Mathematically speaking:
+```
+    df["Vindretning_radians"] = np.radians(df["Vindretning"])
+    df["Vindretning_x"] = np.cos(df["Vindretning_radians"])
+    df["Vindretning_y"] = np.sin(df["Vindretning_radians"])
 
-while *Vindretning_y* has a negative pearson_corr of -0.0989 and a negative spearmann_cor of -0.1443!
+```
 
-While these numbers are not very high, it is an important distinction to make that the x, and y values are together, not so useful, but divided, they can help predict traffic values.
-
--------------
-![Vindstyrke vs traffik](src/figs/VindstyrkeVSTotal_trafikk.png)
-
-Looking at the *Vindstyrke vs Total_trafikk*  graph above, it is clear that there is a strong correlation between the two. It seems between x=0-7 values are mostly consistent in the y=500-450 range, but at x=10 to x=15, values drop fast! 
-
-With a pearson corr value of *0.0259*, this is quite weak, compared to what i thought at first glance.
-The spearmann correlation value of *0.0923* is a little better, and the data is somewhat monotonic, so this could be an ok predictor.
-
-This will be an OK variable to use when predicting.
+Looking at the *Vindkast x/y vs Total_trafikk* graphs above, it is not right away clear that vindkast has a correlation with cycle traffic.
+The original undivided data had a slightly positive pearson correlation of *0.139*, but now after splitting the data in two, it is clear that *Vindretning_x* has a positive pearson corr of *0.1283* while *Vindretning_y* has a negative correlation of *-0.1107*. Splitting this value into two allowed us to gain a deeper understanding of this value, understanding that some vindretning is negativley correlated!
+Since vindretning has been transformed to two different variables, the original "Vindretning" has been dropped.
 
 -------------
+
+### Vindstyrke
+
+**Raw-observation**
+
+![vindstyrke vs traffik](src/figs_new/VindstyrkeVSTotal_trafikk_PRE_CHANGES.png)
+
+Looking at the figure above , it is clear that the data contains outliers, and the data seems to pool weirdly around certain values. This needs to be adjusted for. 
+
+#TODO
+The *Vindkast* and *Vindstyrke* vairbales have a pearson correlation of 0.98, for the purpouses of the data, they tell us virtually the same thing. 
+
+*Vindkast* has a correlation of 0.029 with *Total trafikk*, which is 0.003 less than between *Vindstyrke* og *Total trafikk*, this is almost nothing, but for the purpouses of this paper, i choose to keep *Vindkast*
+
+
+-------------
+
+### Yearly variations of traffic data / Correlation of the two directions
+
 ![FloridaDanmarksplass vs time](src/figs/timeVStrafficBoth.png)
 
-Looking at the *FloridaDanmarksplass vs time* graph above, it can be seen that the two variables are very correlated.
+Looking at the *FloridaDanmarksplass vs time* graph above, one can see that the two variables describing the amount of people driving each direction are very correlated.
 
-Both of the statistical tests back this up aswell, having high values of: 
-pearson = *0.0407*
-spearmann = *0.8269
-It is for this reason i have chosen to combine the two variables into one, as a "total traffic variable".
+Both of the statistical tests back this up aswell, having high values of: pearson = *0.0407* and spearmann = *0.8269
+It is for this reason i have chosen to combine the two variables into one, as a "total traffic variable". 
 
-It can aslo be seen that there was a peak in 2017, due to a large bicycle competion happening that year. This would lead to a large amount of outliers. The solution to this is removing data which sits in the 99th percentile. The model does not need to be good at guessing when the next large scale bicycling competiton is, it is more about day to day cycling. 
+This graph also visualizes a large cycling peak in 2017, due to a large bicycle competion happening that year. 
+This is the cause of a great deal of outliers. The solution to this is removing data which sits in the 99th percentile. The model does not need to be good at guessing when the next large scale bicycling competiton is, it is more about day to day cycling. 
 
 
 -------------
-![Corr matrix](src/figs/corr_matrix.png)
 
-Looking at the *Corr matrix* graph above, it tells us alot about the correlation between variables.
+### Correlation matrix
 
-Notably, the variables *Vindkast* and *Vindstyrke* have a correlation of 0.98, for the purpouses of the data, they tell us virtually the same thing, however, *Vindkast* has a correlation of 0.029 with *Total trafikk*, which is 0.003 less than between *Vindstyrke* og *Total trafikk*, this is almost nothing, but for the purpouses of this paper, i choose to keep *Vindkast*
+**Raw-observation**
+
+![Corr matrix](src/figs_new/corr_matrix_PRE_CHANGES.png)
+
+Looking at the *Corr matrix* graph above, it tells us that the data needs to be processed, as values are all over the place, most probably due to outliers.
+
+**Post-processing**
+
+![Corr matrix](src/figs_new/corr_matrix_POST_CHANGES.png)
 
 The variables *Globalstråling* and *Solskinnstid* have a high degree of correlation, at 0.68.
 This is high, but not high enough that they tell us the same thing, so i am going to keep both variables. It is also important to note that both variables have a decent degree of correlation with *Total_trafikk*, so they could both be very important.
 
+The variables *Luftemperatur* and *Globalstråling* are also quite correlated, as expected, but they only have a pearson correlation of *0.41*, so keeping both values here, (espeically since they both correlate so well with *Total_trafikk*) is the correct choice. 
 
-### Variable correlation check
 The variables which seem to have a good correlation with *Total_trafikk* are:
 
 - Globalstråling (**0.29**)
-The amount of radiation hitting the earth, may just seem like a reflection of *Solskinnstid*, but there could be radiation, and clouds, meaning that the two are not always linked.
-This variable has the highest correlation with *Total_trafikk*, and will be valuable.
 
 - Solskinnstid (**0.24**)
-*Solskinnstid* is a good indicator of the sun, has a high correlation, and as described earlier, is different from *Globalstråling*. This will be useful
 
 - Lufttemperatur (**0.26**)
-*Lufttemperatur* is important as one could imagine, low temperature = less cyclists. 
-Good correlation, will be useful. 
 
-- Vindretning_x/Vindretning_y (~ +/- **0.1**)
-*Vindretning* is actually very useful, since it can tell us something about the rain! Rain is something we would love to know, but this is perhaps a close approximation. 
-As talked about above, the x and y directions the wind comes from, was more important that just the general direction as degrees.
-This will be useful.
+- Vindretning_x/Vindretning_y (~ +/- **0.12~**)
 
-I will therefore be removing "Vindretning" from the final dataframe, as Vindretning_x Vindretning_y are much more useful.
-This can be also seen in the correlation matrix, where *Vindretning_x* and *Vindretning* have virtually the same score of -0.099 and -0.09 respectively. 
-Splitting this variable up will be useful i hope. 
-
-----------------
-*Simply put*
-
-- Remove *Vindstyrke* in favour of *Vindkast*
-- Remove *Vindretning* in favour of *Vindretning_x* and *Vindretning_y* 
-- Most variables here are useful
-
-### Normalized values
-
-
-- *Globalstraling*
-
-<p>
-These values are between 0-1000, and could therefore be normalized to a 0-1 scale without much data loss
-<p>
-
-- *Luftrykk*
-
-<p>
-These values are between 940-1050, and normalizing these values to a 0-1 scale could help the model understand the numbers.
-<p>
-
-- *Solskinnstid*
-
-<p>
-These values are between 0-10, and could therefore be normalized to a 0-1 scale without much data loss
-<p>
-
-<!-- - *Vindkast*
-
-["graph"]("src/figs/VindkastVSTotal_trafikk.png")
-
-<p>
-These values are between 0-25, but there is a clear link between high vindkast and low traffic, so by squaring the values of vindkast could help the model understand that higher numbers mean a large descrease in traffic, while lower numbers do not have an effect on traffic. -->
 
 ### Dropped coloumns
 
@@ -346,12 +301,14 @@ Drop "Relativ luftfuktighet" as this data only exists in 2022 and 2023. While th
 These coloumns do not really tell us much, and could really just confuse the model. 
 
 
-### Dropped values
+### Dropped values #TODO UPDATE THESE VALUES
+
+Values that were deemed as outliers or "99999" were transformed into appropriate values by a KNNImputer, with settings *weights* = distance, since this pertains to date data. 
 
 - *Globalstråling*
 
-<p> When values above 1000 in **Globalstraling** are dropped, </p>
-114 rows are lost
+<p> Values under 0 and over 1000 in **Globalstraling** are considered malformed., </p>
+114 data points turn into NaN from this.
 
 This value was chosen because values over this are only observed "ved atmosfærenses yttergrense"
 
@@ -360,16 +317,18 @@ This value was chosen because values over this are only observed "ved atmosfære
 - *Solskinnstid*
 
 <p>
-When values above 10.01 in **Solskinstid** are dropped </p>
-18 rows are lost, this scale is between 0-10
+Values above 10.01 in **Solskinstid** are are considered  malformed</p>
+18 data points turn into NaN. 
+
+The solskinstid scale is between 0-10
 
 [ref]("https://veret.gfi.uib.no/") 
 
 - *Lufttrykk*
 
 <p>
-When values above 1050 in **Lufttrykk** are dropped </p>
-0 rows are lost.
+Values above 1050 in **Lufttrykk** are considered malformed. </p>
+0 data points turn into NaN.
 
 935 and 1050 are the min/max records of all time. 
 
@@ -379,8 +338,8 @@ When values above 1050 in **Lufttrykk** are dropped </p>
 - *Luftemperatur*
 
 <p>
-When values above 37 in **Lufttemperatur** are dropped </p>
-482 values are lost.
+Values above 37 in **Lufttemperatur** are considered malformed. </p>
+482 values are turned into NaN.
 
 Over 37 degrees is not realistic for norway, as the warmest ever recorded was 35.6 degrees
 
@@ -389,8 +348,8 @@ Over 37 degrees is not realistic for norway, as the warmest ever recorded was 35
 - *Vindkast*
 
 <p>
-When values above 65 in **Vindkast** are dropped </p>
-0 values are lost. So no difference.
+Values above 65 in **Vindkast** are considered malformed </p>
+0 values are considered NaN. So no difference.
 
 Over 65m/s is not realistic for norway, as the highest value ever recorded was 64,7m/s
 
@@ -399,7 +358,7 @@ Over 65m/s is not realistic for norway, as the highest value ever recorded was 6
 - *Vindretning*
 
 <p>
-When values above 360 in **Vindretning** are dropped </p>
+Values above 360 in **Vindretning** are considered malformed </p>
 --- values are lost.
 
 Since vindretning is measured from 0-360, there is no way a degrees of more than 360 could be measured.
@@ -512,12 +471,12 @@ Range: N/A
 
 -----------------------------------
 
-### Considered Features that were dropped
+### Considered Features that were decided against 
 
 - *Total traffic in retning danmarkplass*,
 - *Total traffic in retning florida*,
 
-<p> The reason adding this coloumn doesnt work is, well, if we know how much traffic there is, there is no point in guessing how much traffic there is. 
+<p> The reason adding this coloumn doesnt work is, well, if we know how much traffic there is, there is no point in guessing how much traffic there is.
 </p>
 
 Range: N/A
@@ -530,7 +489,7 @@ Range: N/A
 
 <p> This coloumn would be the value for traffic in the previous row.
 The reason adding this coloumn doesnt work is that it is much harder to train the model when you have to train one line at a time, and use the last row's value's as training values. 
-This could also be a big problem because if we guess wrong on the next traffic, that value will be brought with to the next row's guess, and further for ALL the rows, and if that value is wrong, well then ALL the guesses are potentially wrong. 
+This could also be a big problem because if we guess wrong on the last traffic, that value will be brought with to the next row's guess, and further for ALL the rows, and if that value is wrong, well then ALL the guesses are potentially wrong. 
 </p>
 
 Range: N/A
@@ -542,6 +501,42 @@ Range: N/A
 </p>
 
 Range : 1-31
+
+### Considered features that were dropped: Normalizing values
+
+
+- *Globalstraling*
+
+<p>
+These values are between 0-1000, and could therefore be normalized to a 0-1 scale without much data loss
+
+However, not much was acheived by doing this.
+<p>
+
+- *Luftrykk*
+
+<p>
+These values are between 940-1050, and normalizing these values to a 0-1 scale could help the model understand the numbers.
+<p>
+
+However, not much was acheived by doing this.
+
+- *Solskinnstid*
+
+<p>
+These values are between 0-10, and could therefore be normalized to a 0-1 scale without much data loss
+<p>
+
+However, not much was acheived by doing this.
+
+- *Vindkast*
+
+["graph"]("src/figs/VindkastVSTotal_trafikk.png")
+
+<p>
+These values are between 0-25, but there is a clear link between high vindkast and low traffic, so by squaring the values of vindkast could help the model understand that higher numbers mean a large descrease in traffic, while lower numbers do not have an effect on traffic.
+
+However, not much was acheived by doing this. 
 
 # Issues
 
@@ -560,7 +555,7 @@ open the bytes object with pd.open_csv()
 ## With aligning the two files
 
 - Issue:
-2022 and 2023 florida wweather files  have a coloumn "Relativ luftfuktighet" 
+2022 and 2023 florida weather files have a coloumn called "Relativ luftfuktighet" 
 This seems important, and could help the model
 
 - Solution:
@@ -598,7 +593,7 @@ and
 
 - Solution:
 These gaps are not big enough to warrant large changes, and data is still found for 08-20 for other years, 
-the model should be able to predict fine with some data loss like this. 
+the model should be able to predict fine with some missing data like this. 
 
 ----------------
 
@@ -690,20 +685,22 @@ When dropping unreasonable values in ```dataframe_handling.py```, see above sect
 
 One can see that RandomForestRegressor with n_estimators; 200 is the best model with a RMSE of 25.301.
 
+#TODO COMMENT ON MULTIPLE MODELS
+
 ---------------------------
 
-After finding the best model, i tried finding hyper-parameters that worked well
+After finding the best model, hyper-parameters were found.
 
-![hyperparam](src/figs/MSE_hyperparam_models_V1.png)
+![hyperparam](src/figs/MSE_hyperparam_models_V3.png)
 
 Seeminlgy, a higher n_estimators yeiled slightly better results. 
 
-This may need to be explored further, but attempts to train past 250 n_estimators results in a slowed console and after a while the text "Killed", so i think that may be a warning. 
+This may need to be explored further, but attempts to train past 250 n_estimators results in a slowed console and after a while the text "Killed", so i think that may be a warning. Also, it seems turning up the n_esimators any more may just lead to diminishing returns.
 
 
 --------------------------
 
-After finding the best model and seeing how it worked on validation data, we can use the ```best_model.feature_importances_``` ouput to evaluate importance of coloumns.
+After finding the best model and seeing how it performed on validation data, we can use the ```best_model.feature_importances_``` ouput to evaluate importance of coloumns.
 
 ```
            Feature  Importance
@@ -734,6 +731,8 @@ After finding the best model and seeing how it worked on validation data, we can
 
 ##  TEST DATA:
 --------------------------
+
+# TODO
 
 After finding the best model, we can check it against test data, and use ```best_model.feature_importances_``` ouput and RMSE to evaluate the model.
 
@@ -770,3 +769,7 @@ Test RMSE: 25.07630352032273
 
 This shows us that the model has a RMSE of
 ```25.076``` which is pretty good considerding the ```DummyRegressor``` has a RMSE of ```Test RMSE: 67.007``` on test data! 
+
+### Conclusion:
+
+After performing data analysis, feature engineering, and data transformation, this project explored an approach to creating a somewhat accurate model for approximating cycling traffic given the weather conditions. 

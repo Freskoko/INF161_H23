@@ -5,10 +5,15 @@ import pandas as pd
 from loguru import logger
 from sklearn.ensemble import RandomForestRegressor
 
-from utils.dataframe_handling import (drop_uneeded_cols, feauture_engineer,
-                                      merge_frames, normalize_cols,
-                                      train_test_split_process,
-                                      treat_2023_file, trim_transform_outliers)
+from utils.dataframe_handling import (
+    drop_uneeded_cols,
+    feauture_engineer,
+    merge_frames,
+    normalize_cols,
+    train_test_split_process,
+    treat_2023_file,
+    trim_transform_outliers,
+)
 from utils.file_parsing import treat_florida_files, treat_trafikk_files
 from utils.graphing import graph_all_models, graph_df
 from utils.models import find_hyper_param, train_best_model, train_models
