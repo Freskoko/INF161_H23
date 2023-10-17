@@ -200,9 +200,9 @@ def trim_transform_outliers(df: pd.DataFrame, data2023: bool) -> pd.DataFrame:
 
     length_dict["afterGlobal"] = len(df)
 
-    # df["Globalstraling"] values above 1000 and below 0 are set to NaN
+    # df["Globalstraling"] values above 1000 are set to NaN
     df["Globalstraling"] = np.where(
-        (df["Globalstraling"] < 0) | (df["Globalstraling"] >= 1000),
+        (df["Globalstraling"] >= 1000),
         np.nan,
         df["Globalstraling"],
     )

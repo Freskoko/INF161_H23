@@ -58,7 +58,7 @@ Looking at the figure above , it is clear that the data contains outliers, as a 
 
 ![globalstråling vs traffik](src/figs_new/GlobalstralingVSTotal_trafikk_POST_CHANGES.png)
 
-After processing this data, treating outliers, one can see that the data sits between values of 0-900.
+After processing this data, treating outliers, one can see that the data sits between values of 0-900. #todo
 
 It is clear that there is some correlation between globalstråling and cycle-traffic. 
 
@@ -307,7 +307,7 @@ Values that were deemed as outliers or "99999" were transformed into appropriate
 
 - *Globalstråling*
 
-<p> Values under 0 and over 1000 in **Globalstraling** are considered malformed., </p>
+<p> Values over 1000 in **Globalstraling** are considered malformed., </p>
 114 data points turn into NaN from this.
 
 This value was chosen because values over this are only observed "ved atmosfærenses yttergrense"
