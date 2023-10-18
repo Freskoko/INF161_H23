@@ -303,6 +303,25 @@ These coloumns do not really tell us much, and could really just confuse the mod
 
 ### Dropped values #TODO UPDATE THESE VALUES
 
+{
+  "before": 65266,
+  "afterGlobal": 65266,
+  "afterSolskinn": 65266,
+  "afterLufttemp": 65266,
+  "afterLufttrykk": 65266,
+  "afterVindkast": 65266,
+  "afterVindretning": 65266
+}
+Number of NaNs in each column:
+Globalstraling             114
+Solskinstid                123
+Lufttemperatur             507
+Vindretning                669
+Vindstyrke                   9
+Lufttrykk                  506
+Vindkast                   506
+Relativ luftfuktighet    56513
+
 Values that were deemed as outliers or "99999" were transformed into appropriate values by a KNNImputer, with settings *weights* = distance, since this pertains to date data. 
 
 - *Globalstråling*
