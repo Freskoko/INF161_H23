@@ -2,7 +2,6 @@
 
 ### REPORT
 
-- fix values in readme that have now been updated
 - update data loss parsing section
 
 - evulate multiple models
@@ -16,6 +15,8 @@
 - cleanup
 
 - conda and lock file
+
+- put into one giant python file
 
 # Report for INF161 cycle traffic project
 
@@ -39,7 +40,7 @@ This report pertains to the INF161 project this fall, in creating a model which 
 
 
 # Data exploration:
-In src/figs #todo , there are images presenting each of the coloums in the final data frame, plotted against the total amount of traffic. This part of the report explores these figures.
+In src/figs, there are images presenting each of the coloums in the final data frame, plotted against the total amount of traffic. This part of the report explores these figures.
 
 Data is observed using spearmann and pearson correlation.
 
@@ -58,7 +59,7 @@ Looking at the figure above , it is clear that the data contains outliers, as a 
 
 ![globalstråling vs traffik](src/figs_new/GlobalstralingVSTotal_trafikk_POST_CHANGES.png)
 
-After processing this data, treating outliers, one can see that the data sits between values of 0-900. #todo
+After processing this data, treating outliers, one can see that the data sits between values of .-4 to 900.
 
 It is clear that there is some correlation between globalstråling and cycle-traffic. 
 
@@ -197,7 +198,7 @@ Since vindretning has been transformed to two different variables, the original 
 Looking at the figure above , it is clear that the data contains outliers, and the data seems to pool weirdly around certain values. This needs to be adjusted for. 
 
 #TODO
-The *Vindkast* and *Vindstyrke* vairbales have a pearson correlation of 0.98, for the purpouses of the data, they tell us virtually the same thing. 
+The *Vindkast* and *Vindstyrke* variables have a pearson correlation of 0.98, for the purpouses of the data, they tell us virtually the same thing. 
 
 *Vindkast* has a correlation of 0.029 with *Total trafikk*, which is 0.003 less than between *Vindstyrke* og *Total trafikk*, this is almost nothing, but for the purpouses of this paper, i choose to keep *Vindkast*
 
@@ -301,17 +302,11 @@ Drop "Relativ luftfuktighet" as this data only exists in 2022 and 2023. While th
 These coloumns do not really tell us much, and could really just confuse the model. 
 
 
-### Dropped values #TODO UPDATE THESE VALUES
+### Dropped values 
 
-{
-  "before": 65266,
-  "afterGlobal": 65266,
-  "afterSolskinn": 65266,
-  "afterLufttemp": 65266,
-  "afterLufttrykk": 65266,
-  "afterVindkast": 65266,
-  "afterVindretning": 65266
-}
+Values that were deemed as outliers or "99999" were transformed into appropriate values by a KNNImputer, with settings *weights* = distance, since this pertains to date data. When mentioning that "x" data points were transformed to NaN, this includes the 99999 data points as well as those outside the borders specified in each section.
+
+```
 Number of NaNs in each column:
 Globalstraling             114
 Solskinstid                123
@@ -321,13 +316,13 @@ Vindstyrke                   9
 Lufttrykk                  506
 Vindkast                   506
 Relativ luftfuktighet    56513
+```
 
-Values that were deemed as outliers or "99999" were transformed into appropriate values by a KNNImputer, with settings *weights* = distance, since this pertains to date data. 
 
 - *Globalstråling*
 
-<p> Values over 1000 in **Globalstraling** are considered malformed., </p>
-114 data points turn into NaN from this.
+<p> Values over 1000 in **Globalstraling** are considered malformed. </p>
+114 data points are transformed into NaN.
 
 This value was chosen because values over this are only observed "ved atmosfærenses yttergrense"
 
@@ -337,7 +332,7 @@ This value was chosen because values over this are only observed "ved atmosfære
 
 <p>
 Values above 10.01 in **Solskinstid** are are considered  malformed</p>
-18 data points turn into NaN. 
+123 data points are transformed into NaN. 
 
 The solskinstid scale is between 0-10
 
@@ -347,7 +342,7 @@ The solskinstid scale is between 0-10
 
 <p>
 Values above 1050 in **Lufttrykk** are considered malformed. </p>
-0 data points turn into NaN.
+506 data points turn into NaN.
 
 935 and 1050 are the min/max records of all time. 
 
@@ -358,7 +353,7 @@ Values above 1050 in **Lufttrykk** are considered malformed. </p>
 
 <p>
 Values above 37 in **Lufttemperatur** are considered malformed. </p>
-482 values are turned into NaN.
+507 values are turned into NaN.
 
 Over 37 degrees is not realistic for norway, as the warmest ever recorded was 35.6 degrees
 
@@ -368,7 +363,7 @@ Over 37 degrees is not realistic for norway, as the warmest ever recorded was 35
 
 <p>
 Values above 65 in **Vindkast** are considered malformed </p>
-0 values are considered NaN. So no difference.
+506 values are considered NaN.
 
 Over 65m/s is not realistic for norway, as the highest value ever recorded was 64,7m/s
 
@@ -378,11 +373,17 @@ Over 65m/s is not realistic for norway, as the highest value ever recorded was 6
 
 <p>
 Values above 360 in **Vindretning** are considered malformed </p>
---- values are lost.
+669 values are lost.
 
 Since vindretning is measured from 0-360, there is no way a degrees of more than 360 could be measured.
 
+- *Vindstyrke*
 
+There are 9 missing values here, but this col is dropped in favour of "Vindkast" anyway.
+
+- *Relativ luftfuktighet*
+
+This coloumn is dropped from the start, since there is so much missing data (56513 NaN values)
 
 
 # Feature engineering
