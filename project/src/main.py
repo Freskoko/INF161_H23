@@ -9,13 +9,13 @@ from utils.dataframe_handling import (
     drop_uneeded_cols,
     feauture_engineer,
     merge_frames,
-    normalize_cols,
+    normalize_data,
     train_test_split_process,
     treat_2023_file,
     trim_transform_outliers,
 )
 from utils.file_parsing import treat_florida_files, treat_trafikk_files
-from utils.graphing import graph_all_models, graph_df
+from utils.graphing import graph_a_vs_b, graph_all_models, graph_df
 from utils.models import find_hyper_param, train_best_model, train_models
 
 # get current filepath to use when opening/saving files
@@ -51,67 +51,100 @@ def main():
     df_2023, df_final = merge_frames([big_florida_df, trafikk_df])
     logger.info("All files looped over")
 
-    # --------- DO RESEARCH HERE, THEN ADD STUFF AND GRAPH AFTER AGAIN
-
-    split_dict, training_df, test_df, validation_df = train_test_split_process(df_final)
+    # Graph pre data processing to visualize
+    split_dict_pre, training_df, test_df, validation_df = train_test_split_process(
+        df_final
+    )
     logger.info("Data divided into training,validation and test")
 
     if GRAPHING:
         graph_all_models(training_df, pre_change=True)
         logger.info("Graphed all models PRECHANGE")
 
-    # --------- DONE RESEARCH
+    dataframes_pre = {
+        "training_df": training_df,
+        "validation_df": validation_df,
+        "test_df": test_df,
+    }
 
-    # remove weird outliers like 2000 globalstråling
+    dataframes_post = {}
 
-    logger.info("Applying KNN imputer on missing data, and removing outliers..")
-    logger.info("This could take a while...")
-    df_final = trim_transform_outliers(df_final, False)
-    logger.info("Outliers trimmed")
+    for name, df_transforming in dataframes_pre.items():
+        logger.info("Applying KNN imputer on missing data, and removing outliers..")
+        logger.info("This could take a while...")
 
-    # add important features to help the model
-    df_final = feauture_engineer(df_final, False)
-    logger.info("Features engineered")
+        # transform NaN and outliers to usable data
+        df_transforming = trim_transform_outliers(df_transforming, False)
+        logger.info("Outliers trimmed")
 
-    # normalize coloumns from 0-1 or square coloumns^2
-    df_final = normalize_cols(df_final)
-    logger.info("Coloumns normalized")
+        # add important features to help the model
+        df_transforming = feauture_engineer(df_transforming, False)
+        logger.info("Features engineered")
 
-    # drop coloumns which are not needed (noise)
-    df_final = drop_uneeded_cols(df_final)
-    logger.info("Uneeded cols dropped")
+        # normalize data outliers #TODO IQR?
+        df_transforming = normalize_data(df_transforming)
+        logger.info("Coloumns normalized")
+
+        # drop coloumns which are not needed or redundant
+        df_transforming = drop_uneeded_cols(df_transforming)
+        logger.info("Uneeded cols dropped")
+
+        dataframes_post[name] = df_transforming
 
     # divide data into training,test and validation
-    split_dict, training_df, test_df, validation_df = train_test_split_process(df_final)
     logger.info("Data divided into training,validation and test")
+
+    training_df = dataframes_post["training_df"]
+    test_df = dataframes_post["test_df"]
+    validation_df = dataframes_post["validation_df"]
 
     training_df.to_csv(f"{directory}/main_training_data.csv")
     test_df.to_csv(f"{directory}/main_test_data.csv")
     validation_df.to_csv(f"{directory}/main_validation_data.csv")
     logger.info("Data saved to CSV")
 
+    # Graph post data processing to visualize
     if GRAPHING:
         graph_all_models(training_df, pre_change=False)
         logger.info("Graph all models POSTCHANGE")
 
-    model_dict = train_models(split_dict)
-    best_model = find_hyper_param(split_dict)
-    train_best_model(split_dict, test_data=False)
+    split_dict_post = {
+        "y_train": training_df["Total_trafikk"],
+        "X_train": training_df.drop(["Total_trafikk"], axis=1),
+        "y_validation": validation_df["Total_trafikk"],
+        "X_validation": validation_df.drop(["Total_trafikk"], axis=1),
+        "y_test": test_df["Total_trafikk"],
+        "X_test": test_df.drop(["Total_trafikk"], axis=1),
+    }
 
-    train_best_model(split_dict, test_data=True)
+    # train models
+    train_models(split_dict_post)
 
-    logger.info("Treating 2023 files")
+    # find hyper params for the best model
+    find_hyper_param(split_dict_post)
 
-    # BEST MODEL:
-    best_model = RandomForestRegressor(n_estimators=250, random_state=RANDOM_STATE)
+    # train the best model on validation data
+    train_best_model(split_dict_post, test_data=False)
 
-    X_train = split_dict["x_train"]
-    y_train = split_dict["y_train"]
+    FINAL_RUN = True
 
-    best_model.fit(X_train, y_train)
-    df_with_values = treat_2023_file(df_2023, best_model)
+    if FINAL_RUN:
 
-    return split_dict, training_df, test_df, validation_df
+        # train best model on test data
+        train_best_model(split_dict_post, test_data=True)
+
+        logger.info("Treating 2023 files")
+
+        # use the best model to get values for 2023
+        best_model = RandomForestRegressor(n_estimators=250, random_state=RANDOM_STATE)
+
+        X_train = split_dict_post["x_train"]
+        y_train = split_dict_post["y_train"]
+
+        best_model.fit(X_train, y_train)
+        df_with_values = treat_2023_file(df_2023, best_model)
+
+    return split_dict_post, training_df, test_df, validation_df
 
 
 if __name__ == "__main__":

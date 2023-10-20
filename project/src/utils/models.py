@@ -30,6 +30,8 @@ def train_models(split_dict: dict) -> dict:
     Trains a variety of models on test data, and checks their MSE on validation data
     """
 
+    # split ting opp i
+
     X_train = split_dict["x_train"]
     y_train = split_dict["y_train"]
     X_val = split_dict["x_val"]
@@ -119,15 +121,7 @@ def train_models(split_dict: dict) -> dict:
 
     logger.info("Done training a variety of models!")
 
-    # #--
-    # min_rmse = min([sqrt(i) for i in mse_values_models])
-
-    # print(f"Models = {json.dumps(model_dict,indent=2)}")
-
-    # #--
-    # logger.info(f"Best model is {best_model} with value {min_rmse_index}")
-
-    return "best_model"
+    return
 
 
 def find_hyper_param(split_dict: dict) -> dict:
@@ -195,20 +189,7 @@ def find_hyper_param(split_dict: dict) -> dict:
 
     logger.info("Done training hyperparameter models!")
 
-    # model_dict = dict(zip(model_strings, clf_vals))
-
-    # min_rmse_index = min(clf_vals)
-    # best_model = model_strings[min_rmse_index]
-
-    # print(f"Models = {json.dumps(model_dict,indent=2)}")
-    # logger.info(f"Best model is {best_model} with value {min_rmse_index}")
-
-    # Train best model again
-
-    best_model = RandomForestRegressor(n_estimators=200, random_state=RANDOM_STATE)
-    best_model.fit(X_train, y_train)
-
-    return best_model
+    return
 
 
 def train_best_model(split_dict: dict, test_data: bool) -> None:

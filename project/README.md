@@ -6,7 +6,12 @@
 
 - evulate multiple models
 
-- RUN AGAIN
+- RUN AGAIN MANY TIMES FIND GOOD
+    - RUN WITH DIFFERENT KNN
+    - RUN WITH NORMALIZATION, AND NOT
+
+- NETTSIDE
+    - DE GIR ALT AV DATA, OG SÅNN 
 
 ### CODE
 
@@ -379,7 +384,9 @@ Since vindretning is measured from 0-360, there is no way a degrees of more than
 
 - *Vindstyrke*
 
-There are 9 missing values here, but this col is dropped in favour of "Vindkast" anyway.
+Values above 1000 are considered malformed.
+
+There are 506 missing values here, but this col is dropped in favour of "Vindkast" anyway, as they are so correlated.
 
 - *Relativ luftfuktighet*
 
@@ -722,73 +729,74 @@ This may need to be explored further, but attempts to train past 250 n_estimator
 
 After finding the best model and seeing how it performed on validation data, we can use the ```best_model.feature_importances_``` ouput to evaluate importance of coloumns.
 
-```
-           Feature  Importance
-19       rush_hour    0.327215
-14         weekend    0.183384
-5             hour    0.169680
-2   Lufttemperatur    0.118050
-13           month    0.047983
-0   Globalstraling    0.030485
-3        Lufttrykk    0.023065
-4         Vindkast    0.019096
-21   Vindretning_x    0.016211
-22   Vindretning_y    0.014236
-1      Solskinstid    0.012497
-17          summer    0.012343
-15  public_holiday    0.009316
-6         d_Friday    0.007574
-7         d_Monday    0.002153
-10      d_Thursday    0.002080
-11       d_Tuesday    0.001653
-12     d_Wednesday    0.001210
-18          winter    0.000853
-16         raining    0.000562
-8       d_Saturday    0.000182
-9         d_Sunday    0.000173
-20       sleeptime    0.000000
-```
-
-##  TEST DATA:
---------------------------
-
-# TODO
-
-After finding the best model, we can check it against test data, and use ```best_model.feature_importances_``` ouput and RMSE to evaluate the model.
-
-This provides us with this ouput:
-
-```
-Test MSE: 628.8209982433501
-Test RMSE: 25.07630352032273
-           Feature  Importance
-19       rush_hour    0.327215
-14         weekend    0.183384
-5             hour    0.169680
-2   Lufttemperatur    0.118050
-13           month    0.047983
-0   Globalstraling    0.030485
-3        Lufttrykk    0.023065
-4         Vindkast    0.019096
-21   Vindretning_x    0.016211
-22   Vindretning_y    0.014236
-1      Solskinstid    0.012497
-17          summer    0.012343
-15  public_holiday    0.009316
-6         d_Friday    0.007574
-7         d_Monday    0.002153
-10      d_Thursday    0.002080
-11       d_Tuesday    0.001653
-12     d_Wednesday    0.001210
-18          winter    0.000853
-16         raining    0.000562
-8       d_Saturday    0.000182
-9         d_Sunday    0.000173
-20       sleeptime    0.000000
+Model for test data = False
+MSE: 546.1675294240234
+RMSE: 23.370227414897432
+```json
+                  Feature  Importance
+20              rush_hour    0.317659
+15                weekend    0.190056
+6                    hour    0.110577
+2          Lufttemperatur    0.103409
+21              sleeptime    0.069256
+14                  month    0.052702
+0          Globalstraling    0.032580
+3               Lufttrykk    0.022709
+4                Vindkast    0.019465
+22          Vindretning_x    0.016228
+23          Vindretning_y    0.014458
+5   Relativ luftfuktighet    0.012840
+1             Solskinstid    0.011277
+16         public_holiday    0.009342
+7                d_Friday    0.005943
+18                 summer    0.003310
+8                d_Monday    0.001796
+11             d_Thursday    0.001716
+12              d_Tuesday    0.001464
+13            d_Wednesday    0.001336
+19                 winter    0.000804
+17                raining    0.000601
+9              d_Saturday    0.000247
+10               d_Sunday    0.000224
 ```
 
-This shows us that the model has a RMSE of
-```25.076``` which is pretty good considerding the ```DummyRegressor``` has a RMSE of ```Test RMSE: 67.007``` on test data! 
+which is pretty good considerding the ```DummyRegressor``` has a RMSE of ```Test RMSE: 67.007``` on test data! 
+
+
+
+### TEST DATA :
+
+Model for test data = True
+MSE: 588.7859203426983
+RMSE: 24.264911298883792
+```
+                  Feature  Importance
+20              rush_hour    0.317659
+15                weekend    0.190056
+6                    hour    0.110577
+2          Lufttemperatur    0.103409
+21              sleeptime    0.069256
+14                  month    0.052702
+0          Globalstraling    0.032580
+3               Lufttrykk    0.022709
+4                Vindkast    0.019465
+22          Vindretning_x    0.016228
+23          Vindretning_y    0.014458
+5   Relativ luftfuktighet    0.012840
+1             Solskinstid    0.011277
+16         public_holiday    0.009342
+7                d_Friday    0.005943
+18                 summer    0.003310
+8                d_Monday    0.001796
+11             d_Thursday    0.001716
+12              d_Tuesday    0.001464
+13            d_Wednesday    0.001336
+19                 winter    0.000804
+17                raining    0.000601
+9              d_Saturday    0.000247
+10               d_Sunday    0.000224
+```
+
 
 ### Conclusion:
 

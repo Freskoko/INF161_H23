@@ -118,7 +118,6 @@ def feauture_engineer(df: pd.DataFrame, data2023: bool) -> pd.DataFrame:
     # we cant train where there are no traffic values
     if not data2023:
         df = df.dropna(subset=["Total_trafikk"])
-    # total is found, these two are not needed
 
     # change all values of TRUE in all rows to 1 and FALSE to 0
     # models need NUMERIC data
@@ -229,9 +228,15 @@ def trim_transform_outliers(df: pd.DataFrame, data2023: bool) -> pd.DataFrame:
     df["Vindretning"] = np.where(df["Vindretning"] >= 361, np.nan, df["Vindretning"])
     length_dict["afterVindretning"] = len(df)
 
+    # df["Vindstyrke"] values above 1000 and below 0 are set to NaN
+    df["Vindstyrke"] = np.where(df["Vindstyrke"] < 0, np.nan, df["Vindstyrke"])
+    df["Vindstyrke"] = np.where(df["Vindstyrke"] >= 1000, np.nan, df["Vindstyrke"])
+    length_dict["afterVindstyrke"] = len(df)
+
     if DEBUG == True:
         print(json.dumps(length_dict, indent=2))
 
+    # replace outliers (this should be fixed above, but this is just in case)
     df = df.replace(99999, np.nan)
 
     # observe NaN
@@ -248,11 +253,18 @@ def trim_transform_outliers(df: pd.DataFrame, data2023: bool) -> pd.DataFrame:
     if data2023:
         df_no_traffic = df
 
-    imputer = KNNImputer(n_neighbors=3, weights="distance")
+    # Drop "Relativ luftfuktighet" as this data only exists in 2022 and 2023.
+    # errors="ignore" as most of the data (back to 2015) will not have this coloumn
+    # this also leads to memory errors?
+    df = df.drop(columns=["Relativ luftfuktighet"], errors="ignore")
+
+    imputer = KNNImputer(n_neighbors=2, weights="distance")
 
     # do transformations
+    print("fit transform")
     df_imputed = imputer.fit_transform(df_no_traffic)
 
+    print("fixed")
     df_fixed = pd.DataFrame(
         df_imputed, columns=df_no_traffic.columns, index=df_no_traffic.index
     )
@@ -265,13 +277,14 @@ def trim_transform_outliers(df: pd.DataFrame, data2023: bool) -> pd.DataFrame:
     return df
 
 
-def normalize_cols(df: pd.DataFrame) -> pd.DataFrame:
+def normalize_data(df: pd.DataFrame) -> pd.DataFrame:
     """
     Given a dataframe, normalizes certain values to a 0-1 scale
 
     Normalized values are covered in the README under "Normalized values"
     """
 
+    # run one with, and one without
     # normalize between 0-1,
     # scaler = MinMaxScaler()
     # df[["Globalstraling", "Lufttrykk", "Solskinstid",]] = scaler.fit_transform(
@@ -302,11 +315,7 @@ def drop_uneeded_cols(df: pd.DataFrame) -> pd.DataFrame:
     Dropped values are covered in the README under "Dropped coloumns"
     """
 
-    df.drop(["Vindstyrke", "Vindretning", "Vindretning_radians"], axis=1, inplace=True)
-
-    # Drop "Relativ luftfuktighet" as this data only exists in 2022 and 2023.
-    # errors="ignore" as most of the data (back to 2015) will not have this coloumn
-    df = df.drop(columns=["Relativ luftfuktighet"], errors="ignore")
+    df.drop(["Vindretning", "Vindretning_radians", "Vindstyrke"], axis=1, inplace=True)
 
     return df
 

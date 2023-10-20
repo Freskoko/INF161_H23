@@ -157,10 +157,6 @@ def create_df_matrix(titletext: str, df: pd.DataFrame) -> None:
     return
 
 
-# removed vinkast ** 2
-# add quantile
-
-
 def graph_all_models(main_df: pd.DataFrame, pre_change: bool) -> None:
 
     logger.info("Graphing all graphs...")
@@ -217,16 +213,19 @@ def graph_all_models(main_df: pd.DataFrame, pre_change: bool) -> None:
             "Grader",
             "antall sykler",
         )
-        graph_a_vs_b(
-            titletext, main_df, "Vindstyrke", "Total_trafikk", "Vind", "antall sykler"
-        )
+        graph_a_vs_b(titletext, main_df, "Vindstyrke", "Vindkast", "Styrke", "Kast")
+
+    graph_a_vs_b(
+        titletext, main_df, "Vindstyrke", "Total_trafikk", "Vind", "antall sykler"
+    )
     graph_a_vs_b(
         titletext, main_df, "Lufttrykk", "Total_trafikk", "hPa", "antall sykler"
     )
     graph_a_vs_b(
         titletext, main_df, "Vindkast", "Total_trafikk", "m/s", "antall sykler"
     )
-    # graph_df(main_df)
+
+    graph_df(main_df)
 
     logger.info("Finished graphing!")
     return
