@@ -110,11 +110,11 @@ def main():
 
     split_dict_post = {
         "y_train": training_df["Total_trafikk"],
-        "X_train": training_df.drop(["Total_trafikk"], axis=1),
-        "y_validation": validation_df["Total_trafikk"],
-        "X_validation": validation_df.drop(["Total_trafikk"], axis=1),
+        "x_train": training_df.drop(["Total_trafikk"], axis=1),
+        "y_val": validation_df["Total_trafikk"],
+        "x_val": validation_df.drop(["Total_trafikk"], axis=1),
         "y_test": test_df["Total_trafikk"],
-        "X_test": test_df.drop(["Total_trafikk"], axis=1),
+        "x_test": test_df.drop(["Total_trafikk"], axis=1),
     }
 
     # train models

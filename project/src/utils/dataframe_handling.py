@@ -36,7 +36,7 @@ def feauture_engineer(df: pd.DataFrame, data2023: bool) -> pd.DataFrame:
     """
 
     # BASIC DATE FEATURES
-
+    print(df)
     # hour as own coloumn 0-23
     df["hour"] = df.index.hour  # get first two values
 
@@ -194,6 +194,9 @@ def trim_transform_outliers(df: pd.DataFrame, data2023: bool) -> pd.DataFrame:
     What values are considered abnormal are covered in the README under "Dropped values"
     """
 
+    print("IN")
+    print(df)
+
     # Transform malformed data to NaN.
     length_dict = {"before": len(df)}
 
@@ -256,7 +259,12 @@ def trim_transform_outliers(df: pd.DataFrame, data2023: bool) -> pd.DataFrame:
     # Drop "Relativ luftfuktighet" as this data only exists in 2022 and 2023.
     # errors="ignore" as most of the data (back to 2015) will not have this coloumn
     # this also leads to memory errors?
-    df = df.drop(columns=["Relativ luftfuktighet"], errors="ignore")
+    # Drop "Relativ luftfuktighet" as this data only exists in 2022 and 2023.
+    # errors="ignore" as most of the data (back to 2015) will not have this coloumn
+    # this also leads to memory errors?
+    df_no_traffic = df_no_traffic.drop(
+        columns=["Relativ luftfuktighet"], errors="ignore"
+    )
 
     imputer = KNNImputer(n_neighbors=2, weights="distance")
 
@@ -334,8 +342,8 @@ def train_test_split_process(
     validation_df : reconstructed dataframe containing only validation data
     """
 
-    df = df.reset_index()
-    df = df.drop(["DateFormatted"], axis=1)
+    # df = df.reset_index()
+    # df = df.drop(["DateFormatted"], axis=1)
 
     y = df["Total_trafikk"]
     x = df.drop(["Total_trafikk"], axis=1)
