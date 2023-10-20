@@ -4,7 +4,6 @@ from pathlib import Path
 import pandas as pd
 from loguru import logger
 from sklearn.ensemble import RandomForestRegressor
-
 from utils.dataframe_handling import (
     drop_uneeded_cols,
     feauture_engineer,
@@ -15,7 +14,13 @@ from utils.dataframe_handling import (
     trim_transform_outliers,
 )
 from utils.file_parsing import treat_florida_files, treat_trafikk_files
-from utils.graphing import graph_a_vs_b, graph_all_models, graph_df
+from utils.graphing import (
+    graph_a_vs_b,
+    graph_all_models,
+    graph_df,
+    graph_monthly_amounts,
+    graph_weekly_amounts,
+)
 from utils.models import find_hyper_param, train_best_model, train_models
 
 # get current filepath to use when opening/saving files
@@ -51,7 +56,7 @@ def main():
     df_2023, df_final = merge_frames([big_florida_df, trafikk_df])
     logger.info("All files looped over")
 
-    # Graph pre data processing to visualize
+    # divide data into training,test and validation
     split_dict_pre, training_df, test_df, validation_df = train_test_split_process(
         df_final
     )
@@ -91,9 +96,6 @@ def main():
 
         dataframes_post[name] = df_transforming
 
-    # divide data into training,test and validation
-    logger.info("Data divided into training,validation and test")
-
     training_df = dataframes_post["training_df"]
     test_df = dataframes_post["test_df"]
     validation_df = dataframes_post["validation_df"]
@@ -107,6 +109,9 @@ def main():
     if GRAPHING:
         graph_all_models(training_df, pre_change=False)
         logger.info("Graph all models POSTCHANGE")
+
+    graph_weekly_amounts(training_df)
+    graph_monthly_amounts(training_df)
 
     split_dict_post = {
         "y_train": training_df["Total_trafikk"],

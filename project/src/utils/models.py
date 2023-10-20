@@ -136,7 +136,7 @@ def find_hyper_param(split_dict: dict) -> dict:
 
     models = []
 
-    for i in range(1, 301, 50):
+    for i in range(1, 201, 50):
         if i == 0:
             i = 1
         model = {

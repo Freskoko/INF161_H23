@@ -13,6 +13,11 @@
 - NETTSIDE
     - DE GIR ALT AV DATA, OG SÅNN 
 
+
+- graph weekly traffic amounts
+- grap monthly traffic amounts
+
+
 ### CODE
 
 - cleanup files that may not be used
@@ -138,26 +143,6 @@ The spearmann correlation value of *0.3616*  is ok, but the spearmann corr may n
 
 -------------
 
-### Vindkast 
-
-**Raw-observation**
-
-![vindkast vs traffik](src/figs_new/VindkastVSTotal_trafikk_PRE_CHANGES.png)
-
-Looking at the figure above , it is clear that the data contains outliers, and the data seems to pool weirdly around certain values. This needs to be adjusted for. 
-
-**Post-processing**
-
-![vindkast vs traffik](src/figs_new/VindkastVSTotal_trafikk_POST_CHANGES.png)
-
-Looking at the *Vindkast vs Total_trafikk* graph above, it is clear that vindkast has a correlation with cycle traffic.
-Values bteween 0-15 dont seem to effect traffic, but values above 15 m/s indicate strong winds and therefore we see a drop in traffic at these values.
-
-However, with a pearson corr value of *0.0347*, this indicates quite a weak corrrelation. This data will still be useful.
-The spearmann correlation value of *0.109*  is ok, and since this data portrays as somewhat monotonic, could tell us some correlation is present.
-
--------------
-
 ### Vindretning
 
 **Raw-observation**
@@ -194,6 +179,26 @@ Since vindretning has been transformed to two different variables, the original 
 
 -------------
 
+### Vindkast 
+
+**Raw-observation**
+
+![vindkast vs traffik](src/figs_new/VindkastVSTotal_trafikk_PRE_CHANGES.png)
+
+Looking at the figure above , it is clear that the data contains outliers, and the data seems to pool weirdly around certain values. This needs to be adjusted for. 
+
+**Post-processing**
+
+![vindkast vs traffik](src/figs_new/VindkastVSTotal_trafikk_POST_CHANGES.png)
+
+Looking at the *Vindkast vs Total_trafikk* graph above, it is clear that vindkast has a correlation with cycle traffic.
+Values bteween 0-15 dont seem to effect traffic, but values above 15 m/s indicate strong winds and therefore we see a drop in traffic at these values.
+
+However, with a pearson corr value of *0.0347*, this indicates quite a weak corrrelation. This data will still be useful.
+The spearmann correlation value of *0.109*  is ok, and since this data portrays as somewhat monotonic, could tell us some correlation is present.
+
+-------------
+
 ### Vindstyrke
 
 **Raw-observation**
@@ -202,10 +207,19 @@ Since vindretning has been transformed to two different variables, the original 
 
 Looking at the figure above , it is clear that the data contains outliers, and the data seems to pool weirdly around certain values. This needs to be adjusted for. 
 
-#TODO
-The *Vindkast* and *Vindstyrke* variables have a pearson correlation of 0.98, for the purpouses of the data, they tell us virtually the same thing. 
+**Post-processing**
 
-*Vindkast* has a correlation of 0.029 with *Total trafikk*, which is 0.003 less than between *Vindstyrke* og *Total trafikk*, this is almost nothing, but for the purpouses of this paper, i choose to keep *Vindkast*
+![vindstyrke vs traffik](src/figs_new/VindstyrkeVSTotal_trafikk_POST_CHANGES.png)
+
+
+![vindstyrke vs vindkast](src/figs_new/VindstyrkeVSVindkast_POST_CHANGES.png)
+
+
+The *Vindkast* and *Vindstyrke* variables have a pearson correlation of 0.979, for the purpouses of the data, they tell us virtually the same thing. 
+
+*Vindstyrke* has a correlation of 0.0321 with *Total trafikk*, 
+while *Vindkast* has a correlation 0.0325 with *Total trafikk*.
+*Vindstyrke* has a pearson correlation which is 0.004 less than *Vindstyrke*, this is almost nothing, but for the purpouses of this paper, i choose to keep *Vindkast*. It is also important to note that when two variables are so similar and correlate so well, it is like giving the model the same data two times, which can lead to unwanted effects, like the model over-weighting these two factors or otherwise underrelying on one, and overrelying on the other. When they tell the same story, there is no need to keep them both.
 
 
 -------------
@@ -307,20 +321,21 @@ Drop "Relativ luftfuktighet" as this data only exists in 2022 and 2023. While th
 These coloumns do not really tell us much, and could really just confuse the model. 
 
 
-### Dropped values 
+### Dropped values - updates vlaues 
+### specify if its test training or validation 
 
 Values that were deemed as outliers or "99999" were transformed into appropriate values by a KNNImputer, with settings *weights* = distance, since this pertains to date data. When mentioning that "x" data points were transformed to NaN, this includes the 99999 data points as well as those outside the borders specified in each section.
 
 ```
-Number of NaNs in each column:
-Globalstraling             114
-Solskinstid                123
-Lufttemperatur             507
-Vindretning                669
-Vindstyrke                   9
-Lufttrykk                  506
-Vindkast                   506
-Relativ luftfuktighet    56513
+Number of NaNs in each column: (training data)
+Globalstraling              85
+Solskinstid                 94
+Lufttemperatur             169
+Vindretning                278
+Vindstyrke                 169
+Lufttrykk                  169
+Vindkast                   169
+Relativ luftfuktighet    45746
 ```
 
 
@@ -558,7 +573,7 @@ However, not much was acheived by doing this.
 
 - *Vindkast*
 
-["graph"]("src/figs/VindkastVSTotal_trafikk.png")
+["graph"]("src/figs_new/VindkastVSTotal_trafikk_POST_CHANGES.png")
 
 <p>
 These values are between 0-25, but there is a clear link between high vindkast and low traffic, so by squaring the values of vindkast could help the model understand that higher numbers mean a large descrease in traffic, while lower numbers do not have an effect on traffic.
@@ -722,7 +737,7 @@ After finding the best model, hyper-parameters were found.
 
 Seeminlgy, a higher n_estimators yeiled slightly better results. 
 
-This may need to be explored further, but attempts to train past 250 n_estimators results in a slowed console and after a while the text "Killed", so i think that may be a warning. Also, it seems turning up the n_esimators any more may just lead to diminishing returns.
+This may need to be explored further, but attempts to train past 250 n_estimators results in a slowed console and after a while the text "Killed", so i think i am pushing my memory too far. Also, it seems turning up the n_esimators more may just lead to diminishing returns.
 
 
 --------------------------
@@ -730,72 +745,72 @@ This may need to be explored further, but attempts to train past 250 n_estimator
 After finding the best model and seeing how it performed on validation data, we can use the ```best_model.feature_importances_``` ouput to evaluate importance of coloumns.
 
 Model for test data = False
-MSE: 546.1675294240234
-RMSE: 23.370227414897432
+MSE: 524.0117169640222
+RMSE: 22.891302212063476
 ```json
-                  Feature  Importance
-20              rush_hour    0.317659
-15                weekend    0.190056
-6                    hour    0.110577
-2          Lufttemperatur    0.103409
-21              sleeptime    0.069256
-14                  month    0.052702
-0          Globalstraling    0.032580
-3               Lufttrykk    0.022709
-4                Vindkast    0.019465
-22          Vindretning_x    0.016228
-23          Vindretning_y    0.014458
-5   Relativ luftfuktighet    0.012840
-1             Solskinstid    0.011277
-16         public_holiday    0.009342
-7                d_Friday    0.005943
-18                 summer    0.003310
-8                d_Monday    0.001796
-11             d_Thursday    0.001716
-12              d_Tuesday    0.001464
-13            d_Wednesday    0.001336
-19                 winter    0.000804
-17                raining    0.000601
-9              d_Saturday    0.000247
-10               d_Sunday    0.000224
+           Feature  Importance
+19       rush_hour    0.320061
+14         weekend    0.189385
+5             hour    0.111220
+2   Lufttemperatur    0.104526
+20       sleeptime    0.067550
+13           month    0.053060
+0   Globalstraling    0.035950
+3        Lufttrykk    0.024350
+4         Vindkast    0.020831
+21   Vindretning_x    0.017340
+22   Vindretning_y    0.015379
+1      Solskinstid    0.012289
+15  public_holiday    0.009418
+6         d_Friday    0.006057
+17          summer    0.003716
+7         d_Monday    0.001991
+10      d_Thursday    0.001882
+11       d_Tuesday    0.001596
+12     d_Wednesday    0.001392
+18          winter    0.000873
+16         raining    0.000638
+8       d_Saturday    0.000253
+9         d_Sunday    0.000243
 ```
 
-which is pretty good considerding the ```DummyRegressor``` has a RMSE of ```Test RMSE: 67.007``` on test data! 
+which is pretty good considerding the ```DummyRegressor``` has a RMSE of ```Test RMSE: 57.63``` on test data! 
 
 
 
 ### TEST DATA :
 
 Model for test data = True
-MSE: 588.7859203426983
-RMSE: 24.264911298883792
+MSE: 570.7803538989668
+RMSE: 23.891009897008683
+```json
+           Feature  Importance
+19       rush_hour    0.320061
+14         weekend    0.189385
+5             hour    0.111220
+2   Lufttemperatur    0.104526
+20       sleeptime    0.067550
+13           month    0.053060
+0   Globalstraling    0.035950
+3        Lufttrykk    0.024350
+4         Vindkast    0.020831
+21   Vindretning_x    0.017340
+22   Vindretning_y    0.015379
+1      Solskinstid    0.012289
+15  public_holiday    0.009418
+6         d_Friday    0.006057
+17          summer    0.003716
+7         d_Monday    0.001991
+10      d_Thursday    0.001882
+11       d_Tuesday    0.001596
+12     d_Wednesday    0.001392
+18          winter    0.000873
+16         raining    0.000638
+8       d_Saturday    0.000253
+9         d_Sunday    0.000243
 ```
-                  Feature  Importance
-20              rush_hour    0.317659
-15                weekend    0.190056
-6                    hour    0.110577
-2          Lufttemperatur    0.103409
-21              sleeptime    0.069256
-14                  month    0.052702
-0          Globalstraling    0.032580
-3               Lufttrykk    0.022709
-4                Vindkast    0.019465
-22          Vindretning_x    0.016228
-23          Vindretning_y    0.014458
-5   Relativ luftfuktighet    0.012840
-1             Solskinstid    0.011277
-16         public_holiday    0.009342
-7                d_Friday    0.005943
-18                 summer    0.003310
-8                d_Monday    0.001796
-11             d_Thursday    0.001716
-12              d_Tuesday    0.001464
-13            d_Wednesday    0.001336
-19                 winter    0.000804
-17                raining    0.000601
-9              d_Saturday    0.000247
-10               d_Sunday    0.000224
-```
+
+
 
 
 ### Conclusion:

@@ -4,6 +4,7 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import plotly.express as px
 import seaborn as sns
 from loguru import logger
 from scipy.stats import spearmanr
@@ -11,6 +12,63 @@ from scipy.stats import spearmanr
 # get current filepath to use when opening/saving files
 PWD = Path().absolute()
 PWD = f"{PWD}/src"
+
+
+def graph_weekly_amounts(df: pd.DataFrame):
+
+    days = [
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+        "Sunday",
+    ]
+
+    avg_traffic = [df[df[day] == 1]["Total_trafikk"].mean() for day in days]
+
+    avg_traffic_df = pd.DataFrame({"Day": days, "Average_Traffic": avg_traffic})
+
+    fig = px.bar(
+        avg_traffic_df,
+        x="Day",
+        y="Average_Traffic",
+        title="Average Traffic per Day of the Week",
+    )
+    fig.write_image(f"{PWD}/figs_new/weekly_traffic.png")
+
+
+def graph_monthly_amounts(df: pd.DataFrame):
+
+    months = [
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December",
+    ]
+
+    avg_traffic_monthly = df.groupby("month")["Total_trafikk"].mean()
+
+    avg_traffic_monthly_df = pd.DataFrame(
+        {"Month": months, "Average_Traffic": avg_traffic_monthly}
+    )
+
+    fig = px.bar(
+        avg_traffic_monthly_df,
+        x="Month",
+        y="Average_Traffic",
+        title="Average Traffic per Month",
+    )
+    fig.write_image(f"{PWD}/figs_new/monthly_traffic.png")
 
 
 def graph_a_vs_b(
@@ -83,6 +141,7 @@ def graph_df(df: pd.DataFrame) -> None:
         df["Trafikkmengde_Totalt_i_retning_Florida"],
         label="Traffic towards Florida",
     )
+
     plt.xlabel("Time")
     plt.ylabel("Traffic")
     plt.suptitle("Time vs Traffic")
@@ -216,16 +275,13 @@ def graph_all_models(main_df: pd.DataFrame, pre_change: bool) -> None:
         graph_a_vs_b(titletext, main_df, "Vindstyrke", "Vindkast", "Styrke", "Kast")
 
     graph_a_vs_b(
-        titletext, main_df, "Vindstyrke", "Total_trafikk", "Vind", "antall sykler"
-    )
-    graph_a_vs_b(
         titletext, main_df, "Lufttrykk", "Total_trafikk", "hPa", "antall sykler"
     )
     graph_a_vs_b(
         titletext, main_df, "Vindkast", "Total_trafikk", "m/s", "antall sykler"
     )
 
-    graph_df(main_df)
+    # graph_df(main_df)
 
     logger.info("Finished graphing!")
     return
