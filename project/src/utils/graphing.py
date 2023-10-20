@@ -17,13 +17,13 @@ PWD = f"{PWD}/src"
 def graph_weekly_amounts(df: pd.DataFrame):
 
     days = [
-        "Monday",
-        "Tuesday",
-        "Wednesday",
-        "Thursday",
-        "Friday",
-        "Saturday",
-        "Sunday",
+        "d_Monday",
+        "d_Tuesday",
+        "d_Wednesday",
+        "d_Thursday",
+        "d_Friday",
+        "d_Saturday",
+        "d_Sunday",
     ]
 
     avg_traffic = [df[df[day] == 1]["Total_trafikk"].mean() for day in days]

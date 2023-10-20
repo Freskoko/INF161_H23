@@ -224,6 +224,16 @@ while *Vindkast* has a correlation 0.0325 with *Total trafikk*.
 
 -------------
 
+# Variations within time
+
+![year](src/figs_new/monthly_traffic.png)
+
+Certain months have different amounts of mean traffic, so providing the model the month will help it understand this correlation. I am using dummies from python in order to setup a coloumn for each month. 
+
+![week1](src/figs_new/weekly_traffic.png)
+
+Certain days have different amounts of mean traffic, so providing the model the day will help it understand this correlation. I am using dummies from python in order to setup a coloumn for each day. 
+
 ### Yearly variations of traffic data / Correlation of the two directions
 
 ![FloridaDanmarksplass vs time](src/figs/timeVStrafficBoth.png)
@@ -809,6 +819,54 @@ RMSE: 23.891009897008683
 8       d_Saturday    0.000253
 9         d_Sunday    0.000243
 ```
+
+
+-- AFTER ADDING MONTHS AS DUMMIES -> ITS WORSE!
+
+```json
+Model for test data = False
+MSE: 537.0067702399648
+RMSE: 23.17340653076204
+           Feature  Importance
+29       rush_hour    0.320061
+24         weekend    0.189387
+5             hour    0.113872
+2   Lufttemperatur    0.107780
+30       sleeptime    0.067550
+0   Globalstraling    0.037603
+3        Lufttrykk    0.023860
+14        m_August    0.022208
+4         Vindkast    0.021975
+31   Vindretning_x    0.017055
+32   Vindretning_y    0.015136
+1      Solskinstid    0.012720
+25  public_holiday    0.010564
+21      m_November    0.005824
+6         d_Friday    0.005786
+18          m_June    0.003761
+20           m_May    0.003385
+15      m_December    0.003368
+22       m_October    0.002600
+10      d_Thursday    0.001983
+7         d_Monday    0.001979
+11       d_Tuesday    0.001585
+28          winter    0.001547
+12     d_Wednesday    0.001375
+23     m_September    0.001354
+13         m_April    0.001340
+16      m_Feburary    0.001114
+17          m_July    0.000775
+19         m_March    0.000734
+26         raining    0.000623
+27          summer    0.000621
+8       d_Saturday    0.000241
+9         d_Sunday    0.000238
+
+```
+
+
+
+
 
 
 

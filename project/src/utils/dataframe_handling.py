@@ -58,7 +58,29 @@ def feauture_engineer(df: pd.DataFrame, data2023: bool) -> pd.DataFrame:
     # make each day their own coloumn
     df = pd.get_dummies(df, columns=["d"])  # convert to True/False
 
-    # month as own coloum 1-12
+    # ---------------------------
+    # TODO FIX THIS REMOVE
+    # month_dict = {
+    #     0 :"January",
+    #     1 :"Feburary",
+    #     2 :"March",
+    #     3 :"April",
+    #     4 :"May",
+    #     5 :"June",
+    #     6 :"July",
+    #     7 :"August",
+    #     8 :"September",
+    #     9 :"October",
+    #     10:"November",
+    #     11:"December",
+    # }
+
+    # df["m"] = df.index.month.map(month_dict)
+
+    # # make each month their own coloumn
+    # df = pd.get_dummies(df, columns=["m"])  # convert to True/False
+    # ---------------
+
     df["month"] = df.index.month
 
     # MORE ADVANCED FEATURES
@@ -122,6 +144,9 @@ def feauture_engineer(df: pd.DataFrame, data2023: bool) -> pd.DataFrame:
     # change all values of TRUE in all rows to 1 and FALSE to 0
     # models need NUMERIC data
     df = df.replace({True: 1, False: 0})
+
+    # once we done with it drop month
+    # df.drop("month",axis=1,inplace=True) -- TODO
 
     return df
 
