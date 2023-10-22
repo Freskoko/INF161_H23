@@ -77,7 +77,7 @@ def feauture_engineer(df: pd.DataFrame, data2023: bool) -> pd.DataFrame:
 
     # df["m"] = df.index.month.map(month_dict)
 
-    # # make each month their own coloumn
+    # # make each month their own coloumn REMOVED SEE REPORT
     # df = pd.get_dummies(df, columns=["m"])  # convert to True/False
     # ---------------
 
@@ -291,7 +291,7 @@ def trim_transform_outliers(df: pd.DataFrame, data2023: bool) -> pd.DataFrame:
         columns=["Relativ luftfuktighet"], errors="ignore"
     )
 
-    imputer = KNNImputer(n_neighbors=2, weights="distance")
+    imputer = KNNImputer(n_neighbors=20, weights="distance")
 
     # do transformations
     print("fit transform")
@@ -317,8 +317,6 @@ def normalize_data(df: pd.DataFrame) -> pd.DataFrame:
     Normalized values are covered in the README under "Normalized values"
     """
 
-    # run one with, and one without
-    # normalize between 0-1,
     # scaler = MinMaxScaler()
     # df[["Globalstraling", "Lufttrykk", "Solskinstid",]] = scaler.fit_transform(
     #     df[
@@ -329,6 +327,8 @@ def normalize_data(df: pd.DataFrame) -> pd.DataFrame:
     #         ]
     #     ]
     # )
+
+    # df["Vindkast"] = df["Vindkast"]**2
 
     print(len(df))
 

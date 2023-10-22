@@ -1,14 +1,23 @@
 ### TODO
 
+INCLUDE THE GRAPHS IN DISUCSSION TO SHOW RUSH HOURS !!!
+
+CHANGE THE PART ABOUT DATA FLCUTATION TO A BETTER DATE AND TIME !!!
+
+
+
 ### REPORT
 
 - update data loss parsing section
+
+- update report for desci0ns made to be reflected in data not just because sounds good
 
 - evulate multiple models
 
 - RUN AGAIN MANY TIMES FIND GOOD
     - RUN WITH DIFFERENT KNN
     - RUN WITH NORMALIZATION, AND NOT
+
 
 - NETTSIDE
     - DE GIR ALT AV DATA, OG SÅNN 
@@ -19,6 +28,8 @@
 
 
 ### CODE
+
+- mkdirs
 
 - cleanup files that may not be used
 
@@ -784,49 +795,28 @@ RMSE: 22.891302212063476
 9         d_Sunday    0.000243
 ```
 
-which is pretty good considerding the ```DummyRegressor``` has a RMSE of ```Test RMSE: 57.63``` on test data! 
+which is pretty good considerding the ```DummyRegressor``` has a RMSE of ```RMSE: 57.63``` on validation data! 
+
+So, now that we have a model, we can try to tweak it, in order to get better results.
+Of course, validation data will be used to see if the model is good or not. Test data is saved entirely for last. 
+
+*Changes to attempt* 
+- Adding dummy variables for months
+- Data normaliazation
+- Changing the n_neigbours for the KNNimputer
+- Removing dummy variables for days
+- Removing the raining coloumn
 
 
+### Adding dummy variables for months:
 
-### TEST DATA :
-
-Model for test data = True
-MSE: 570.7803538989668
-RMSE: 23.891009897008683
-```json
-           Feature  Importance
-19       rush_hour    0.320061
-14         weekend    0.189385
-5             hour    0.111220
-2   Lufttemperatur    0.104526
-20       sleeptime    0.067550
-13           month    0.053060
-0   Globalstraling    0.035950
-3        Lufttrykk    0.024350
-4         Vindkast    0.020831
-21   Vindretning_x    0.017340
-22   Vindretning_y    0.015379
-1      Solskinstid    0.012289
-15  public_holiday    0.009418
-6         d_Friday    0.006057
-17          summer    0.003716
-7         d_Monday    0.001991
-10      d_Thursday    0.001882
-11       d_Tuesday    0.001596
-12     d_Wednesday    0.001392
-18          winter    0.000873
-16         raining    0.000638
-8       d_Saturday    0.000253
-9         d_Sunday    0.000243
-```
+After changing the month coloumn from being a number 0-11, to instead each month haivng their own coloumn with value of either 0 or 1.
 
 
--- AFTER ADDING MONTHS AS DUMMIES -> ITS WORSE!
-
-```json
 Model for test data = False
 MSE: 537.0067702399648
 RMSE: 23.17340653076204
+```json
            Feature  Importance
 29       rush_hour    0.320061
 24         weekend    0.189387
@@ -863,6 +853,258 @@ RMSE: 23.17340653076204
 9         d_Sunday    0.000238
 
 ```
+
+After this change, the RMSE increased by about 0.3, proving that adding dummy variables for the months did not decrease the RMSE.
+It is also interesting to note that the same 5 variables stay the most important, but the month variables end up having vastly different importances.
+
+*Important variables*
+``` 
+29       rush_hour    0.320061
+24         weekend    0.189387
+5             hour    0.113872
+2   Lufttemperatur    0.107780
+30       sleeptime    0.067550
+```
+
+ August is very important, while March is very unimportant.
+When adding dummy variables for months, the summer variable becomes very unimportant, meaning that the model may lean more on the months rather than summer.
+This feature may have worked in theory, as adding dummy variables for days does, however the month variables are better reflected in their own coloumn, and through other variables such as summer/winter
+
+### Data normalization
+
+These variables were changed to a 0-1 scale
+
+"Globalstraling",
+"Lufttrykk",
+"Solskinstid",
+
+The thought behind this is that since these values are all between 0-10 or in the case of Lufttrykk, 950-1050, changing to a 0-1 scale would help the model understand the difference between a high and low value. 
+
+And 
+
+All values of "Vindkast" were taken to the second power.
+
+![graph](src/figs_new/VindkastVSTotal_trafikk_POST_CHANGES.png)
+
+The thought behind this is that since values between 0-15 do not effect traffic, but values between 15-25 do, it would be a way to make the model understand this.  
+
+Results:
+
+Model for test data = False
+
+MSE: 549.9913200328366
+
+RMSE: 23.45189374086529
+
+```
+           Feature  Importance
+19       rush_hour    0.320061
+14         weekend    0.189385
+5             hour    0.111220
+2   Lufttemperatur    0.104526
+20       sleeptime    0.067550
+13           month    0.053060
+0   Globalstraling    0.035950
+3        Lufttrykk    0.024350
+4         Vindkast    0.020831
+21   Vindretning_x    0.017340
+22   Vindretning_y    0.015379
+1      Solskinstid    0.012289
+15  public_holiday    0.009418
+6         d_Friday    0.006057
+17          summer    0.003716
+7         d_Monday    0.001991
+10      d_Thursday    0.001882
+11       d_Tuesday    0.001596
+12     d_Wednesday    0.001392
+18          winter    0.000873
+16         raining    0.000638
+8       d_Saturday    0.000253
+9         d_Sunday    0.000243
+```
+
+The model got worse, by about  a 0.5 increase in RMSE!
+
+But looking at the importances, nothing changed! This made me run my base model again, since that is quite interesting that the model is worse but none of the feature importances changed.
+
+I suspect data normalization may be a useful tool sometimes, but in this case it made the model worse, as maybe while data is transformed, it is also lost.  
+
+### TODO - ASK ABOUT THIS
+
+### Changing the n_neighbours for the KNNimputer
+
+Baseline is n_neighbours = 2
+
+After running the model with different n_neighbours, it results in this graph:
+
+| n_neighbours | RMSE   |
+| ------------ | ------ |
+| 2            | 22.770 |
+| 10           | 22.773 |
+| 19           | 22.799 |
+| 20           | ***22.754*** |
+| 21           | 22.799 |
+| 23           | 22.778 |
+| 25           | 22.815 |
+| 30           | 22.804 |
+
+From these attempts, one can see that n_neighbours of 20 results in the lowest RMSE.
+
+Interestingly, when n_neighbours is too high, it results in missing values filled in in a way that makes the model predict traffic values worse, compared to that of when n_neighbours is 20. 
+
+### Removing dummy variables for days
+
+So far, i have taken the dummy variables for days as a given, but what if they actually are making the model worse?
+Instead, day will just be a coloumn with a number 0-6
+
+Model for test data = False
+MSE: 520.6407280284674
+RMSE: 22.817553068382846
+```json
+           Feature  Importance
+13       rush_hour    0.320061
+5             hour    0.111321
+6              day    0.104902
+2   Lufttemperatur    0.104729
+8          weekend    0.096677
+14       sleeptime    0.067550
+7            month    0.053234
+0   Globalstraling    0.035788
+3        Lufttrykk    0.024492
+4         Vindkast    0.020902
+15   Vindretning_x    0.017557
+16   Vindretning_y    0.015657
+1      Solskinstid    0.012397
+9   public_holiday    0.009422
+11          summer    0.003761
+12          winter    0.000888
+10         raining    0.000664
+```
+
+Removing dummy variables for days made the model worse.
+The new best RMSE is 22.754, and removing dummy variables led to an RMSE of 22.81. Looking at previous model importances, the days did not seem to be very important, but trying without the days as dummies did provide insight into their importance. 
+
+### Removing 2020 and 2021
+
+MSE: 528.4341584282549
+RMSE: 22.98769580510963
+
+2020 and 2021 were very different years due to the COIVD-19 pandemic. 
+
+![FloridaDanmarksplass vs time](src/figs/timeVStrafficBoth.png)
+
+In general, traffic was lower and 
+
+
+
+### Removing the raining coloumn
+
+The idea behind the "raining" coloumn, is that when the air pressure is below 996, it may be a way to indicate raining. 
+This idea came from research below:
+[Rain air pressure link]("https://geo.libretexts.org/Bookshelves/Oceanography/Oceanography_101_(Miracosta)/08%3A_Atmospheric_Circulation/8.08%3A_How_Does_Air_Pressure_Relate_to_Weather#:~:text=Increasing%20high%20pressure%20(above%201000,corresponds%20with%20cloudy%2C%20rainy%20weather.")
+
+After removing the rain coloumn, RMSE increased to 
+RMSE: 22.794. so an increase of 0.04. This proves that this coloumn helped the model, it also implies that the idea of rain appearing below a certain air pressure, but does not actually prove it. It may be a complete coincedence.
+
+### Adding a dummies year coloumn
+
+#TODO
+
+
+
+### TEST DATA :
+
+After experimenting and finding the best model for this use case, the model was checked against test data, to see if the model can actually generalize, or if it is just good at the training and valdiation data. 
+
+
+Model for test data = True
+MSE: 570.7803538989668
+RMSE: 23.891009897008683
+```json
+           Feature  Importance
+19       rush_hour    0.320061
+14         weekend    0.189385
+5             hour    0.111220
+2   Lufttemperatur    0.104526
+20       sleeptime    0.067550
+13           month    0.053060
+0   Globalstraling    0.035950
+3        Lufttrykk    0.024350
+4         Vindkast    0.020831
+21   Vindretning_x    0.017340
+22   Vindretning_y    0.015379
+1      Solskinstid    0.012289
+15  public_holiday    0.009418
+6         d_Friday    0.006057
+17          summer    0.003716
+7         d_Monday    0.001991
+10      d_Thursday    0.001882
+11       d_Tuesday    0.001596
+12     d_Wednesday    0.001392
+18          winter    0.000873
+16         raining    0.000638
+8       d_Saturday    0.000253
+9         d_Sunday    0.000243
+```
+
+RESULTS QUESTIONS:
+
+The results are not that suprising. Looking at the prdicted values for 2023, the model picks up on a few key things.
+
+- In the middle of the night (22:00-04:00), traffic drops to 1/2 cyclists.
+- During rush hour (07:00-09:00) and (14-17:00) the traffic shoots to 200, and to even higher numbers if the weather is nice. 
+
+The model seems to get the general gist in what causes cyclist traffic to vary, but predicting the exact values is almost an impossible task. The amount of variables one could imagine could have an effect on traffic are almost endless. One could imagine a coloumn which was "% of votes for MDG" in the past voting year. This could have an effect on the amount of people cycling, as more people voting "green" could reflect an increasingly cycle-friendly culture. The point is, given the data, i am impressed that the model is this "close" to reality. 
+ 
+The model is not exact, but this is due to the numbers never being "exact" in reality, and 
+
+This can be seen by picking a random date, for example the 7th of march and seeing how data differed over the years. 
+
+# TODO FIX THIS WTF IS GOING ON HERE?
+
+
+| time/year  | 2023 (model guess) | 2022 | 2021 | 2020 | 2019 |
+|---|------|------|------|------|------|
+|**01**|  1  |  1  |  1  |  3  |  0  |
+|**08**|141  |226  |  5  | 10  |201  |
+|**16**|146  |217  | 55  | 18  |188  |
+|**19**| 30  | 79  | 24  |  9  | 33  |
+
+A clear pattern occours in the years 2021 and 2022. 
+(yes dates chosen were in typical low-spots for cyclists durign the year, see the graph below, but the point still stands)
+
+![FloridaDanmarksplass vs time](src/figs/timeVStrafficBoth.png)
+
+The point is, given the amount traffic variates in real life, a RMSE around 20 is pretty good. The 2020/2021 data is a good example of this, since during certain periods people could / could not go to work, affecting the existance of a rush hour.
+
+Interestingly, the average amount of cycle traffic was slightly higher for 2020:
+
+From the training data: (does not include 2021.)
+
+| Year | Mean Traffic |
+|------|--------------|
+| 2015 | 50.576    |
+| 2016 | 49.743    |
+| 2017 | 49.109    |
+| 2018 | 47.451    |
+| 2019 | 54.560    |
+| 2020 | 58.594    |
+
+This reflects a difference in the years 
+
+# TODO GRAPH AVERAGE CYCLING PER HOUR FOR EACH YEAR ????
+
+
+
+
+
+for times such as 19:00 on a tuesday, where the model guesses 15 cyclists (2024-03-01). Since this is in the future, but these "akward" time periods have a large amount of fluctation in traffic. Maybe there were 10 people, or maybe there were 40? 
+
+
+
+
+
+
 
 
 

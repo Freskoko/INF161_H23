@@ -8,6 +8,8 @@ from flask import Flask, render_template, request
 
 app = Flask(__name__)
 
+# on init grab the model
+
 
 def load_data():
     data = pd.read_csv("/home/henrik/INF161_H23/project/app/trafikkdata.csv")

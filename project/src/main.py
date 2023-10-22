@@ -3,20 +3,33 @@ from pathlib import Path
 
 import pandas as pd
 from loguru import logger
+from matplotlib import pyplot as plt
 from sklearn.ensemble import RandomForestRegressor
 
-from utils.dataframe_handling import (drop_uneeded_cols, feauture_engineer,
-                                      merge_frames, normalize_data,
-                                      train_test_split_process,
-                                      treat_2023_file, trim_transform_outliers)
+from utils.dataframe_handling import (
+    drop_uneeded_cols,
+    feauture_engineer,
+    merge_frames,
+    normalize_data,
+    train_test_split_process,
+    treat_2023_file,
+    trim_transform_outliers,
+)
 from utils.file_parsing import treat_florida_files, treat_trafikk_files
-from utils.graphing import (graph_a_vs_b, graph_all_models, graph_df,
-                            graph_monthly_amounts, graph_weekly_amounts)
+from utils.graphing import (
+    graph_a_vs_b,
+    graph_all_models,
+    graph_df,
+    graph_monthly_amounts,
+    graph_weekly_amounts,
+)
 from utils.models import find_hyper_param, train_best_model, train_models
 
 # get current filepath to use when opening/saving files
 PWD = Path().absolute()
 GRAPHING = False
+TRAIN_MANY = False
+FINAL_RUN = False
 RANDOM_STATE = 2
 
 
@@ -52,6 +65,29 @@ def main():
         df_final
     )
     logger.info("Data divided into training,validation and test")
+
+    # Calculate the average traffic for each year
+    average_traffic_per_year = (
+        training_df["Total_trafikk"].groupby(training_df.index.year).mean()
+    )
+
+    # Print the average traffic for each year
+    print("AVERAGE TRAFFIC =")
+    print(average_traffic_per_year)
+
+    # -------------------------------
+    years = df_final.index.year.unique()
+
+    for year in years:
+        df_year = df_final[df_final.index.year == year]
+        avg_cycling_hourly = df_year.groupby(df_year.index.hour)["Total_trafikk"].mean()
+        avg_cycling_hourly.plot(kind="bar")
+        plt.title(f"Average Cycling per Hour in {year}")
+        plt.xlabel("Hour of the Day")
+        plt.ylabel("Average Cycling")
+
+        plt.savefig(f"src/yearfigs/{year}_trafficmean")
+        # -------------------------------
 
     if GRAPHING:
         graph_all_models(training_df, pre_change=True)
@@ -115,15 +151,15 @@ def main():
     }
 
     # train models
-    train_models(split_dict_post)
 
-    # find hyper params for the best model
-    find_hyper_param(split_dict_post)
+    if TRAIN_MANY:
+        train_models(split_dict_post)
+
+        # find hyper params for the best model
+        find_hyper_param(split_dict_post)
 
     # train the best model on validation data
     train_best_model(split_dict_post, test_data=False)
-
-    FINAL_RUN = False
 
     if FINAL_RUN:
 
