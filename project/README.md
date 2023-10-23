@@ -1034,7 +1034,7 @@ RMSE: 25.551596341189175
 14           month    0.052892
 0   Globalstraling    0.033611
 3        Lufttrykk    0.022354
-13            year    0.018281
+13            year    0.018281x
 4         Vindkast    0.017599
 22   Vindretning_x    0.014814
 23   Vindretning_y    0.013099
@@ -1051,15 +1051,12 @@ RMSE: 25.551596341189175
 8       d_Saturday    0.000261
 9         d_Sunday    0.000228
 
-It got worse! Hmm maybe year is just confusing!
-
-
+Adding the year as a column seems to make the model worse. This may make sense as the amount of traffic does not vary greatly across years. 
 
 
 ### TEST DATA :
 
 After experimenting and finding the best model for this use case, the model was checked against test data, to see if the model can actually generalize, or if it is just good at the training and valdiation data. 
-
 
 Model for test data = True
 MSE: 570.7803538989668
@@ -1126,15 +1123,34 @@ More data such as the actual amount of precipitation, the amount of ice on the g
 
 I think a RandomForestRegressor with an even higher *n_estimators* past 200 could make the model marginally better aswell.
 
+### Other models:
+
+Other models did not perform as well as RandomForestRegressor
+
+Modles such as SVR and ElasticNet 
+
+Elasticnet - linear regression
+SVR - fits data in condtious plane
+KNeighboursRegressor
+DescionTreeRegressor
+Lasso
+
+![attempt1_MSE](src/figs/MANYMODELS_MSE.png)
 
 
+RandomForestRegressor may outperform other models due to several reasons:
 
+1. Variety: RandomForestRegressor uses several tree-based models on various subsets of the data, integrating their predictions. This variance tends to result in a more robust and accurate model.
 
+2. Feature Importance: RandomForestRegressor ranks the importance of features within the dataset. It gives more importance to significant features and less importance to less significant features, hence enhancing the model's performance.
 
+3. Overfitting: RandomForestRegresor, being an ensemble method, is less likely to overfit data as compared to other individual models like DecisionTreeRegressor. 
 
+4. Outliers and Non-linear Features: RandomForestRegressor is more robust to outliers and can handle non-linear features more efficiently than ElasticNet or Lasso, which are linear models and can be sensitive to outliers.
 
+5. Scalability: RandomForestRegressor scales well as the number of predictors variable increases, and it produces good predictions even with the default parameter setting.
 
-
+The performance of a model can change significantly depending on the specific problem and data at hand. Therefore, it's always good to try with different models and selecting the best performing one.
 
 
 

@@ -75,7 +75,7 @@ def main():
     )
 
     # Print the average traffic for each year
-    print("AVERAGE TRAFFIC =")
+    print("AVERAGE TRAFFIC =")  
     print(average_traffic_per_year)
 
     if GRAPHING:
@@ -119,8 +119,6 @@ def main():
     validation_df = dataframes_post["validation_df"]
 
     training_df.to_csv(f"{directory}/main_training_data.csv")
-    test_df.to_csv(f"{directory}/main_test_data.csv")
-    validation_df.to_csv(f"{directory}/main_validation_data.csv")
     logger.info("Data saved to CSV")
 
     # Graph post data processing to visualize
@@ -154,6 +152,7 @@ def main():
     # train the best model on validation data
     train_best_model(split_dict_post, test_data=False)
 
+    FINAL_RUN = True
     if FINAL_RUN:
 
         # train best model on test data
