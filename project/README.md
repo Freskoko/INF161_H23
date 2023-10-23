@@ -8,8 +8,6 @@ INCLUDE THE GRAPHS IN DISUCSSION TO SHOW RUSH HOURS !!!
 
 - update report for desci0ns made to be reflected in data not just because sounds good
 
-- evulate multiple models
-
 
 - NETTSIDE
     - DE GIR ALT AV DATA, OG SÅNN 
@@ -47,12 +45,193 @@ This report pertains to the INF161 project this fall, in creating a model which 
 - Conclusion
 
 
+## Approach and design choices
+
+Given multiple files describing weather, and a single file describing traffic, there were hurdles to get over, and choices to make in order to create a DataFrame which an eventual model could learn from.
+
+### Issues/Choices
+
+*Parsing*
+
+Simply opening the traffic data in a nice format was a challenge. The trafficdata.csv uses both "|" and ";" as seperators. The solution was to open the file as a string, replace all "|" with ";" and then open the file with pandas.
+
+*Difference in data spacing*
+
+The weather data has 6 data points per hour, (for every 10 minutes), however the traffic data only has 1 data point per hour. The solution to this misalignment was taking the mean of the 6 values makign up an hour in the weather data. 
+The end goal is to predict weather for a given hour, and so converting the traffic per hour for minutes by dividing by 6 would not be favourable, as now the model would guess for each 10 minutes in an hour. Taking the mean of values is an area where quite a lot of data may be lost through "compression".
+
+*Time frame differences*
+
+One issue that is quikcly observed is that the time frame is different between the two data sets. Traffic data is only in the range:
+*2015-07-16 15:00:00* - *2022-12-31 00:00:00* meanwhile weather data is in much longer from 2010-2023. The solution is to merge the two files, and drop all the dates with missing values for traffic data. This loss of data is unfortunate, but it is impossible to train a model for traffic data if there is no traffic data.
+
+*Data loss*
+
+A choice that was made was also to completely remove the "Relativ luftfuktighet" coloumn in the weather files. This is because this column only existed in the 2022 and 2023 data files. The overall data exists in the timeframe 2017-2022 and so this column has a lot of missing data, and would very hard to incorporate into a model. However, a coloumn for "rain" would be very useful, and this is added further into the report. 
+
+*Test train split*
+
+In order to validate model efficacy, and check for over-training, a test-train-split process was used in order to observe model generalization. 70% of data was used as training data, while the remaining 30% was split into two parts of 15%, going to validation and test data. 
+
+### *Note* 
+The data processing part of the report appears before the data exploration part as data exploration showcases data pre and post processing. It is essential to know the processing done to understand the outcome of the data expolration.
+
+## Data processing
+
+This section goes over the treatment of outliers, and other processing steps. 
+
+Values that were deemed as outliers such as "99999" were transformed into NaN.
+Follwing this step, these NaN were transformed into real values by a KNNImputer, with settings *weights* = distance, since this pertains to date data. When mentioning that "x" data points were transformed to NaN, this includes the 99999 data points as well as those outside the borders specified in each section.
+
+```
+Number of NaNs in each column: (training data)
+Globalstraling              85
+Solskinstid                 94
+Lufttemperatur             169
+Vindretning                278
+Vindstyrke                 169
+Lufttrykk                  169
+Vindkast                   169
+Relativ luftfuktighet    45746
+```
+
+
+- *Globalstråling*
+
+<p> Values over 1000 in **Globalstraling** are considered malformed. </p>
+114 data points are transformed into NaN.
+
+This value was chosen because values over this are only observed "ved atmosfærenses yttergrense"
+
+[ref]("https://veret.gfi.uib.no/") 
+
+- *Solskinnstid*
+
+<p>
+Values above 10.01 in **Solskinstid** are are considered  malformed</p>
+123 data points are transformed into NaN. 
+
+The solskinstid scale is between 0-10
+
+[ref]("https://veret.gfi.uib.no/") 
+
+- *Lufttrykk*
+
+<p>
+Values above 1050 in **Lufttrykk** are considered malformed. </p>
+506 data points turn into NaN.
+
+935 and 1050 are the min/max records of all time. 
+
+[ref]("https://en.wikipedia.org/wiki/List_of_atmospheric_pressure_records_in_Europe") 
+
+
+- *Luftemperatur*
+
+<p>
+Values above 37 in **Lufttemperatur** are considered malformed. </p>
+507 values are turned into NaN.
+
+Over 37 degrees is not realistic for norway, as the warmest ever recorded was 35.6 degrees
+
+[ref]("https://no.wikipedia.org/wiki/Norske_v%C3%A6rrekorder") 
+
+- *Vindkast*
+
+<p>
+Values above 65 in **Vindkast** are considered malformed </p>
+506 values are considered NaN.
+
+Over 65m/s is not realistic for norway, as the highest value ever recorded was 64,7m/s
+
+[ref]("https://no.wikipedia.org/wiki/Norske_v%C3%A6rrekorder") 
+
+- *Vindretning*
+
+<p>
+Values above 360 in **Vindretning** are considered malformed </p>
+669 values are lost.
+
+Since vindretning is measured from 0-360, there is no way a degrees of more than 360 could be measured.
+
+- *Vindstyrke*
+
+Values above 1000 are considered malformed.
+
+There are 506 missing values here, but this col is dropped in favour of "Vindkast" anyway, as they are so correlated.
+
+- *Relativ luftfuktighet*
+
+This coloumn is dropped from the start, since there is so much missing data (56513 NaN values)
+
+- Outliers in traffic data
+
+![FloridaDanmarksplass vs time](src/figs/timeVStrafficBoth.png)
+
+Looking at traffic data above, a clear peak was the year 2017, where there was a cycling competiton in bergen. These outliers may effect the data, as there is not a large scale cycling competion every year.
+Values in the 99th percentile were removed, in hopes of normalizing data each year, so that the model can understand trends across months, not a trend which occoured one year. 
+
+
+
 
 # Data exploration:
 In src/figs, there are images presenting each of the coloums in the final data frame, plotted against the total amount of traffic. This part of the report explores these figures.
 
-Data is observed using spearmann and pearson correlation.
+# Variations within time
 
+![year](src/figs_new/monthly_traffic.png)
+
+Certain months have different amounts of mean traffic, so providing the model the month will help it understand this correlation. I am using dummies from python in order to setup a coloumn for each month. 
+
+![week1](src/figs_new/weekly_traffic.png)
+
+Certain days have different amounts of mean traffic, so providing the model the day will help it understand this correlation. I am using dummies from python in order to setup a coloumn for each day. 
+
+## TODO AVERGE TRAFICC PER HOUR
+
+### Yearly variations of traffic data / Correlation of the two directions
+
+![FloridaDanmarksplass vs time](src/figs/timeVStrafficBoth.png)
+
+Looking at the *FloridaDanmarksplass vs time* graph above, one can see that the two variables describing the amount of people driving each direction are very correlated.
+
+Both of the statistical tests back this up aswell, having high values of: pearson = *0.0407* and spearmann = *0.8269
+It is for this reason i have chosen to combine the two variables into one, as a "total traffic variable". In hindsight, the two variables must be combined, as in order to predict total traffic, the input data should be total traffic. 
+
+This graph also visualizes a large cycling peak in 2017, due to a large bicycle competion happening that year. 
+This is the cause of a great deal of outliers. The solution to this is removing data which sits in the 99th percentile. The model does not need to be good at guessing when the next large scale bicycling competiton is, it is more about day to day cycling. 
+
+
+### Correlation matrix
+
+**Raw-observation**
+
+![Corr matrix](src/figs_new/corr_matrix_PRE_CHANGES.png)
+
+Looking at the *Corr matrix* graph above, it tells us that the data needs to be processed, as values are all over the place, most probably due to outliers.
+
+**Post-processing**
+
+![Corr matrix](src/figs_new/corr_matrix_POST_CHANGES.png)
+
+The variables *Globalstråling* and *Solskinnstid* have a high degree of correlation, at 0.68.
+This is high, but not high enough that they tell us the same thing, so i am going to keep both variables. It is also important to note that both variables have a decent degree of correlation with *Total_trafikk*, so they could both be very important.
+
+The variables *Luftemperatur* and *Globalstråling* are also quite correlated, as expected, but they only have a pearson correlation of *0.41*, so keeping both values here, (espeically since they both correlate so well with *Total_trafikk*) is the correct choice. 
+
+The variables which seem to have a good correlation with *Total_trafikk* are:
+
+- Globalstråling (**0.29**)
+
+- Solskinnstid (**0.24**)
+
+- Lufttemperatur (**0.26**)
+
+- Vindretning_x/Vindretning_y (~ +/- **0.12~**)
+
+
+
+Data is staistically analysed using spearmann and pearson correlation.
 
 -------------
 
@@ -220,61 +399,7 @@ The *Vindkast* and *Vindstyrke* variables have a pearson correlation of 0.979, f
 while *Vindkast* has a correlation 0.0325 with *Total trafikk*.
 *Vindstyrke* has a pearson correlation which is 0.004 less than *Vindstyrke*, this is almost nothing, but for the purpouses of this paper, i choose to keep *Vindkast*. It is also important to note that when two variables are so similar and correlate so well, it is like giving the model the same data two times, which can lead to unwanted effects, like the model over-weighting these two factors or otherwise underrelying on one, and overrelying on the other. When they tell the same story, there is no need to keep them both.
 
-
--------------
-
-# Variations within time
-
-![year](src/figs_new/monthly_traffic.png)
-
-Certain months have different amounts of mean traffic, so providing the model the month will help it understand this correlation. I am using dummies from python in order to setup a coloumn for each month. 
-
-![week1](src/figs_new/weekly_traffic.png)
-
-Certain days have different amounts of mean traffic, so providing the model the day will help it understand this correlation. I am using dummies from python in order to setup a coloumn for each day. 
-
-### Yearly variations of traffic data / Correlation of the two directions
-
-![FloridaDanmarksplass vs time](src/figs/timeVStrafficBoth.png)
-
-Looking at the *FloridaDanmarksplass vs time* graph above, one can see that the two variables describing the amount of people driving each direction are very correlated.
-
-Both of the statistical tests back this up aswell, having high values of: pearson = *0.0407* and spearmann = *0.8269
-It is for this reason i have chosen to combine the two variables into one, as a "total traffic variable". 
-
-This graph also visualizes a large cycling peak in 2017, due to a large bicycle competion happening that year. 
-This is the cause of a great deal of outliers. The solution to this is removing data which sits in the 99th percentile. The model does not need to be good at guessing when the next large scale bicycling competiton is, it is more about day to day cycling. 
-
-
--------------
-
-### Correlation matrix
-
-**Raw-observation**
-
-![Corr matrix](src/figs_new/corr_matrix_PRE_CHANGES.png)
-
-Looking at the *Corr matrix* graph above, it tells us that the data needs to be processed, as values are all over the place, most probably due to outliers.
-
-**Post-processing**
-
-![Corr matrix](src/figs_new/corr_matrix_POST_CHANGES.png)
-
-The variables *Globalstråling* and *Solskinnstid* have a high degree of correlation, at 0.68.
-This is high, but not high enough that they tell us the same thing, so i am going to keep both variables. It is also important to note that both variables have a decent degree of correlation with *Total_trafikk*, so they could both be very important.
-
-The variables *Luftemperatur* and *Globalstråling* are also quite correlated, as expected, but they only have a pearson correlation of *0.41*, so keeping both values here, (espeically since they both correlate so well with *Total_trafikk*) is the correct choice. 
-
-The variables which seem to have a good correlation with *Total_trafikk* are:
-
-- Globalstråling (**0.29**)
-
-- Solskinnstid (**0.24**)
-
-- Lufttemperatur (**0.26**)
-
-- Vindretning_x/Vindretning_y (~ +/- **0.12~**)
-
+-----------
 
 ### Dropped coloumns
 
@@ -330,91 +455,6 @@ Drop "Relativ luftfuktighet" as this data only exists in 2022 and 2023. While th
 These coloumns do not really tell us much, and could really just confuse the model. 
 
 
-### Dropped values - updates vlaues 
-### specify if its test training or validation 
-
-Values that were deemed as outliers or "99999" were transformed into appropriate values by a KNNImputer, with settings *weights* = distance, since this pertains to date data. When mentioning that "x" data points were transformed to NaN, this includes the 99999 data points as well as those outside the borders specified in each section.
-
-```
-Number of NaNs in each column: (training data)
-Globalstraling              85
-Solskinstid                 94
-Lufttemperatur             169
-Vindretning                278
-Vindstyrke                 169
-Lufttrykk                  169
-Vindkast                   169
-Relativ luftfuktighet    45746
-```
-
-
-- *Globalstråling*
-
-<p> Values over 1000 in **Globalstraling** are considered malformed. </p>
-114 data points are transformed into NaN.
-
-This value was chosen because values over this are only observed "ved atmosfærenses yttergrense"
-
-[ref]("https://veret.gfi.uib.no/") 
-
-- *Solskinnstid*
-
-<p>
-Values above 10.01 in **Solskinstid** are are considered  malformed</p>
-123 data points are transformed into NaN. 
-
-The solskinstid scale is between 0-10
-
-[ref]("https://veret.gfi.uib.no/") 
-
-- *Lufttrykk*
-
-<p>
-Values above 1050 in **Lufttrykk** are considered malformed. </p>
-506 data points turn into NaN.
-
-935 and 1050 are the min/max records of all time. 
-
-[ref]("https://en.wikipedia.org/wiki/List_of_atmospheric_pressure_records_in_Europe") 
-
-
-- *Luftemperatur*
-
-<p>
-Values above 37 in **Lufttemperatur** are considered malformed. </p>
-507 values are turned into NaN.
-
-Over 37 degrees is not realistic for norway, as the warmest ever recorded was 35.6 degrees
-
-[ref]("https://no.wikipedia.org/wiki/Norske_v%C3%A6rrekorder") 
-
-- *Vindkast*
-
-<p>
-Values above 65 in **Vindkast** are considered malformed </p>
-506 values are considered NaN.
-
-Over 65m/s is not realistic for norway, as the highest value ever recorded was 64,7m/s
-
-[ref]("https://no.wikipedia.org/wiki/Norske_v%C3%A6rrekorder") 
-
-- *Vindretning*
-
-<p>
-Values above 360 in **Vindretning** are considered malformed </p>
-669 values are lost.
-
-Since vindretning is measured from 0-360, there is no way a degrees of more than 360 could be measured.
-
-- *Vindstyrke*
-
-Values above 1000 are considered malformed.
-
-There are 506 missing values here, but this col is dropped in favour of "Vindkast" anyway, as they are so correlated.
-
-- *Relativ luftfuktighet*
-
-This coloumn is dropped from the start, since there is so much missing data (56513 NaN values)
 
 
 # Feature engineering
@@ -589,138 +629,8 @@ These values are between 0-25, but there is a clear link between high vindkast a
 
 However, not much was acheived by doing this. 
 
-# Issues
-
-## With parsing
-
-- Issue:
-trafikkdata.csv has both "|" and ";" as seperators, and cant be directly opened with pd.open_csv().
-
-- Solution:
-open the file as a long string, replace all "|" with ";"
-save the string as a bytes object using StringIO
-open the bytes object with pd.open_csv()
 
 ----------------
-
-## With aligning the two files
-
-- Issue:
-2022 and 2023 florida weather files have a coloumn called "Relativ luftfuktighet" 
-This seems important, and could help the model
-
-- Solution:
-Since this is missing for all the other years, it is best just to drop it
-
-----------------
-
-- Issue:
-Weather data has 6 data points for an hour
-Traffic data only has 1 data point for an hour
-
-- Solution: 
-Take the mean of the 6 values in the weather data
-example:
-`df_weather_resampled = df_weather.resample('H').mean() # or median()`
-
-----------------
-
-- Issue:
-Traffic data is only in the range:
-*2015-07-16 15:00:00* - *2022-12-31 00:00:00*
-meanwhile weather data is in much longer from 2010-2023
-
-- Solution: 
-After merging the two frames drop all rows where values in traffic data is empty, such as the col:
-`Trafikkmengde_Totalt_i_retning_Florida`
-
-----------------
-
-- Issue:
-In *trafikkdata.csv* there are gaps in the data for trafikkmende, such as between
-2015-08-20T02:00+02:00
-and
-2015-08-20T12:00+02:00
-
-- Solution:
-These gaps are not big enough to warrant large changes, and data is still found for 08-20 for other years, 
-the model should be able to predict fine with some missing data like this. 
-
-----------------
-
-# Data loss
-
-:warning: **THIS NEEDS TO BE UPDATED SINCE PARSING IS NOW A BIT DIFFERENT**
-
-
-
-**Below is a walkthrough of how the files have been treated, and where data loss comes would come from**
-
-The final *out_file.csv* has 64652 lines of data (before splitting into train,validation and test data)
-
-This is much less than the **trafikkdata.csv** and **florida.csv** files contain!
-How did we get here?
-
-## trafikkdata.csv
-**trafikkdata.csv** has *348641* lines
-
-Looking at **trafikkdata.csv**, we see that there is a lot of missing data 
-between *2023-07-01* and *2023-01-01*
-348641 - 326809 = 21832 lines with no data
-
-We drop these, and we are left with 326809 lines
-
-Each hour has 5 values, but we only really care bout two of these (florida,danmarksplass)
-the 3 other values are the same, or a combination of florida+danmarkplass
-so (326809 / 5) * 2 = *130723* lines
-
-After transforming the data and pivoting it so that 
-```Trafikkmengde_Totalt_i_retning_Danmarksplass``` and ```Trafikkmengde_Totalt_i_retning_Florida```
-are coloumns instead of values within the ```felt``` coloumn. 
-
-These two new coloums contaning the data previously in the coloum ```trafikkmengde``` for their category, this again splits the amount of lines in two, as now for one hour, we can see both values for florida and danmarkplass! 
-This trick is possible because all other coloums except for 
-```trafikkmengde```,
-```Trafikkmengde_Totalt_i_retning_Danmarksplass``` and ```Trafikkmengde_Totalt_i_retning_Florida```
-were dropped, and the date is the index
-
-130723 / 2 = *65361*
-
-This number lines up almost quite nicely up with the amount in our final out file: *64652*
-
-## florida.csv
-
-an average **florida.csv** file has *~52500* lines
-
-but each hour has 6 values (00:00,00:10,00:20.. etc)
-
-In order to align florida with trafikkdata, each hour should have one value, therefore the average (```mean```) of the value across the hour is taken as the value for that hour, 
-this cuts files down to 
-
-52500/6 = ~8750 lines
-There are 14 florida files
-14*8750 = ~122500 lines altogether
-
-However, florida data files contain weather data from *2010-2023 (halfway through 2023)* while traffic data only goes between *2015(07-16)-2022*, this means that only
-**7.5** (0.5 since only about half of the 2015 weather file is used) of the florida files are actually used, and the rest are cut out by missing values for those dates in trafikk.csv. 
-
-- This is done since we want the model to not rely only on weather data, and lots of missing data can really effect modeling. 
-- There is a point to be made for creating artifical traffic data for previous years, but ironically this is what the model is trying to do anyway (only with future years).
-
-
-52500/6 = ~8750 lines
-There are **7.5** florida files in use
-
-(7*8750) + (24336/6) = ~65266 lines altogether
-**NOTE** <p> (24336/6) is the amount of relevant lines in the 2015 florida weather file
-(07-16 to 12-31) <p>
-
-This aligns almost quite nicely with our previous estimate of *64652* traffic data lines.
-
-The discrepency in length comes from severe outliers.
-*65266 - 64652 = 614 lines too many*
-
-When dropping unreasonable values in ```dataframe_handling.py```, see above sections for this. 
 
 
 # RESULTS :

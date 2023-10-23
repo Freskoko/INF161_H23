@@ -159,7 +159,7 @@ def main():
 
     # train the best model on validation data
     train_best_model(split_dict_post, test_data=False)
-    FINAL_RUN = True
+
     if FINAL_RUN:
 
         # train best model on test data
