@@ -1020,9 +1020,39 @@ This idea came from research below:
 After removing the rain coloumn, RMSE increased to 
 RMSE: 22.794. so an increase of 0.04. This proves that this coloumn helped the model, it also implies that the idea of rain appearing below a certain air pressure, but does not actually prove it. It may be a complete coincedence.
 
-### Adding a dummies year coloumn
+### Adding a year coloumn
 
-# TODO
+Model for test data = False
+MSE: 652.8840755830721
+RMSE: 25.551596341189175
+           Feature  Importance
+20       rush_hour    0.320061
+15         weekend    0.189351
+5             hour    0.111178
+2   Lufttemperatur    0.101366
+21       sleeptime    0.067550
+14           month    0.052892
+0   Globalstraling    0.033611
+3        Lufttrykk    0.022354
+13            year    0.018281
+4         Vindkast    0.017599
+22   Vindretning_x    0.014814
+23   Vindretning_y    0.013099
+1      Solskinstid    0.011184
+16  public_holiday    0.009163
+6         d_Friday    0.005836
+18          summer    0.003750
+7         d_Monday    0.001809
+10      d_Thursday    0.001655
+11       d_Tuesday    0.001340
+12     d_Wednesday    0.001198
+19          winter    0.000799
+17         raining    0.000623
+8       d_Saturday    0.000261
+9         d_Sunday    0.000228
+
+It got worse! Hmm maybe year is just confusing!
+
 
 
 

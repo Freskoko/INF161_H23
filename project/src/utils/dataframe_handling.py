@@ -59,6 +59,13 @@ def feauture_engineer(df: pd.DataFrame, data2023: bool) -> pd.DataFrame:
     df = pd.get_dummies(df, columns=["d"])  # convert to True/False
 
     # ---------------------------
+
+    # BASIC DATE FEATURES
+    # print(df)
+
+    # df["year"] = df.index.year  # get first two values
+
+    # ---------------------------
     # TODO FIX THIS REMOVE
     # month_dict = {
     #     0 :"January",
