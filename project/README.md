@@ -2,10 +2,6 @@
 
 INCLUDE THE GRAPHS IN DISUCSSION TO SHOW RUSH HOURS !!!
 
-CHANGE THE PART ABOUT DATA FLCUTATION TO A BETTER DATE AND TIME !!!
-
-
-
 ### REPORT
 
 - update data loss parsing section
@@ -14,17 +10,9 @@ CHANGE THE PART ABOUT DATA FLCUTATION TO A BETTER DATE AND TIME !!!
 
 - evulate multiple models
 
-- RUN AGAIN MANY TIMES FIND GOOD
-    - RUN WITH DIFFERENT KNN
-    - RUN WITH NORMALIZATION, AND NOT
-
 
 - NETTSIDE
     - DE GIR ALT AV DATA, OG SÅNN 
-
-
-- graph weekly traffic amounts
-- grap monthly traffic amounts
 
 
 ### CODE
@@ -735,64 +723,99 @@ The discrepency in length comes from severe outliers.
 When dropping unreasonable values in ```dataframe_handling.py```, see above sections for this. 
 
 
-
 # RESULTS :
-
-**TODO**
- - Er resultater av tre fundamentalt forskjellige modeller rapportert?
- - Update graphs to be easier to read
-
-
 
 ![attempt1_MSE](src/figs/MANYMODELS_MSE.png)
 
-One can see that RandomForestRegressor with n_estimators; 200 is the best model with a RMSE of 25.301.
+One can see that RandomForestRegressor with n_estimators; 200 is the best model with a RMSE of 22.723.
 
-#TODO COMMENT ON MULTIPLE MODELS
-
----------------------------
-
-After finding the best model, hyper-parameters were found.
+After finding the best model hyper-parameters were found.
 
 ![hyperparam](src/figs/MSE_hyperparam_models_V3.png)
 
-Seeminlgy, a higher n_estimators yeiled slightly better results. 
+Seemingly, a higher n_estimators yeiled slightly better results.
 
-This may need to be explored further, but attempts to train past 250 n_estimators results in a slowed console and after a while the text "Killed", so i think i am pushing my memory too far. Also, it seems turning up the n_esimators more may just lead to diminishing returns.
+![hyperparam](src/figs/MSE_hyperparam_models_further.png)
 
+Attempting to optimize hyper-parameters even further, results show that 181 n_estimators was the best. 
+
+A deeper dive into the best hyper-parameters could have been done, however this amount of optimization already takes quite a while, and it would seemingly result in diminishing returns, as improvements made are very miniscule. 
+
+### Evaluating other models:
+
+Other models did not perform as well as RandomForestRegressor
+
+1. Elasticnet, SVR, and Lasso: *Linear models*
+
+ElasticNet RMSE:53.58
+
+SVR RMSE: 56.455
+
+Lasso RMSE:54.213
+
+Elasticnet and Lasso include regularization to prevent overfitting. These types of models may not do so well if the data is not excusivley linear, which is the case for the relationship between some of the variables in the model. 
+
+2. KNeighborsRegressor: *Prediction based on "neighbours"*
+
+KNeighborsRegressor RMSE:44.412
+
+This model does not perform so well since there is no clear "cut" between if there are for example 30, or 31 cyclists. This model works better when prediciting variables such as plant species, where variables will together align to place the predicted value in a "category". Since this data is more numerical rather than categorical the model struggles. Imagine the model is making several hundred "categories" for all possible outcomes of cyclists.
+
+3. DecisionTreeRegressor: *Tree based prediction*
+DecisionTreeRegressor RMSE:26.725
+
+This model is not doing half bad when compared to RandomForestRegressor but it may be overfitting to the trainig data, creating many specific "rules", which are not valid anymore for unseen data.
+
+
+4. GradientBoostingRegressor: *Ensamble boosting model*
+GradientBoostingRegressor RMSE:27.312
+
+This model is not doing half bad when compared to RandomForestRegressor
+This model works buy building trees one at a time, where each new tree helps to correct the mistakes made by the previously trained tree. 
+This model may struggle since the data has a large variance in traffic, for example when looking at max and min cyclists for a given hour. 
+
+5. RandomForestRegressor: *Ensamble model*
+RandomForestRegressor RMSE:22.723
+
+This is an ensemble learning method that operates by constructing a multitude of decision trees at training time and outputting the means prediction of the individual trees. 
+
+8. DummyRegressor:
+
+DummyRegressor RMSE: 57.637
+Just a benchmark which always guesses the mean. Cannot learn anything. 
 
 --------------------------
 
 After finding the best model and seeing how it performed on validation data, we can use the ```best_model.feature_importances_``` ouput to evaluate importance of coloumns.
 
 Model for test data = False
-MSE: 524.0117169640222
-RMSE: 22.891302212063476
+MSE: 516.2760090328828
+RMSE: 22.721707881074494
 ```json
            Feature  Importance
-19       rush_hour    0.320061
-14         weekend    0.189385
-5             hour    0.111220
-2   Lufttemperatur    0.104526
-20       sleeptime    0.067550
-13           month    0.053060
-0   Globalstraling    0.035950
-3        Lufttrykk    0.024350
-4         Vindkast    0.020831
-21   Vindretning_x    0.017340
-22   Vindretning_y    0.015379
-1      Solskinstid    0.012289
-15  public_holiday    0.009418
-6         d_Friday    0.006057
-17          summer    0.003716
-7         d_Monday    0.001991
-10      d_Thursday    0.001882
-11       d_Tuesday    0.001596
-12     d_Wednesday    0.001392
-18          winter    0.000873
-16         raining    0.000638
-8       d_Saturday    0.000253
-9         d_Sunday    0.000243
+19       rush_hour    0.320274
+14         weekend    0.189272
+5             hour    0.111285
+2   Lufttemperatur    0.104513
+20       sleeptime    0.067502
+13           month    0.053306
+0   Globalstraling    0.035742
+3        Lufttrykk    0.024270
+4         Vindkast    0.020730
+21   Vindretning_x    0.017398
+22   Vindretning_y    0.015512
+1      Solskinstid    0.012013
+15  public_holiday    0.009460
+6         d_Friday    0.006085
+17          summer    0.003759
+7         d_Monday    0.001981
+10      d_Thursday    0.001885
+11       d_Tuesday    0.001652
+12     d_Wednesday    0.001390
+18          winter    0.000850
+16         raining    0.000642
+8       d_Saturday    0.000247
+9         d_Sunday    0.000233
 ```
 
 which is pretty good considerding the ```DummyRegressor``` has a RMSE of ```RMSE: 57.63``` on validation data! 
@@ -810,63 +833,24 @@ Of course, validation data will be used to see if the model is good or not. Test
 
 ### Adding dummy variables for months:
 
-After changing the month coloumn from being a number 0-11, to instead each month haivng their own coloumn with value of either 0 or 1.
+RMSE: 23.05279285362234
 
-
-Model for test data = False
-MSE: 537.0067702399648
-RMSE: 23.17340653076204
-```json
-           Feature  Importance
-29       rush_hour    0.320061
-24         weekend    0.189387
-5             hour    0.113872
-2   Lufttemperatur    0.107780
-30       sleeptime    0.067550
-0   Globalstraling    0.037603
-3        Lufttrykk    0.023860
-14        m_August    0.022208
-4         Vindkast    0.021975
-31   Vindretning_x    0.017055
-32   Vindretning_y    0.015136
-1      Solskinstid    0.012720
-25  public_holiday    0.010564
-21      m_November    0.005824
-6         d_Friday    0.005786
-18          m_June    0.003761
-20           m_May    0.003385
-15      m_December    0.003368
-22       m_October    0.002600
-10      d_Thursday    0.001983
-7         d_Monday    0.001979
-11       d_Tuesday    0.001585
-28          winter    0.001547
-12     d_Wednesday    0.001375
-23     m_September    0.001354
-13         m_April    0.001340
-16      m_Feburary    0.001114
-17          m_July    0.000775
-19         m_March    0.000734
-26         raining    0.000623
-27          summer    0.000621
-8       d_Saturday    0.000241
-9         d_Sunday    0.000238
-
-```
+After changing the month coloumn from being a number 0-11, to instead each month having their own coloumn with value of either 0 or 1.
 
 After this change, the RMSE increased by about 0.3, proving that adding dummy variables for the months did not decrease the RMSE.
 It is also interesting to note that the same 5 variables stay the most important, but the month variables end up having vastly different importances.
 
 *Important variables*
 ``` 
-29       rush_hour    0.320061
-24         weekend    0.189387
-5             hour    0.113872
-2   Lufttemperatur    0.107780
-30       sleeptime    0.067550
+           Feature  Importance
+29       rush_hour    0.320274
+24         weekend    0.189263
+5             hour    0.114113
+2   Lufttemperatur    0.107731
+30       sleeptime    0.067502
 ```
 
- August is very important, while March is very unimportant.
+August is very important, while March is very unimportant.
 When adding dummy variables for months, the summer variable becomes very unimportant, meaning that the model may lean more on the months rather than summer.
 This feature may have worked in theory, as adding dummy variables for days does, however the month variables are better reflected in their own coloumn, and through other variables such as summer/winter
 
@@ -892,35 +876,33 @@ Results:
 
 Model for test data = False
 
-MSE: 549.9913200328366
-
-RMSE: 23.45189374086529
-
-```
+MSE: 541.1933281526466
+RMSE: 23.263562241252878
+```json
            Feature  Importance
-19       rush_hour    0.320061
-14         weekend    0.189385
-5             hour    0.111220
-2   Lufttemperatur    0.104526
-20       sleeptime    0.067550
-13           month    0.053060
-0   Globalstraling    0.035950
-3        Lufttrykk    0.024350
-4         Vindkast    0.020831
-21   Vindretning_x    0.017340
-22   Vindretning_y    0.015379
-1      Solskinstid    0.012289
-15  public_holiday    0.009418
-6         d_Friday    0.006057
-17          summer    0.003716
-7         d_Monday    0.001991
-10      d_Thursday    0.001882
-11       d_Tuesday    0.001596
-12     d_Wednesday    0.001392
-18          winter    0.000873
-16         raining    0.000638
-8       d_Saturday    0.000253
-9         d_Sunday    0.000243
+19       rush_hour    0.320274
+14         weekend    0.189272
+5             hour    0.111285
+2   Lufttemperatur    0.104513
+20       sleeptime    0.067502
+13           month    0.053306
+0   Globalstraling    0.035742
+3        Lufttrykk    0.024270
+4         Vindkast    0.020730
+21   Vindretning_x    0.017398
+22   Vindretning_y    0.015512
+1      Solskinstid    0.012013
+15  public_holiday    0.009460
+6         d_Friday    0.006085
+17          summer    0.003759
+7         d_Monday    0.001981
+10      d_Thursday    0.001885
+11       d_Tuesday    0.001652
+12     d_Wednesday    0.001390
+18          winter    0.000850
+16         raining    0.000642
+8       d_Saturday    0.000247
+9         d_Sunday    0.000233
 ```
 
 The model got worse, by about  a 0.5 increase in RMSE!
@@ -933,24 +915,24 @@ I suspect data normalization may be a useful tool sometimes, but in this case it
 
 ### Changing the n_neighbours for the KNNimputer
 
-Baseline is n_neighbours = 2
+Baseline is n_neighbours = 20
 
 After running the model with different n_neighbours, it results in this graph:
 
 | n_neighbours | RMSE   |
 | ------------ | ------ |
-| 2            | 22.770 |
-| 10           | 22.773 |
-| 19           | 22.799 |
-| 20           | ***22.754*** |
-| 21           | 22.799 |
-| 23           | 22.778 |
-| 25           | 22.815 |
-| 30           | 22.804 |
+| 2            | 22.8670 |
+| 10           | 22.7435 |
+| 19           | 22.7801 |
+| 20           | ***22.7217*** |
+| 21           | 22.7677 |
+| 23           | 22.7419 |
+| 25           | 22.7919 |
+| 30           | 22.7695 |
 
 From these attempts, one can see that n_neighbours of 20 results in the lowest RMSE.
 
-Interestingly, when n_neighbours is too high, it results in missing values filled in in a way that makes the model predict traffic values worse, compared to that of when n_neighbours is 20. 
+This implies that, when n_neighbours is too high or too low, it results in missing values filled in in a way that makes the model predict traffic values worse, compared to that of when n_neighbours is 20. 
 
 ### Removing dummy variables for days
 
@@ -958,36 +940,36 @@ So far, i have taken the dummy variables for days as a given, but what if they a
 Instead, day will just be a coloumn with a number 0-6
 
 Model for test data = False
-MSE: 520.6407280284674
-RMSE: 22.817553068382846
+MSE: 520.0266991625633
+RMSE: 22.804093912334324
 ```json
            Feature  Importance
-13       rush_hour    0.320061
-5             hour    0.111321
-6              day    0.104902
-2   Lufttemperatur    0.104729
-8          weekend    0.096677
-14       sleeptime    0.067550
-7            month    0.053234
-0   Globalstraling    0.035788
-3        Lufttrykk    0.024492
-4         Vindkast    0.020902
-15   Vindretning_x    0.017557
-16   Vindretning_y    0.015657
-1      Solskinstid    0.012397
-9   public_holiday    0.009422
-11          summer    0.003761
-12          winter    0.000888
-10         raining    0.000664
+13       rush_hour    0.320274
+5             hour    0.111358
+6              day    0.106641
+2   Lufttemperatur    0.104609
+8          weekend    0.094840
+14       sleeptime    0.067502
+7            month    0.053264
+0   Globalstraling    0.035871
+3        Lufttrykk    0.024423
+4         Vindkast    0.020886
+15   Vindretning_x    0.017562
+16   Vindretning_y    0.015691
+1      Solskinstid    0.012260
+9   public_holiday    0.009465
+11          summer    0.003843
+12          winter    0.000851
+10         raining    0.000660
 ```
 
 Removing dummy variables for days made the model worse.
-The new best RMSE is 22.754, and removing dummy variables led to an RMSE of 22.81. Looking at previous model importances, the days did not seem to be very important, but trying without the days as dummies did provide insight into their importance. 
+The best RMSE is 22.7217, and removing dummy variables led to an RMSE of 22.81. Looking at previous model importances, the days did not seem to be very important, but trying without the days as dummies did provide insight into their importance. 
 
 ### Removing 2020 and 2021
 
-MSE: 528.4341584282549
-RMSE: 22.98769580510963
+MSE: 527.6663695222314
+RMSE: 22.97098973754138
 
 2020 and 2021 were very different years due to the COIVD-19 pandemic. 
 
@@ -1013,45 +995,57 @@ From the training data: (does not include 2021.)
 
 ### Removing the raining coloumn
 
+MSE: 517.221
+RMSE: 22.742
+
+
 The idea behind the "raining" coloumn, is that when the air pressure is below 996, it may be a way to indicate raining. 
 This idea came from research below:
 [Rain air pressure link]("https://geo.libretexts.org/Bookshelves/Oceanography/Oceanography_101_(Miracosta)/08%3A_Atmospheric_Circulation/8.08%3A_How_Does_Air_Pressure_Relate_to_Weather#:~:text=Increasing%20high%20pressure%20(above%201000,corresponds%20with%20cloudy%2C%20rainy%20weather.")
 
 After removing the rain coloumn, RMSE increased to 
-RMSE: 22.794. so an increase of 0.04. This proves that this coloumn helped the model, it also implies that the idea of rain appearing below a certain air pressure, but does not actually prove it. It may be a complete coincedence.
+RMSE: 22.742. so an increase of 0.2. This proves that this coloumn helped the model, it also implies that the idea of rain appearing below a certain air pressure, but does not actually prove it. It may be a complete coincedence.
 
 ### Adding a year coloumn
 
 Model for test data = False
-MSE: 652.8840755830721
-RMSE: 25.551596341189175
+MSE: 651.6418182673983
+RMSE: 25.52727596645201
+```json
            Feature  Importance
-20       rush_hour    0.320061
-15         weekend    0.189351
-5             hour    0.111178
-2   Lufttemperatur    0.101366
-21       sleeptime    0.067550
-14           month    0.052892
-0   Globalstraling    0.033611
-3        Lufttrykk    0.022354
-13            year    0.018281x
-4         Vindkast    0.017599
-22   Vindretning_x    0.014814
-23   Vindretning_y    0.013099
-1      Solskinstid    0.011184
-16  public_holiday    0.009163
-6         d_Friday    0.005836
-18          summer    0.003750
-7         d_Monday    0.001809
-10      d_Thursday    0.001655
-11       d_Tuesday    0.001340
-12     d_Wednesday    0.001198
-19          winter    0.000799
-17         raining    0.000623
-8       d_Saturday    0.000261
+20       rush_hour    0.320274
+15         weekend    0.189234
+5             hour    0.111280
+2   Lufttemperatur    0.101361
+21       sleeptime    0.067502
+14           month    0.052923
+0   Globalstraling    0.033653
+3        Lufttrykk    0.022210
+13            year    0.018167
+4         Vindkast    0.017497
+22   Vindretning_x    0.014863
+23   Vindretning_y    0.013142
+1      Solskinstid    0.011050
+16  public_holiday    0.009208
+6         d_Friday    0.005860
+18          summer    0.003832
+7         d_Monday    0.001815
+10      d_Thursday    0.001682
+11       d_Tuesday    0.001356
+12     d_Wednesday    0.001187
+19          winter    0.000785
+17         raining    0.000639
+8       d_Saturday    0.000253
 9         d_Sunday    0.000228
+```
 
-Adding the year as a column seems to make the model worse. This may make sense as the amount of traffic does not vary greatly across years. 
+Adding the year as a column seems to make the model worse. This may make sense as the amount of traffic does not vary greatly across years. See above graphs  #TODO
+
+--------------------------------------
+
+After experimenting, the final model is:
+
+**RandomForestRegressor with n_estimators = 181 with an RMSE of 22.7217**
 
 
 ### TEST DATA :
@@ -1059,38 +1053,42 @@ Adding the year as a column seems to make the model worse. This may make sense a
 After experimenting and finding the best model for this use case, the model was checked against test data, to see if the model can actually generalize, or if it is just good at the training and valdiation data. 
 
 Model for test data = True
-MSE: 570.7803538989668
-RMSE: 23.891009897008683
+MSE: 570.3603010827786
+RMSE: 23.882217256418606
 ```json
            Feature  Importance
-19       rush_hour    0.320061
-14         weekend    0.189385
-5             hour    0.111220
-2   Lufttemperatur    0.104526
-20       sleeptime    0.067550
-13           month    0.053060
-0   Globalstraling    0.035950
-3        Lufttrykk    0.024350
-4         Vindkast    0.020831
-21   Vindretning_x    0.017340
-22   Vindretning_y    0.015379
-1      Solskinstid    0.012289
-15  public_holiday    0.009418
-6         d_Friday    0.006057
-17          summer    0.003716
-7         d_Monday    0.001991
-10      d_Thursday    0.001882
-11       d_Tuesday    0.001596
-12     d_Wednesday    0.001392
-18          winter    0.000873
-16         raining    0.000638
-8       d_Saturday    0.000253
-9         d_Sunday    0.000243
+19       rush_hour    0.320274
+14         weekend    0.189272
+5             hour    0.111285
+2   Lufttemperatur    0.104513
+20       sleeptime    0.067502
+13           month    0.053306
+0   Globalstraling    0.035742
+3        Lufttrykk    0.024270
+4         Vindkast    0.020730
+21   Vindretning_x    0.017398
+22   Vindretning_y    0.015512
+1      Solskinstid    0.012013
+15  public_holiday    0.009460
+6         d_Friday    0.006085
+17          summer    0.003759
+7         d_Monday    0.001981
+10      d_Thursday    0.001885
+11       d_Tuesday    0.001652
+12     d_Wednesday    0.001390
+18          winter    0.000850
+16         raining    0.000642
+8       d_Saturday    0.000247
+9         d_Sunday    0.000233
 ```
 
 ### Results discussion:
 
-**The chosen best model was "RandomForestRegressor" with an *n_estimators* of 200 #TODO.**
+**The chosen best model was "RandomForestRegressor" with an *n_estimators* of 181 which has an RMSE of 22.7217 on validation data and 23.8822 on test data**
+
+![attempt1_MSE](src/figs/MANYMODELS_MSE.png)
+
+### Exploring Results acheived with a RandomForestRegressor model
 
 The results present a model which is suprisingly good, considering the amount of variance in the data. 
 
@@ -1121,38 +1119,7 @@ The model is not exact, but this is due to the numbers never being "exact" in re
 Given enough time and data, the model could be improved upon in a vriety of ways. Choosing a more complex, model which is made to excel in data over time, could improve the model.
 More data such as the actual amount of precipitation, the amount of ice on the ground, the current news scene, or data around COVID-19 restrictions could have made the model better.
 
-I think a RandomForestRegressor with an even higher *n_estimators* past 200 could make the model marginally better aswell.
-
-### Other models:
-
-Other models did not perform as well as RandomForestRegressor
-
-Modles such as SVR and ElasticNet 
-
-Elasticnet - linear regression
-SVR - fits data in condtious plane
-KNeighboursRegressor
-DescionTreeRegressor
-Lasso
-
-![attempt1_MSE](src/figs/MANYMODELS_MSE.png)
-
-
-RandomForestRegressor may outperform other models due to several reasons:
-
-1. Variety: RandomForestRegressor uses several tree-based models on various subsets of the data, integrating their predictions. This variance tends to result in a more robust and accurate model.
-
-2. Feature Importance: RandomForestRegressor ranks the importance of features within the dataset. It gives more importance to significant features and less importance to less significant features, hence enhancing the model's performance.
-
-3. Overfitting: RandomForestRegresor, being an ensemble method, is less likely to overfit data as compared to other individual models like DecisionTreeRegressor. 
-
-4. Outliers and Non-linear Features: RandomForestRegressor is more robust to outliers and can handle non-linear features more efficiently than ElasticNet or Lasso, which are linear models and can be sensitive to outliers.
-
-5. Scalability: RandomForestRegressor scales well as the number of predictors variable increases, and it produces good predictions even with the default parameter setting.
-
-The performance of a model can change significantly depending on the specific problem and data at hand. Therefore, it's always good to try with different models and selecting the best performing one.
-
-
+I think a RandomForestRegressor with an even more well-tuned *n_estimators* could make the model marginally better aswell, but this is held back by training time. 
 
 ### Conclusion:
 

@@ -36,7 +36,6 @@ def feauture_engineer(df: pd.DataFrame, data2023: bool) -> pd.DataFrame:
     """
 
     # BASIC DATE FEATURES
-    print(df)
     # hour as own coloumn 0-23
     df["hour"] = df.index.hour  # get first two values
 
@@ -58,12 +57,13 @@ def feauture_engineer(df: pd.DataFrame, data2023: bool) -> pd.DataFrame:
     # make each day their own coloumn
     df = pd.get_dummies(df, columns=["d"])  # convert to True/False
 
+    # df["day"] = df.index.weekday
     # ---------------------------
 
     # BASIC DATE FEATURES
     # print(df)
 
-    # df["year"] = df.index.year  # get first two values
+    # df["year"] = df.index.year
 
     # ---------------------------
     # TODO FIX THIS REMOVE
@@ -84,10 +84,9 @@ def feauture_engineer(df: pd.DataFrame, data2023: bool) -> pd.DataFrame:
 
     # df["m"] = df.index.month.map(month_dict)
 
-    # # make each month their own coloumn REMOVED SEE REPORT
+    # make each month their own coloumn REMOVED SEE REPORT
     # df = pd.get_dummies(df, columns=["m"])  # convert to True/False
     # ---------------
-
     df["month"] = df.index.month
 
     # MORE ADVANCED FEATURES
@@ -153,7 +152,7 @@ def feauture_engineer(df: pd.DataFrame, data2023: bool) -> pd.DataFrame:
     df = df.replace({True: 1, False: 0})
 
     # once we done with it drop month
-    # df.drop("month",axis=1,inplace=True) -- TODO
+    # df.drop("month",axis=1,inplace=True)
 
     return df
 
@@ -186,16 +185,16 @@ def merge_frames(frames: list) -> pd.DataFrame:
     # Drops missing values
     PWD = Path().absolute()
     directory = f"{str(PWD)}/src/out"
-    print("before drop ", len(df_final))
+    # print("before drop ", len(df_final))
     df_final.to_csv(f"{directory}/before_drop.csv")
 
-    print(df_final)
+    # print(df_final)
     df_2023 = df_2023 = df_final.loc["2023-01-01":"2023-12-31"]
     df_2023.to_csv(f"{directory}/2023data.csv")
     # get where index is between 2023-01-01 00:00:00 and 2023-12-31 00:00:00
 
     df_final = df_final.dropna(subset=["Trafikkmengde_Totalt_i_retning_Florida"])
-    print("after drop ", len(df_final))
+    # print("after drop ", len(df_final))
     df_final.to_csv(f"{directory}/after_drop.csv")
 
     # finding means of values lead to floating point errors, round to fix these
@@ -226,8 +225,8 @@ def trim_transform_outliers(df: pd.DataFrame, data2023: bool) -> pd.DataFrame:
     What values are considered abnormal are covered in the README under "Dropped values"
     """
 
-    print("IN")
-    print(df)
+    # print("IN")
+    # print(df)
 
     # Transform malformed data to NaN.
     length_dict = {"before": len(df)}
@@ -298,13 +297,14 @@ def trim_transform_outliers(df: pd.DataFrame, data2023: bool) -> pd.DataFrame:
         columns=["Relativ luftfuktighet"], errors="ignore"
     )
 
+    # 20 is right
     imputer = KNNImputer(n_neighbors=20, weights="distance")
 
     # do transformations
-    print("fit transform")
+    # print("fit transform")
     df_imputed = imputer.fit_transform(df_no_traffic)
 
-    print("fixed")
+    # print("fixed")
     df_fixed = pd.DataFrame(
         df_imputed, columns=df_no_traffic.columns, index=df_no_traffic.index
     )
@@ -337,12 +337,12 @@ def normalize_data(df: pd.DataFrame) -> pd.DataFrame:
 
     # df["Vindkast"] = df["Vindkast"]**2
 
-    print(len(df))
+    print(f"Values pre removal of outliers: {len(df)}")
 
     quant = df["Total_trafikk"].quantile(0.99)
     df = df[df["Total_trafikk"] <= quant]
 
-    print(len(df))
+    print(f"Values post removal of outliers: {len(df)}")
 
     return df
 
@@ -430,16 +430,11 @@ def treat_2023_file(df, model):
     df_final = drop_uneeded_cols(df_final)
     logger.info("Uneeded cols dropped")
 
-    print("PRE SUPER FINAL DF:")
-    print(df_final)
     try:
         df_final["Total_trafikk"] = model.predict(df_final)
     except ValueError as e:
         print(e)
 
-    print("SUPER FINAL DF:")
-    print(df_final)
-
-    df_final.to_csv("src/out/2023FIXEDDATA.csv")
+    df_final.to_csv("src/out/predictions.csv")
 
     return df_final

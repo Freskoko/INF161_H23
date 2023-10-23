@@ -83,7 +83,7 @@ def train_models(split_dict: dict) -> dict:
     clf_vals = []
 
     for mod in models:
-        name = mod["model_type"].__name__
+        name = str(mod["model_type"].__name__)[0:8]
         settings = mod["settings"]
 
         logger.info(f"Training model type: {name}_{settings}")
@@ -115,6 +115,11 @@ def train_models(split_dict: dict) -> dict:
         labels={"x": "Model", "y": "Mean Error"},
         text=data_models["mse_values"].round(3),
     )
+    fig.update_layout(
+        autosize=False,
+        width=1200,
+        height=1200,
+    )
     fig.update_traces(textposition="auto")
 
     fig.write_image(f"{PWD}/src/figs/MANYMODELS_MSE.png")
@@ -136,7 +141,7 @@ def find_hyper_param(split_dict: dict) -> dict:
 
     models = []
 
-    for i in range(1, 201, 50):
+    for i in range(1, 252, 50):
         if i == 0:
             i = 1
         model = {
@@ -150,7 +155,7 @@ def find_hyper_param(split_dict: dict) -> dict:
     clf_vals = []
 
     for mod in models:
-        name = mod["model_type"].__name__
+        name = str(mod["model_type"].__name__)[0:8]
         settings = mod["settings"]
 
         logger.info(f"Training model type: {name}_{settings}")
@@ -179,13 +184,83 @@ def find_hyper_param(split_dict: dict) -> dict:
         data_models,
         x="model_name",
         y="mse_values",
-        title="MSE values for different models",
+        title="MSE values for RandomForestRegressor",
         labels={"x": "Model", "y": "Mean Error"},
         text=data_models["mse_values"].round(3),
     )
+
     fig.update_traces(textposition="auto")
 
     fig.write_image(f"{PWD}/src/figs/MSE_hyperparam_models_V3.png")
+
+    logger.info("Done training hyperparameter models!")
+
+    return
+
+
+def find_hyper_param_further(split_dict: dict) -> dict:
+    """
+    Trains a single model (testing multiple hyperparameters) on test data, finds its MSE on validation data
+    """
+
+    X_train = split_dict["x_train"]
+    y_train = split_dict["y_train"]
+    X_val = split_dict["x_val"]
+    y_val = split_dict["y_val"]
+
+    models = []
+
+    for i in range(151, 252, 30):
+        if i == 0:
+            i = 1
+        model = {
+            "model_type": RandomForestRegressor,
+            "settings": {"n_estimators": i, "random_state": RANDOM_STATE},
+        }
+        models.append(model)
+
+    model_strings = []
+    mse_values_models = []
+    clf_vals = []
+
+    for mod in models:
+        name = str(mod["model_type"].__name__)[0:8]
+        settings = mod["settings"]
+
+        logger.info(f"Training model type: {name}_{settings}")
+        clf = mod["model_type"](**mod["settings"])  # henter ut settings her
+        clf.fit(X_train, y_train)
+
+        y_predicted = clf.predict(X_val)
+
+        # finn mse
+        pf_mse = mean_squared_error(y_val, y_predicted, squared=True)
+
+        mse_values_models.append(pf_mse)
+        model_strings.append(f"{name}_{settings}")
+        clf_vals.append(clf)
+
+    data_models = pd.DataFrame(
+        {
+            "model_name": model_strings,
+            "mse_values": [sqrt(i) for i in mse_values_models],
+        }
+    )
+
+    print(data_models.sort_values(by="mse_values"))
+
+    fig = px.bar(
+        data_models,
+        x="model_name",
+        y="mse_values",
+        title="MSE values for RandomForestRegressor",
+        labels={"x": "Model", "y": "Mean Error"},
+        text=data_models["mse_values"].round(3),
+    )
+
+    fig.update_traces(textposition="auto")
+
+    fig.write_image(f"{PWD}/src/figs/MSE_hyperparam_models_further.png")
 
     logger.info("Done training hyperparameter models!")
 
@@ -208,7 +283,7 @@ def train_best_model(split_dict: dict, test_data: bool) -> None:
     y_train = split_dict["y_train"]
 
     # BEST MODEL:
-    best_model = RandomForestRegressor(n_estimators=250, random_state=RANDOM_STATE)
+    best_model = RandomForestRegressor(n_estimators=181, random_state=RANDOM_STATE)
 
     best_model.fit(X_train, y_train)
 

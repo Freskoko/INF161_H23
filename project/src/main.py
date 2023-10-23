@@ -26,7 +26,12 @@ from utils.graphing import (
     graph_monthly_amounts,
     graph_weekly_amounts,
 )
-from utils.models import find_hyper_param, train_best_model, train_models
+from utils.models import (
+    find_hyper_param,
+    find_hyper_param_further,
+    train_best_model,
+    train_models,
+)
 
 # get current filepath to use when opening/saving files
 PWD = Path().absolute()
@@ -63,6 +68,9 @@ def main():
     df_2023, df_final = merge_frames([big_florida_df, trafikk_df])
     logger.info("All files looped over")
 
+    # remove the years 2020 and 2021
+    # df_final = df_final[~df_final.index.strftime('%Y').isin(['2020', '2021'])]
+
     # divide data into training,test and validation
     split_dict_pre, training_df, test_df, validation_df = train_test_split_process(
         df_final
@@ -75,8 +83,8 @@ def main():
     )
 
     # Print the average traffic for each year
-    print("AVERAGE TRAFFIC =")  
-    print(average_traffic_per_year)
+    print("AVERAGE TRAFFIC TRAINING DATA =")
+    print(average_traffic_per_year)  # TODO SAVE THIS INTO A FILE
 
     if GRAPHING:
         graph_all_models(training_df, pre_change=True)
@@ -104,7 +112,7 @@ def main():
         df_transforming = feauture_engineer(df_transforming, False)
         logger.info(f"Features engineered for {name}")
 
-        # normalize data outliers #TODO IQR?
+        # normalize data outliers
         df_transforming = normalize_data(df_transforming)
         logger.info(f"Coloumns normalized for {name}")
 
@@ -118,8 +126,9 @@ def main():
     test_df = dataframes_post["test_df"]
     validation_df = dataframes_post["validation_df"]
 
-    training_df.to_csv(f"{directory}/main_training_data.csv")
-    logger.info("Data saved to CSV")
+    # TODO FIX THIS
+    # training_df.to_csv(f"{directory}/main_training_data.csv")
+    # logger.info("Data saved to CSV")
 
     # Graph post data processing to visualize
 
@@ -142,16 +151,14 @@ def main():
     }
 
     # train models
-
     if TRAIN_MANY:
         train_models(split_dict_post)
-
         # find hyper params for the best model
         find_hyper_param(split_dict_post)
+        find_hyper_param_further(split_dict_post)
 
     # train the best model on validation data
     train_best_model(split_dict_post, test_data=False)
-
     FINAL_RUN = True
     if FINAL_RUN:
 
