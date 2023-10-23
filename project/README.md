@@ -991,10 +991,24 @@ RMSE: 22.98769580510963
 
 2020 and 2021 were very different years due to the COIVD-19 pandemic. 
 
+Completely removing these years led to a higher RMSE. The reason i bring this up is because if the goal is to predict 2023 data, it may be smart to drop these years since 2023 society resembles 2017-2019 society more than 2020-2021. However, removing so much data would probably do more harm than good, as traffic did not vary that much across these two years.
+
 ![FloridaDanmarksplass vs time](src/figs/timeVStrafficBoth.png)
 
-In general, traffic was lower and 
+Simply graphing average traffic per hour for each year also reveals that while there is some variance between years, the general idea of a "rush hour" still stands.
 
+Interestingly, the average amount of cycle traffic was slightly higher for 2020:
+
+From the training data: (does not include 2021.)
+
+| Year | Mean Traffic |
+|------|--------------|
+| 2015 | 50.576    |
+| 2016 | 49.743    |
+| 2017 | 49.109    |
+| 2018 | 47.451    |
+| 2019 | 54.560    |
+| 2020 | 58.594    |
 
 
 ### Removing the raining coloumn
@@ -1008,7 +1022,7 @@ RMSE: 22.794. so an increase of 0.04. This proves that this coloumn helped the m
 
 ### Adding a dummies year coloumn
 
-#TODO
+# TODO
 
 
 
@@ -1047,59 +1061,40 @@ RMSE: 23.891009897008683
 9         d_Sunday    0.000243
 ```
 
-RESULTS QUESTIONS:
+### Results discussion:
 
-The results are not that suprising. Looking at the prdicted values for 2023, the model picks up on a few key things.
+**The chosen best model was "RandomForestRegressor" with an *n_estimators* of 200 #TODO.**
+
+The results present a model which is suprisingly good, considering the amount of variance in the data. 
+
+Simply comparing it to a DummyRegressor, the model is a lot better, as the DummyRegressor gets a RMSE on test data of:
+#TODO. 
+
+Looking at the predicted values for 2023, the model picks up on a few key things.
 
 - In the middle of the night (22:00-04:00), traffic drops to 1/2 cyclists.
 - During rush hour (07:00-09:00) and (14-17:00) the traffic shoots to 200, and to even higher numbers if the weather is nice. 
+- There is a smaller amount of traffic between (09:00-14:00) and (17:00-22:00)
 
-The model seems to get the general gist in what causes cyclist traffic to vary, but predicting the exact values is almost an impossible task. The amount of variables one could imagine could have an effect on traffic are almost endless. One could imagine a coloumn which was "% of votes for MDG" in the past voting year. This could have an effect on the amount of people cycling, as more people voting "green" could reflect an increasingly cycle-friendly culture. The point is, given the data, i am impressed that the model is this "close" to reality. 
+The model seems to get the general gist of what causes cyclist traffic to vary, but predicting the exact values is almost an impossible task. A good way to represent this is graphing the difference between the highest and lowest traffic value for each hour (on training data)
+
+![diff min/max traffic per hour](src/yearfigs/traffic_diff_perhour.png)
+
+This exempliflies how much the traffic varies, and how daunting of a task it would be to guess exact values. 
+
+The amount of variables one could imagine could have an effect on traffic are almost endless. One could imagine a coloumn which was "% of votes for MDG" in the past voting year. This could have an effect on the amount of people cycling, as more people voting "green" could reflect an increasingly cycle-friendly culture. The point is, given the data, i am impressed that the model is this "close" to reality. 
  
-The model is not exact, but this is due to the numbers never being "exact" in reality, and 
-
-This can be seen by picking a random date, for example the 7th of march and seeing how data differed over the years. 
-
-# TODO FIX THIS WTF IS GOING ON HERE?
+The model is not exact, but this is due to the numbers never being "exact" in reality, and an RMSE of around 20 is very reasonable. 
 
 
-| time/year  | 2023 (model guess) | 2022 | 2021 | 2020 | 2019 |
-|---|------|------|------|------|------|
-|**01**|  1  |  1  |  1  |  3  |  0  |
-|**08**|141  |226  |  5  | 10  |201  |
-|**16**|146  |217  | 55  | 18  |188  |
-|**19**| 30  | 79  | 24  |  9  | 33  |
+----------------------------
 
-A clear pattern occours in the years 2021 and 2022. 
-(yes dates chosen were in typical low-spots for cyclists durign the year, see the graph below, but the point still stands)
+### Model improvements
 
-![FloridaDanmarksplass vs time](src/figs/timeVStrafficBoth.png)
+Given enough time and data, the model could be improved upon in a vriety of ways. Choosing a more complex, model which is made to excel in data over time, could improve the model.
+More data such as the actual amount of precipitation, the amount of ice on the ground, the current news scene, or data around COVID-19 restrictions could have made the model better.
 
-The point is, given the amount traffic variates in real life, a RMSE around 20 is pretty good. The 2020/2021 data is a good example of this, since during certain periods people could / could not go to work, affecting the existance of a rush hour.
-
-Interestingly, the average amount of cycle traffic was slightly higher for 2020:
-
-From the training data: (does not include 2021.)
-
-| Year | Mean Traffic |
-|------|--------------|
-| 2015 | 50.576    |
-| 2016 | 49.743    |
-| 2017 | 49.109    |
-| 2018 | 47.451    |
-| 2019 | 54.560    |
-| 2020 | 58.594    |
-
-This reflects a difference in the years 
-
-# TODO GRAPH AVERAGE CYCLING PER HOUR FOR EACH YEAR ????
-
-
-
-
-
-for times such as 19:00 on a tuesday, where the model guesses 15 cyclists (2024-03-01). Since this is in the future, but these "akward" time periods have a large amount of fluctation in traffic. Maybe there were 10 people, or maybe there were 40? 
-
+I think a RandomForestRegressor with an even higher *n_estimators* past 200 could make the model marginally better aswell.
 
 
 

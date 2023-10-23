@@ -20,6 +20,9 @@ from utils.graphing import (
     graph_a_vs_b,
     graph_all_models,
     graph_df,
+    graph_hour_diff,
+    graph_hour_traffic_peryear,
+    graph_hour_variance,
     graph_monthly_amounts,
     graph_weekly_amounts,
 )
@@ -75,20 +78,6 @@ def main():
     print("AVERAGE TRAFFIC =")
     print(average_traffic_per_year)
 
-    # -------------------------------
-    years = df_final.index.year.unique()
-
-    for year in years:
-        df_year = df_final[df_final.index.year == year]
-        avg_cycling_hourly = df_year.groupby(df_year.index.hour)["Total_trafikk"].mean()
-        avg_cycling_hourly.plot(kind="bar")
-        plt.title(f"Average Cycling per Hour in {year}")
-        plt.xlabel("Hour of the Day")
-        plt.ylabel("Average Cycling")
-
-        plt.savefig(f"src/yearfigs/{year}_trafficmean")
-        # -------------------------------
-
     if GRAPHING:
         graph_all_models(training_df, pre_change=True)
         logger.info("Graphed all models PRECHANGE")
@@ -135,10 +124,14 @@ def main():
     logger.info("Data saved to CSV")
 
     # Graph post data processing to visualize
+
     if GRAPHING:
+        graph_hour_diff(training_df)
         graph_all_models(training_df, pre_change=False)
         graph_weekly_amounts(training_df)
         graph_monthly_amounts(training_df)
+        graph_hour_variance(training_df)
+        graph_hour_traffic_peryear(training_df)
         logger.info("Graph all models POSTCHANGE")
 
     split_dict_post = {

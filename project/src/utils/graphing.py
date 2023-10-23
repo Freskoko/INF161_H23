@@ -14,6 +14,65 @@ PWD = Path().absolute()
 PWD = f"{PWD}/src"
 
 
+def graph_hour_variance(df: pd.DataFrame):
+    # given a dataframe where the index is a date in the format
+    # 2023-01-01 14:00:00
+
+    # graph the amount of variance between the highest and lowest value for that hour
+
+    # the values are found in "Total_trafikk"
+
+    df.index = pd.to_datetime(df.index)
+    df["hour"] = df.index.hour
+    hourly_variance = df.groupby("hour")["Total_trafikk"].var()
+
+    plt.figure(figsize=[10, 5])
+    plt.bar(hourly_variance.index, hourly_variance.values)
+    plt.xlabel("Hour of the Day")
+    plt.ylabel("Variance in Total Traffic")
+    plt.suptitle("Variance in Total Traffic by Hour of the Day")
+    plt.title("(After removing traffic in the 99th quantile)")
+    plt.xticks(range(0, 24))
+    plt.savefig(f"src/yearfigs/hour_variance_99")
+
+
+def graph_hour_diff(df: pd.DataFrame):
+    # Group the data by 'hour' and calculate the highest and lowest 'Total_trafikk' for each hour
+
+    df["hour"] = df.index.hour
+    df_grouped = df.groupby("hour")["Total_trafikk"]
+    hourly_max = df_grouped.max()
+    hourly_min = df_grouped.min()
+
+    # Calculate the difference
+    hourly_diff = hourly_max - hourly_min
+
+    # Plot the difference
+    plt.figure(figsize=[10, 5])
+    plt.bar(hourly_diff.index, hourly_diff.values)
+    plt.xlabel("Hour of the Day")
+    plt.ylabel("Difference in Total Traffic")
+    plt.title("Difference in Total Traffic by Hour of the Day")
+    plt.xticks(range(0, 24))
+    plt.savefig(f"src/yearfigs/traffic_diff_perhour")
+
+
+def graph_hour_traffic_peryear(df: pd.DataFrame):
+    # -------------------------------
+    years = df.index.year.unique()
+
+    for year in years:
+        df_year = df[df.index.year == year]
+        avg_cycling_hourly = df_year.groupby(df_year.index.hour)["Total_trafikk"].mean()
+        avg_cycling_hourly.plot(kind="bar")
+        plt.title(f"Average Cycling per Hour in {year}")
+        plt.xlabel("Hour of the Day")
+        plt.ylabel("Average Cycle Traffic")
+
+        plt.savefig(f"src/yearfigs/{year}_trafficmean")
+    # -------------------------------
+
+
 def graph_weekly_amounts(df: pd.DataFrame):
 
     days = [
