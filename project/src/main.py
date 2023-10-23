@@ -68,9 +68,6 @@ def main():
     df_2023, df_final = merge_frames([big_florida_df, trafikk_df])
     logger.info("All files looped over")
 
-    # remove the years 2020 and 2021
-    # df_final = df_final[~df_final.index.strftime('%Y').isin(['2020', '2021'])]
-
     # divide data into training,test and validation
     split_dict_pre, training_df, test_df, validation_df = train_test_split_process(
         df_final
@@ -96,6 +93,9 @@ def main():
         "test_df": test_df,
     }
 
+    # loop through each data frame and transform the data
+    # this is done seperatley for each df (test/train/validation) 
+    # so that the training data is never influced by the other data
     dataframes_post = {}
 
     for name, df_transforming in dataframes_pre.items():
@@ -126,13 +126,12 @@ def main():
     test_df = dataframes_post["test_df"]
     validation_df = dataframes_post["validation_df"]
 
-    # TODO FIX THIS
-    # training_df.to_csv(f"{directory}/main_training_data.csv")
-    # logger.info("Data saved to CSV")
+    training_df.to_csv(f"{directory}/main_training_data.csv")
+    logger.info("Data saved to CSV")
 
-    # Graph post data processing to visualize
 
     if GRAPHING:
+        # Graph post data processing to visualize and analyze data
         graph_hour_diff(training_df)
         graph_all_models(training_df, pre_change=False)
         graph_weekly_amounts(training_df)

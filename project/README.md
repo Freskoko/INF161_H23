@@ -1,16 +1,13 @@
-### TODO
-
-INCLUDE THE GRAPHS IN DISUCSSION TO SHOW RUSH HOURS !!!
-
 ### REPORT
 
-- update data loss parsing section
+- LOOK MORE MAKE CLEAN
 
-- update report for desci0ns made to be reflected in data not just because sounds good
+- GOOGLE DOCS
 
 
-- NETTSIDE
-    - DE GIR ALT AV DATA, OG SÅNN 
+- Update graphs to have titles or undertext (WHAT DATA SET MADE FIGURE?)
+
+- Update part talking about different models
 
 
 ### CODE
@@ -24,6 +21,11 @@ INCLUDE THE GRAPHS IN DISUCSSION TO SHOW RUSH HOURS !!!
 - conda and lock file
 
 - put into one giant python file
+
+- NETTSIDE
+    - DE GIR ALT AV DATA, OG SÅNN 
+
+- change log to print
 
 # Report for INF161 cycle traffic project
 
