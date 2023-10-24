@@ -2,14 +2,55 @@
 <html>
 <head>
     <title>Cyclists Over Nygårdsbroen!</title>
+    <style>
+        form div {
+            margin-bottom: 10px;
+        }
+    </style>
 </head>
 <body>
     <h1>Cyclists Over Nygårdsbroen!</h1>
     <form method="POST">
-        <label for="date">What date are you pondering:</label>
-        <input type="date" id="date" name="date" min="2015-01-01" max="2024-12-31" required>
-        <label for="hour">Select an hour:</label>
-        <input type="number" id="hour" name="hour" min="0" max="23" required>
+        <div>
+            <label for="date">Date: format (YYYY-MM-DD HH):</label>
+            <input type="text" id="date" name="DateFormatted" required>
+        </div>
+        
+        <div>
+            <label for="solarRadiation">Global Radiation:</label>
+            <input type="text" id="solarRadiation" name="Globalstraling">
+        </div>
+        
+        <div>
+            <label for="sunshineDuration">Sunshine Duration:</label>
+            <input type="text" id="sunshineDuration" name="Solskinstid" required>
+        </div>
+        
+        <div>
+            <label for="airTemp">Air Temperature:</label>
+            <input type="text" id="airTemp" name="Lufttemperatur" required>
+        </div>
+        
+        <div>
+            <label for="windDirection">Wind Direction:</label>
+            <input type="text" id="windDirection" name="Vindretning" required>
+        </div>
+        
+        <div>
+            <label for="windSpeed">Wind Speed:</label>
+            <input type="text" id="windSpeed" name="Vindstyrke" required>
+        </div>
+        
+        <div>
+            <label for="airPressure">Air Pressure:</label>
+            <input type="text" id="airPressure" name="Lufttrykk" required>
+        </div>
+        
+        <div>
+            <label for="windGusts">Wind Gusts:</label>
+            <input type="text" id="windGusts" name="Vindkast" required>
+        </div>
+
         <input type="submit" value="Submit">
     </form>
     {% if traffic_data %}

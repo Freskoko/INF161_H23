@@ -1,5 +1,8 @@
+from datetime import datetime
 import os
 from pathlib import Path
+import pickle
+import numpy as np
 
 import pandas as pd
 from loguru import logger
@@ -178,10 +181,6 @@ def main():
     return split_dict_post, training_df, test_df, validation_df
 
 
-if __name__ == "__main__":
-    split_dict, training_df, test_df, validation_df = main()
-
-
 
 def load_best_model() -> RandomForestRegressor:
     """
@@ -266,7 +265,6 @@ def load_best_model() -> RandomForestRegressor:
         dataframes_post[name] = df_transforming
 
     training_df = dataframes_post["training_df"]
-    logger.info("Data saved to CSV")
 
 
     split_dict_post = {
@@ -278,20 +276,55 @@ def load_best_model() -> RandomForestRegressor:
     y_train = split_dict_post["y_train"]
 
     # BEST MODEL:
+    logger.info("Training best model")
     best_model = RandomForestRegressor(n_estimators=181, random_state=2)
     best_model.fit(X_train, y_train)
 
     return best_model
 
 
-
-
-
-def prep_data_from_user(df):
+def prep_data_from_user(input_dict):
     """
     Loads the best model
     """
     logger.info("Starting prep data from user ... ")
+
+    col_keys = ['DateFormatted',
+                'Globalstraling',
+                  'Solskinstid',
+                    'Lufttemperatur',
+                      'Vindretning',
+                        'Vindstyrke',
+                          'Lufttrykk',
+                            'Vindkast']
+
+    df_dict = {}
+
+    date_format = '%Y-%m-%d %H:%M:%S'
+
+    for col in col_keys:
+        if col in input_dict.keys():
+            if col == "DateFormatted":
+                df_dict[col] = [datetime.strptime(input_dict[col],date_format)] 
+            else:
+                df_dict[col] = [float(input_dict[col])] 
+        else:
+            df_dict[col] = np.nan
+
+
+        if df_dict[col] == "":
+            df_dict[col] = np.nan
+
+
+    print(df_dict)
+
+    df = pd.DataFrame(df_dict)  # Converts input data into dataframe
+
+    df['DateFormatted'] = pd.to_datetime(df['DateFormatted'])
+    df.set_index('DateFormatted', inplace=True)
+
+    print("halfway df ----------------------")
+    print(df)
 
     name="userinp"
 
@@ -301,7 +334,7 @@ def prep_data_from_user(df):
     logger.info("This could take a while...")
 
     # transform NaN and outliers to usable data
-    df = trim_transform_outliers(df, False)
+    df = trim_transform_outliers(df, True)
     logger.info(f"Outliers trimmed for {name}")
 
     # add important features to help the model
@@ -312,4 +345,29 @@ def prep_data_from_user(df):
     df = drop_uneeded_cols(df)
     logger.info(f"Uneeded cols dropped for {name}")
 
+    logger.info("re-aranging df to fit")
+    
+    # df["DateFormatted"] = df.index
+    
+    df = df[['Globalstraling', 'Solskinstid', 'Lufttemperatur', 'Lufttrykk', 'Vindkast', 
+                'hour', 'd_Friday', 'd_Monday', 'd_Saturday', 'd_Sunday',
+                'd_Thursday', 'd_Tuesday', 'd_Wednesday', 
+                'month', 'weekend', 'public_holiday', 'raining', 'summer', 
+                'winter', 'rush_hour', 'sleeptime', 'Vindretning_x', 'Vindretning_y']]
     return df
+
+
+# if __name__ == "__main__":
+#     split_dict, training_df, test_df, validation_df = main()
+
+if __name__ == "__main__":
+   
+    # best_model = load_best_model()
+    # pickle.dump(best_model, open('model.pkl', 'wb'))
+    pickled_model = pickle.load(open('model.pkl', 'rb'))
+    print(pickled_model.feature_importances_)
+
+    input_dict = {'DateFormatted': '2023-01-01 00:00:00', 'Globalstraling': '50', 'Solskinstid': '9', 'Lufttemperatur': '10', 'Vindretning': '320', 'Vindstyrke': '10', 'Lufttrykk': '910', 'Vindkast': '12'}
+    df=prep_data_from_user(input_dict)
+    df.to_csv("trainthis.csv")
+    print(pickled_model.predict(df))

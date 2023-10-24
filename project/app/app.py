@@ -1,58 +1,30 @@
-from datetime import datetime
 from flask import Flask, render_template, request
 import pandas as pd
-import os
-import sys
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
-# Now you can use absolute imports as if you're at the top-level directory.
-from src.main import load_best_model
+# from main import load_best_model, prepare_data_for_model
 
 app = Flask(__name__)
 
 global predictor
-global data
-global prepared_data
+global df_2023
+# predictor = load_best_model()
 
-def load_data():
-    data = pd.read_csv("/home/henrik/INF161_H23/project/app/trafikkdata.csv")
-    data["date"] = pd.to_datetime(data["DateFormatted"])
-    data.set_index("date", inplace=True)
-    return data
+def create_df_from_user():
+    pass
 
-def init():
-    predictor = load_best_model()
-    data = load_data()
-
-
-def find_or_predict_value(input_datetime):
-    # we are gonna fix this
-    if input_datetime in data.index():
-        traf_data = int(
-            data.loc[data.index == input_datetime, "Total_trafikk"].values[0]
-        )
-    else:
-        predicted_data = predictor.predict(prepared_data)
-        traf_data = int(predicted_data[input_datetime])
-    return traf_data
-
+def load_df_2023():
+    pass
 
 @app.route("/", methods=["GET", "POST"])
 def home():
     if request.method == "POST":
-        data = load_data()
-        input_date_str = request.form["date"]
-        input_hour_str = request.form["hour"]
-        input_datetime = datetime.strptime(
-            input_date_str + " " + input_hour_str, "%Y-%m-%d %H"
-        )
-        traf_data = find_or_predict_value(input_datetime)
-        return render_template(
-            "home.html", traffic_data=traf_data
-        )
-    return render_template("home.html")
-
+        input_dict = request.form.to_dict()
+        print(input_dict)
+        prepped_data = prep_data_from_user(input_dict)
+        traf_data = predictor.predict(prepped_data)
+        
+        return render_template("home.html", traffic_data=int(traf_data[0]))  # Cast prediction to int for display
+    else:
+        return render_template("home.html")
 
 if __name__ == "__main__":
-    init()
     app.run(debug=True)

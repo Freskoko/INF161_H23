@@ -56,6 +56,15 @@ def feauture_engineer(df: pd.DataFrame, data2023: bool) -> pd.DataFrame:
 
     # make each day their own coloumn
     df = pd.get_dummies(df, columns=["d"])  # convert to True/False
+    # TODO: ADD THE COLOUMNS FOR ALL THE OTHER DAYS AND MAKE THEIR VALUE 0
+
+    complete_days = ['d_Monday', 'd_Tuesday', 'd_Wednesday', 'd_Thursday', 'd_Friday', 'd_Saturday', 'd_Sunday']
+
+    # iterate through the complete set of days
+    for day in complete_days:
+        # if the day is not a column in df, add it with a value of 0
+        if not day in df.columns:
+            df[day] = 0
 
     # df["day"] = df.index.weekday
     # ---------------------------
@@ -293,6 +302,10 @@ def trim_transform_outliers(df: pd.DataFrame, data2023: bool) -> pd.DataFrame:
     # Drop "Relativ luftfuktighet" as this data only exists in 2022 and 2023.
     # errors="ignore" as most of the data (back to 2015) will not have this coloumn
     # this also leads to memory errors?
+
+    # Save the DateFormatted column
+
+
     df_no_traffic = df_no_traffic.drop(
         columns=["Relativ luftfuktighet"], errors="ignore"
     )
@@ -312,9 +325,22 @@ def trim_transform_outliers(df: pd.DataFrame, data2023: bool) -> pd.DataFrame:
     if not data2023:
         df_fixed = pd.concat([df_fixed, total_traffic_series], axis=1)
 
-    df = df_fixed
+    # # Drop the DateFormatted column from df_no_traffic
+    # df_no_traffic = df_no_traffic.drop(columns=["DateFormatted"])
 
-    return df
+    # # Now, perform the imputation
+    # df_imputed = imputer.fit_transform(df_no_traffic)
+
+    # # Convert the result back to DataFrame
+    # df_fixed = pd.DataFrame(
+    #     df_imputed, columns=df_no_traffic.columns, index=df_no_traffic.index
+    # )
+
+    # # Add back the DateFormatted column
+    # df_fixed = pd.concat([df_fixed, date_formatted_series], axis=1)
+
+
+    return df_fixed
 
 
 def normalize_data(df: pd.DataFrame) -> pd.DataFrame:

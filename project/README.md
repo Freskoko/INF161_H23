@@ -4,7 +4,6 @@
 
 - GOOGLE DOCS
 
-
 - Update graphs to have titles or undertext (WHAT DATA SET MADE FIGURE?)
 
 - Update part talking about different models
