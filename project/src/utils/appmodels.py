@@ -18,9 +18,6 @@ from loguru import logger
 from sklearn.ensemble import RandomForestRegressor
 
 PWD = Path().absolute()
-GRAPHING = False
-TRAIN_MANY = False
-FINAL_RUN = False
 RANDOM_STATE = 2
 
 
@@ -235,4 +232,6 @@ if __name__ == "__main__":
 
     df = prep_data_from_user(input_dict)
     df.to_csv("trainthis.csv")
-    print(best_model.predict(df))
+    prediction = best_model.predict(df)
+    print(prediction)
+    print(int(prediction[0]))

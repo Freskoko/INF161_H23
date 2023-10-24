@@ -1,4 +1,3 @@
-import pandas as pd
 from flask import Flask, render_template, request
 
 from main import load_best_model, prep_data_from_user
@@ -16,9 +15,8 @@ def home():
         prepped_data = prep_data_from_user(input_dict)
         traf_data = predictor.predict(prepped_data)
 
-        return render_template(
-            "home.html", traffic_data=int(traf_data[0])
-        )  # Cast prediction to int for display
+        return render_template("home.html", traffic_data=int(traf_data[0]))
+
     else:
         return render_template("home.html")
 

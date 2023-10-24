@@ -1,18 +1,15 @@
-import json
 from math import sqrt
 from pathlib import Path
 
-import numpy as np
 import pandas as pd
 import plotly.express as px
 from loguru import logger
 from sklearn.dummy import DummyRegressor
 from sklearn.ensemble import GradientBoostingRegressor, RandomForestRegressor
-from sklearn.gaussian_process import GaussianProcessRegressor
-from sklearn.linear_model import ElasticNet, Lasso, LogisticRegression
+from sklearn.linear_model import ElasticNet, Lasso
 from sklearn.metrics import mean_squared_error
 from sklearn.neighbors import KNeighborsRegressor
-from sklearn.svm import SVC, SVR
+from sklearn.svm import SVR
 from sklearn.tree import DecisionTreeRegressor
 
 RANDOM_STATE = 2
