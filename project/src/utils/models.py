@@ -301,4 +301,3 @@ def train_best_model(split_dict: dict, test_data: bool) -> None:
     )
 
     print(importance_df.sort_values(by="Importance", ascending=False))
-

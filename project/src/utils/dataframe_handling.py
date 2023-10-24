@@ -58,7 +58,15 @@ def feauture_engineer(df: pd.DataFrame, data2023: bool) -> pd.DataFrame:
     df = pd.get_dummies(df, columns=["d"])  # convert to True/False
     # TODO: ADD THE COLOUMNS FOR ALL THE OTHER DAYS AND MAKE THEIR VALUE 0
 
-    complete_days = ['d_Monday', 'd_Tuesday', 'd_Wednesday', 'd_Thursday', 'd_Friday', 'd_Saturday', 'd_Sunday']
+    complete_days = [
+        "d_Monday",
+        "d_Tuesday",
+        "d_Wednesday",
+        "d_Thursday",
+        "d_Friday",
+        "d_Saturday",
+        "d_Sunday",
+    ]
 
     # iterate through the complete set of days
     for day in complete_days:
@@ -305,7 +313,6 @@ def trim_transform_outliers(df: pd.DataFrame, data2023: bool) -> pd.DataFrame:
 
     # Save the DateFormatted column
 
-
     df_no_traffic = df_no_traffic.drop(
         columns=["Relativ luftfuktighet"], errors="ignore"
     )
@@ -338,7 +345,6 @@ def trim_transform_outliers(df: pd.DataFrame, data2023: bool) -> pd.DataFrame:
 
     # # Add back the DateFormatted column
     # df_fixed = pd.concat([df_fixed, date_formatted_series], axis=1)
-
 
     return df_fixed
 
