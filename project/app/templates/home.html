@@ -7,7 +7,7 @@
     <h1>Cyclists Over Nygårdsbroen!</h1>
     <form method="POST">
         <label for="date">What date are you pondering:</label>
-        <input type="date" id="date" name="date" min="2023-01-01" max="2023-12-31" required>
+        <input type="date" id="date" name="date" min="2015-01-01" max="2024-12-31" required>
         <label for="hour">Select an hour:</label>
         <input type="number" id="hour" name="hour" min="0" max="23" required>
         <input type="submit" value="Submit">
@@ -15,11 +15,9 @@
     {% if traffic_data %}
     <h2>Cyclists: {{ traffic_data }}</h2>
     {% endif %}
-
     <!-- Draw an image of nygårsboren and put cyclists on it equal to traffic that day -->
     {% if traffic_image %}
     <img src="{{ url_for('static', filename='cyclist_image.png') }}" alt="nygardsbroen">
     {% endif %}
-
 </body>
 </html>
