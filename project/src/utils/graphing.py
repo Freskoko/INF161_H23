@@ -74,7 +74,6 @@ def graph_hour_traffic_peryear(df: pd.DataFrame):
 
 
 def graph_weekly_amounts(df: pd.DataFrame):
-
     days = [
         "d_Monday",
         "d_Tuesday",
@@ -99,7 +98,6 @@ def graph_weekly_amounts(df: pd.DataFrame):
 
 
 def graph_monthly_amounts(df: pd.DataFrame):
-
     months = [
         "January",
         "February",
@@ -276,7 +274,6 @@ def create_df_matrix(titletext: str, df: pd.DataFrame) -> None:
 
 
 def graph_all_models(main_df: pd.DataFrame, pre_change: bool) -> None:
-
     logger.info("Graphing all graphs...")
 
     if pre_change:

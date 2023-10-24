@@ -43,7 +43,6 @@ def load_best_model() -> RandomForestRegressor:
     florida_df_list = []
 
     for filename in os.scandir(directory):
-
         if "Florida" in str(filename):
             florida_df = treat_florida_files(f"{str(directory)}/{filename.name}")
             florida_df_list.append(florida_df)
@@ -144,7 +143,6 @@ def prep_data_from_user(input_dict):
 
     for col in col_keys:
         try:
-
             if col in input_dict.keys():
                 if col == "DateFormatted":
                     df_dict[col] = [datetime.strptime(input_dict[col], date_format)]
@@ -223,6 +221,9 @@ def prep_data_from_user(input_dict):
 
 
 if __name__ == "__main__":
+    """
+    Example run of prep data
+    """
 
     best_model = load_best_model()
 

@@ -440,7 +440,6 @@ def train_test_split_process(
 
 
 def treat_2023_file(df, model):
-
     df = df.drop(
         columns=[
             "Trafikkmengde_Totalt_i_retning_Danmarksplass",

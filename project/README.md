@@ -9,6 +9,21 @@
 - Update part talking about different models
 
 
+### WEBSITE
+
+- NETTSIDE
+    - DE GIR ALT AV DATA, OG SÅNN 
+    - UPDATE suggested ranges just look at outlier trimming
+
+- WEBSITE INIDEPNDANT OF MAIN PY!!!
+
+SO JUST MOVE EVERYTHING OVER AND WE ARE GOOD!!
+
+- fix predictions.csv to just have dato tid and prediction!!!
+
+
+
+
 ### CODE
 
 - mkdirs
@@ -21,9 +36,6 @@
 
 - put into one giant python file
 
-- NETTSIDE
-    - DE GIR ALT AV DATA, OG SÅNN 
-    - UPDATE suggested ranges just look at outlier trimming
 
 - change log to print
 
@@ -173,8 +185,11 @@ This coloumn is dropped from the start, since there is so much missing data (565
 Looking at traffic data above, a clear peak was the year 2017, where there was a cycling competiton in bergen. These outliers may effect the data, as there is not a large scale cycling competion every year.
 Values in the 99th percentile were removed, in hopes of normalizing data each year, so that the model can understand trends across months, not a trend which occoured one year. 
 
+*For training data:*
+Values pre removal of outliers: 45746
+Values post removal of outliers: 45290
 
-
+So 456 values were removed, so not a lot relative to the entire dataset.
 
 # Data exploration:
 In src/figs, there are images presenting each of the coloums in the final data frame, plotted against the total amount of traffic. This part of the report explores these figures.

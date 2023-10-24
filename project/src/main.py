@@ -53,7 +53,6 @@ def main():
     florida_df_list = []
 
     for filename in os.scandir(directory):
-
         if "Florida" in str(filename):
             florida_df = treat_florida_files(f"{str(directory)}/{filename.name}")
             florida_df_list.append(florida_df)
@@ -163,7 +162,6 @@ def main():
     train_best_model(split_dict_post, test_data=True)
 
     if FINAL_RUN:
-
         # train best model on test data
         train_best_model(split_dict_post, test_data=True)
 
