@@ -33,6 +33,8 @@ def load_best_model() -> RandomForestRegressor:
     except FileNotFoundError as e:
         pass
 
+    logger.info("No pre-existing model found... building from baseline")
+
     logger.info("Starting parsing on loading best model ... ")
     # loop over files in local directory
     directory = f"{str(PWD)}/src/raw_data"  # change
@@ -141,16 +143,21 @@ def prep_data_from_user(input_dict):
     date_format = "%Y-%m-%d %H:%M:%S"
 
     for col in col_keys:
-        if col in input_dict.keys():
-            if col == "DateFormatted":
-                df_dict[col] = [datetime.strptime(input_dict[col], date_format)]
-            else:
-                df_dict[col] = [float(input_dict[col])]
-        else:
-            df_dict[col] = np.nan
+        try:
 
-        if df_dict[col] == "":
-            df_dict[col] = np.nan
+            if col in input_dict.keys():
+                if col == "DateFormatted":
+                    df_dict[col] = [datetime.strptime(input_dict[col], date_format)]
+                else:
+                    df_dict[col] = [float(input_dict[col])]
+            else:
+                df_dict[col] = np.nan
+
+            if df_dict[col] == "":
+                df_dict[col] = np.nan
+
+        except TypeError as e:
+            return e
 
     print(df_dict)
 

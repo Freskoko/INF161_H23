@@ -23,6 +23,7 @@
 
 - NETTSIDE
     - DE GIR ALT AV DATA, OG SÅNN 
+    - UPDATE suggested ranges just look at outlier trimming
 
 - change log to print
 
@@ -1027,10 +1028,17 @@ The model is not exact, but this is due to the numbers never being "exact" in re
 
 ### Model improvements
 
-Given enough time and data, the model could be improved upon in a vriety of ways. Choosing a more complex, model which is made to excel in data over time, could improve the model.
+Given enough time and data, the model could be improved upon in a variety of ways. Choosing a more complex, model which is made to excel in data over time, could improve the model.
 More data such as the actual amount of precipitation, the amount of ice on the ground, the current news scene, or data around COVID-19 restrictions could have made the model better.
 
 I think a RandomForestRegressor with an even more well-tuned *n_estimators* could make the model marginally better aswell, but this is held back by training time. 
+
+
+### Website
+
+The idea of the website was easy, but implementing its key features proved a challenge. Allowing a user to input all data, led to having to "build" their input as a dataframe before passing it to the predictor. 
+The predictor takes some time to build, so the library `pickle` was used to save the model after its creation. The model is too large to upload to git, let alone any other service, so for first time use, there may be a little bit of waiting time as the model is created. 
+The website allows all fields to not have values, except the date. The date is something that  is hard to be predicted by a KNNimputer. It is possible, but requires data represented in a differen format, rather than the datetime format this project uses. 
 
 ### Conclusion:
 
