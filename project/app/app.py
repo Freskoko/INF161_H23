@@ -7,8 +7,6 @@ app = Flask(__name__)
 app.secret_key = "A_in_INF161?_:P"
 
 global predictor
-predictor = load_best_model()
-
 
 @app.route("/", methods=["GET", "POST"])
 def home():
@@ -52,6 +50,7 @@ def home():
 
 
 if __name__ == "__main__":
+    predictor = load_best_model()
     print("Starting app...")
     app.run(debug=True, port="8080")
 

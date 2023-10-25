@@ -1,3 +1,7 @@
 model.pkl
 /model.pkl
 .model.pkl
+
+pickle_knn.pkl
+/pickle_knn.pkl
+.pickle_knn.pkl

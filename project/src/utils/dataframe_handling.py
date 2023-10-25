@@ -1,5 +1,6 @@
 import json
 from pathlib import Path
+import pickle
 
 import numpy as np
 import pandas as pd
@@ -281,9 +282,6 @@ def trim_transform_outliers(df: pd.DataFrame, data2023: bool) -> pd.DataFrame:
 
     # 20 is right
     imputer = KNNImputer(n_neighbors=20, weights="distance")
-
-    # do transformations
-    # print("fit transform")
     df_imputed = imputer.fit_transform(df_no_traffic)
 
     # print("fixed")

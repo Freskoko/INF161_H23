@@ -432,37 +432,39 @@ def trim_transform_outliers(df: pd.DataFrame, data2023: bool) -> pd.DataFrame:
         columns=["Relativ luftfuktighet"], errors="ignore"
     )
 
-    # 20 is right
-    imputer = KNNImputer(n_neighbors=20, weights="distance")
+    pkl_filename = "pickle_knn.pkl"
 
-    # do transformations
-    # print("fit transform")
-    df_imputed = imputer.fit_transform(df_no_traffic)
+    try:
 
-    # print("fixed")
-    print(".--------------------------------------------HERE    ")
-    print(df_imputed)
+        with open(pkl_filename, 'rb') as file:
+            imputer = pickle.load(file)
+
+            df_imputed = imputer.transform(df_no_traffic)
+            logger.success("FOUND PICKLE")
+
+    except FileNotFoundError as e:
+        logger.success("DID NOT FIND PICKLE -> MAKING IT!")
+        imputer = KNNImputer(n_neighbors=20, weights="distance")
+        df_imputed = imputer.fit_transform(df_no_traffic)
+
+        #pickle
+        if len(df_no_traffic) > 40000:
+            with open(pkl_filename, 'wb') as file:
+                print("PICKLING")
+                pickle.dump(imputer, file)
+
+    print("DF NO TRAFFIC -> ")
     print(df_no_traffic)
+
+    print("DF IMPUTED ->>>>>>>>>>>>>")
+    print(df_imputed)
+
     df_fixed = pd.DataFrame(
         df_imputed, columns=df_no_traffic.columns, index=df_no_traffic.index
     )
 
     if not data2023:
         df_fixed = pd.concat([df_fixed, total_traffic_series], axis=1)
-
-    # # Drop the DateFormatted column from df_no_traffic
-    # df_no_traffic = df_no_traffic.drop(columns=["DateFormatted"])
-
-    # # Now, perform the imputation
-    # df_imputed = imputer.fit_transform(df_no_traffic)
-
-    # # Convert the result back to DataFrame
-    # df_fixed = pd.DataFrame(
-    #     df_imputed, columns=df_no_traffic.columns, index=df_no_traffic.index
-    # )
-
-    # # Add back the DateFormatted column
-    # df_fixed = pd.concat([df_fixed, date_formatted_series], axis=1)
 
     return df_fixed
 
@@ -596,6 +598,7 @@ def load_best_model() -> RandomForestRegressor:
     """
 
     # if the model already exists as pickle, return it
+
     try:
         pickled_model = pickle.load(open("model.pkl", "rb"))
         return pickled_model

@@ -189,6 +189,11 @@ Values post removal of outliers: 45290
 
 So 456 values were removed, so not a lot relative to the entire dataset.
 
+This choice is a toss-up because the model will become generally better at guessing mean values, but will struggle on predicting high values. 
+
+This also removes the bottom 99th percentile, again making the model worse at guessing very low values, but better at general values. The hope is that the model is able to understand that at night there are less cyclists, through other variables/features.
+
+
 # Data exploration:
 In src/figs, there are images presenting each of the coloums in the final data frame, plotted against the total amount of traffic. This part of the report explores these figures.
 
@@ -201,6 +206,18 @@ Certain months have different amounts of mean traffic, so providing the model th
 ![week1](src/figs_new/weekly_traffic.png)
 
 Certain days have different amounts of mean traffic, so providing the model the day will help it understand this correlation. I am using dummies from python in order to setup a coloumn for each day. 
+
+![day](src/figs_new/daily_traffic.png)
+
+Certain hours differ in traffic amounts, and this will be a key aspect of the model to understand.
+
+![diff min/max traffic per hour](src/yearfigs/traffic_diff_perhour.png)
+
+It is also important to note that within an hour, 
+
+
+
+
 
 ## TODO AVERGE TRAFICC PER HOUR
 
@@ -964,7 +981,9 @@ RMSE: 25.52727596645201
 9         d_Sunday    0.000228
 ```
 
-Adding the year as a column seems to make the model worse. This may make sense as the amount of traffic does not vary greatly across years. See above graphs  #TODO
+![FloridaDanmarksplass vs time](src/figs/timeVStrafficBoth.png)
+
+Adding the year as a column seems to make the model worse. This may make sense as the amount of traffic does not vary greatly across years, with the execption of 2017, as can be seen in the graph above
 
 --------------------------------------
 
@@ -1017,8 +1036,7 @@ RMSE: 23.882217256418606
 
 The results present a model which is suprisingly good, considering the amount of variance in the data. 
 
-Simply comparing it to a DummyRegressor, the model is a lot better, as the DummyRegressor gets a RMSE on test data of:
-#TODO. 
+Simply comparing it to a DummyRegressor, the model is a lot better, as the DummyRegressor gets a RMSE on test data of: 57.637
 
 Looking at the predicted values for 2023, the model picks up on a few key things.
 
@@ -1046,15 +1064,16 @@ More data such as the actual amount of precipitation, the amount of ice on the g
 
 I think a RandomForestRegressor with an even more well-tuned *n_estimators* could make the model marginally better aswell, but this is held back by training time. 
 
-
-TODO: hour as cos/sin
+A possible improvement would be to calculate hour or months as a points on a circle using sin/cos. This would allow the model to understand the circular nature of time. A scale from 0-30 works, but the model may struggle to understand that 30 and 0 are "next to eachother" in terms of time.
 
 
 ### Website
 
 The idea of the website was easy, but implementing its key features proved a challenge. Allowing a user to input all data, led to having to "build" their input as a dataframe before passing it to the predictor. 
 The predictor takes some time to build, so the library `pickle` was used to save the model after its creation. The model is too large to upload to git, let alone any other service, so for first time use, there may be a little bit of waiting time as the model is created. 
-The website allows all fields to not have values, except the date. The date is something that  is hard to be predicted by a KNNimputer. It is possible, but requires data represented in a differen format, rather than the datetime format this project uses. 
+The website allows all fields to not have values, except the date. The date is something that  is hard to be predicted by a KNNimputer. It is possible, but requires data represented in a different format, rather than the datetime format this project uses. 
+
+KNNimputer.
 
 ### Conclusion:
 
