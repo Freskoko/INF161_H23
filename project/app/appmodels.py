@@ -1,3 +1,4 @@
+import json
 import os
 import pickle
 from datetime import datetime
@@ -6,11 +7,14 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-from loguru import logger
 from sklearn.ensemble import RandomForestRegressor
+from sklearn.impute import KNNImputer
+from sklearn.model_selection import train_test_split
 
 # get current filepath to use when opening/saving files
 PWD = Path().absolute()
+RANDOM_STATE = 2
+DEBUG = True
 
 
 def treat_florida_files(filename: str) -> pd.DataFrame:
@@ -135,30 +139,7 @@ def treat_trafikk_files(filename: str) -> pd.DataFrame:
 
         result_df = result_df.join(felt_df)
 
-    # save to csv
-    directory = f"{str(PWD)}/src/out"
-    result_df.to_csv(f"{directory}/check_traffic.csv")
-
     return result_df
-
-
-PWD = Path().absolute()
-RANDOM_STATE = 2
-
-import json
-from pathlib import Path
-
-import numpy as np
-import pandas as pd
-from loguru import logger
-from matplotlib import pyplot as plt
-from sklearn.discriminant_analysis import StandardScaler
-from sklearn.impute import KNNImputer
-from sklearn.metrics import mean_squared_error
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import MinMaxScaler
-
-DEBUG = True
 
 
 def feauture_engineer(df: pd.DataFrame, data2023: bool) -> pd.DataFrame:
@@ -310,17 +291,14 @@ def merge_frames(frames: list) -> pd.DataFrame:
     # Drops missing values
     PWD = Path().absolute()
     directory = f"{str(PWD)}/src/out"
-    # print("before drop ", len(df_final))
-    df_final.to_csv(f"{directory}/before_drop.csv")
 
     # print(df_final)
     df_2023 = df_2023 = df_final.loc["2023-01-01":"2023-12-31"]
-    df_2023.to_csv(f"{directory}/2023data.csv")
+
     # get where index is between 2023-01-01 00:00:00 and 2023-12-31 00:00:00
 
     df_final = df_final.dropna(subset=["Trafikkmengde_Totalt_i_retning_Florida"])
     # print("after drop ", len(df_final))
-    df_final.to_csv(f"{directory}/after_drop.csv")
 
     # finding means of values lead to floating point errors, round to fix these
     df_final = df_final.apply(pd.to_numeric, errors="ignore").round(30)
@@ -432,10 +410,10 @@ def trim_transform_outliers(df: pd.DataFrame, data2023: bool) -> pd.DataFrame:
             imputer = pickle.load(file)
 
             df_imputed = imputer.transform(df_no_traffic)
-            logger.success("FOUND PICKLE")
+            print("FOUND PICKLE")
 
     except FileNotFoundError as e:
-        logger.success("DID NOT FIND PICKLE -> MAKING IT!")
+        print("DID NOT FIND PICKLE -> MAKING IT!")
         imputer = KNNImputer(n_neighbors=20, weights="distance")
         df_imputed = imputer.fit_transform(df_no_traffic)
 
@@ -563,22 +541,20 @@ def treat_2023_file(df, model):
 
     # add important features to help the model
     df_final = feauture_engineer(df_fixed, True)
-    logger.info("Features engineered")
+    print("Features engineered")
 
     # normalize coloumns from 0-1 or square coloumns^2
     # df_final = normalize_cols(df_final)
-    # logger.info("Coloumns normalized")
+    # print("Coloumns normalized")
 
     # drop coloumns which are not needed (noise)
     df_final = drop_uneeded_cols(df_final)
-    logger.info("Uneeded cols dropped")
+    print("Uneeded cols dropped")
 
     try:
         df_final["Total_trafikk"] = model.predict(df_final)
     except ValueError as e:
         print(e)
-
-    df_final.to_csv("src/out/predictions.csv")
 
     return df_final
 
@@ -596,11 +572,11 @@ def load_best_model() -> RandomForestRegressor:
     except FileNotFoundError as e:
         pass
 
-    logger.info("No pre-existing model found... building from baseline")
+    print("No pre-existing model found... building from baseline")
 
-    logger.info("Starting parsing on loading best model ... ")
+    print("Starting parsing on loading best model ... ")
     # loop over files in local directory
-    directory = f"{str(PWD)}/app/raw_data"  # change
+    directory = f"{str(PWD)}/raw_data"  # change
 
     # multiple florida files will all be converted to df's, placed in this list, and concacted
     florida_df_list = []
@@ -613,21 +589,21 @@ def load_best_model() -> RandomForestRegressor:
         if "trafikkdata" in str(filename):
             trafikk_df = treat_trafikk_files(f"{str(directory)}/{filename.name}")
 
-    logger.info("All files parsed!")
+    print("All files parsed!")
 
     # concat all the florida df's to one
     big_florida_df = pd.concat(florida_df_list, axis=0)
-    logger.info("Florida files concacted")
+    print("Florida files concacted")
 
     # merge the dataframes
     df_2023, df_final = merge_frames([big_florida_df, trafikk_df])
-    logger.info("All files looped over")
+    print("All files looped over")
 
     # divide data into training,test and validation
     split_dict_pre, training_df, test_df, validation_df = train_test_split_process(
         df_final
     )
-    logger.info("Data divided into training,validation and test")
+    print("Data divided into training,validation and test")
 
     dataframes_pre = {
         "training_df": training_df,
@@ -639,26 +615,26 @@ def load_best_model() -> RandomForestRegressor:
     dataframes_post = {}
 
     for name, df_transforming in dataframes_pre.items():
-        logger.info(
+        print(
             f"Applying KNN imputer on missing data, and removing outliers.. for {name}"
         )
-        logger.info("This could take a while...")
+        print("This could take a while...")
 
         # transform NaN and outliers to usable data
         df_transforming = trim_transform_outliers(df_transforming, False)
-        logger.info(f"Outliers trimmed for {name}")
+        print(f"Outliers trimmed for {name}")
 
         # add important features to help the model
         df_transforming = feauture_engineer(df_transforming, False)
-        logger.info(f"Features engineered for {name}")
+        print(f"Features engineered for {name}")
 
         # normalize data outliers
         df_transforming = normalize_data(df_transforming)
-        logger.info(f"Coloumns normalized for {name}")
+        print(f"Coloumns normalized for {name}")
 
         # drop coloumns which are not needed or redundant
         df_transforming = drop_uneeded_cols(df_transforming)
-        logger.info(f"Uneeded cols dropped for {name}")
+        print(f"Uneeded cols dropped for {name}")
 
         dataframes_post[name] = df_transforming
 
@@ -673,7 +649,7 @@ def load_best_model() -> RandomForestRegressor:
     y_train = split_dict_post["y_train"]
 
     # BEST MODEL:
-    logger.info("Training best model")
+    print("Training best model")
     best_model = RandomForestRegressor(n_estimators=181, random_state=2)
     best_model.fit(X_train, y_train)
 
@@ -687,7 +663,7 @@ def prep_data_from_user(input_dict):
     """
     Loads the best model
     """
-    logger.info("Starting prep data from user ... ")
+    print("Starting prep data from user ... ")
 
     col_keys = [
         "DateFormatted",
@@ -734,24 +710,22 @@ def prep_data_from_user(input_dict):
 
     name = "userinp"
 
-    logger.info(
-        f"Applying KNN imputer on missing data, and removing outliers.. for {name}"
-    )
-    logger.info("This could take a while...")
+    print(f"Applying KNN imputer on missing data, and removing outliers.. for {name}")
+    print("This could take a while...")
 
     # transform NaN and outliers to usable data
     df = trim_transform_outliers(df, True)
-    logger.info(f"Outliers trimmed for {name}")
+    print(f"Outliers trimmed for {name}")
 
     # add important features to help the model
     df = feauture_engineer(df, True)
-    logger.info(f"Features engineered for {name}")
+    print(f"Features engineered for {name}")
 
     # drop coloumns which are not needed or redundant
     df = drop_uneeded_cols(df)
-    logger.info(f"Uneeded cols dropped for {name}")
+    print(f"Uneeded cols dropped for {name}")
 
-    logger.info("re-aranging df to fit")
+    print("re-aranging df to fit")
 
     # df["DateFormatted"] = df.index
 
@@ -804,7 +778,6 @@ if __name__ == "__main__":
     }
 
     df = prep_data_from_user(input_dict)
-    df.to_csv("trainthis.csv")
     prediction = best_model.predict(df)
     print(prediction)
     print(int(prediction[0]))

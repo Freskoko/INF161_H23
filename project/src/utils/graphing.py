@@ -11,7 +11,7 @@ from scipy.stats import spearmanr
 
 # get current filepath to use when opening/saving files
 PWD = Path().absolute()
-PWD = f"{PWD}/src"
+FIGPWD = f"{PWD}/src"
 
 
 def graph_hour_variance(df: pd.DataFrame):

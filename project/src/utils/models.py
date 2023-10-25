@@ -17,10 +17,6 @@ PWD = Path().absolute()
 
 directory = f"{str(PWD)}/src/out"
 
-training_df = pd.read_csv(f"{directory}/main_training_data.csv")
-test_df = pd.read_csv(f"{directory}/main_test_data.csv")
-validation_df = pd.read_csv(f"{directory}/main_validation_data.csv")
-
 
 def train_models(split_dict: dict) -> dict:
     """

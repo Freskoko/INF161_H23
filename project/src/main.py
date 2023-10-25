@@ -42,6 +42,10 @@ FINAL_RUN = False
 RANDOM_STATE = 2
 
 
+def create_dirs():
+    os.mkdir("figs")
+
+
 def main():
     logger.info("Starting parsing ... ")
     # loop over files in local directory
@@ -204,4 +208,5 @@ def main():
 
 
 if __name__ == "__main__":
+    create_dirs()
     split_dict, training_df, test_df, validation_df = main()
