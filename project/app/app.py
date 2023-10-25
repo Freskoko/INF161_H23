@@ -27,10 +27,11 @@ def home():
 
         trafficamount = int(trafficamount[0])
 
-        cyclist = """
-                          __________
-                        < Hei Nello! >
-                    __o   ``````````
+        cyclist = f"""     
+                            _______________   
+                          / Hei Nello :^)     
+                         <  I am one of {trafficamount}!   >
+                    __o   \_________________/
                  _ |/<_
                 (_)| (_)
 

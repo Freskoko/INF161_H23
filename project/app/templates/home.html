@@ -23,13 +23,19 @@
             top: 20%;
 
         }
+
+        #flashes{
+            position: absolute;
+            right: 25%;
+            top: 30%;
+        }
     </style>
 </head>
 <body>
 
         {% with messages = get_flashed_messages() %}
     {% if messages %}
-        <ul class=flashes>
+        <ul class=flashes id="flashes">
         {% for message in messages %}
         <li>{{ message }}</li>
         {% endfor %}
@@ -50,9 +56,9 @@
 
     <form method="POST">
         <div>
-            <h3> Welcome to this webiste which allows one to predict the number of cyclists given weather data </h3>
+            <h3> Welcome to this website which allows one to predict the number of cyclists given weather data </h3>
 
-            <h3> Please enter in data points below </h3>
+            <h3> Please enter in data points below. All data points except "Date" are optional! </h3>
         </div>
 
         <div>
@@ -78,6 +84,8 @@
             </pre>
 
         </div>
+
+        <input type="submit" value="Predict!">
 
 
 
@@ -145,7 +153,6 @@
             </div>
         </div>
 
-        <input type="submit" value="Predict!">
     </form>
 
     <!-- Draw an image of nygårsboren and put cyclists on it equal to traffic that day -->
