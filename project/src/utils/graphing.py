@@ -33,7 +33,7 @@ def graph_hour_variance(df: pd.DataFrame):
     plt.suptitle("Variance in Total Traffic by Hour of the Day")
     plt.title("(After removing traffic in the 99th quantile)")
     plt.xticks(range(0, 24))
-    plt.savefig(f"src/yearfigs/hour_variance_99")
+    plt.savefig(f"src/figs/hour_variance_99")
 
 
 def graph_hour_diff(df: pd.DataFrame):
@@ -54,23 +54,29 @@ def graph_hour_diff(df: pd.DataFrame):
     plt.ylabel("Difference in Total Traffic")
     plt.title("Difference in Total Traffic by Hour of the Day")
     plt.xticks(range(0, 24))
-    plt.savefig(f"src/yearfigs/traffic_diff_perhour")
+    plt.savefig(f"src/figs/traffic_diff_perhour")
 
 
-def graph_hour_traffic_peryear(df: pd.DataFrame):
-    # -------------------------------
-    years = df.index.year.unique()
+def graph_total_traffic_overtime(df: pd.DataFrame, VERSION):
+    """
+    Graphs total traffic over time.
+    """
+    plt.clf()
+    plt.figure(figsize=(15, 7))
+    plt.plot(
+        df.index,
+        df["Total_trafikk"],
+        label="Total Traffic",
+    )
 
-    for year in years:
-        df_year = df[df.index.year == year]
-        avg_cycling_hourly = df_year.groupby(df_year.index.hour)["Total_trafikk"].mean()
-        avg_cycling_hourly.plot(kind="bar")
-        plt.title(f"Average Cycling per Hour in {year}")
-        plt.xlabel("Hour of the Day")
-        plt.ylabel("Average Cycle Traffic")
+    plt.xlabel("Time")
+    plt.ylabel("Traffic")
+    plt.suptitle(f"Time vs Traffic_{VERSION}")
 
-        plt.savefig(f"src/yearfigs/{year}_trafficmean")
-    # -------------------------------
+    plt.grid(True)
+    plt.legend()
+    plt.savefig(f"src/figs/timeVStraffic_{VERSION}.png")
+    return None
 
 
 def graph_weekly_amounts(df: pd.DataFrame):
@@ -94,7 +100,7 @@ def graph_weekly_amounts(df: pd.DataFrame):
         y="Average_Traffic",
         title="Average Traffic per Day of the Week",
     )
-    fig.write_image(f"{PWD}/figs_new/weekly_traffic.png")
+    fig.write_image(f"{PWD}/figs/weekly_traffic.png")
 
 
 def graph_monthly_amounts(df: pd.DataFrame):
@@ -125,7 +131,7 @@ def graph_monthly_amounts(df: pd.DataFrame):
         y="Average_Traffic",
         title="Average Traffic per Month",
     )
-    fig.write_image(f"{PWD}/figs_new/monthly_traffic.png")
+    fig.write_image(f"{PWD}/figs/monthly_traffic.png")
 
 
 def graph_a_vs_b(
@@ -159,11 +165,11 @@ def graph_a_vs_b(
 
     plt.title(f"""pearson_corr = {pear} spearmann_corr = {spear} {titletext}""")
     plt.grid(True)
-    plt.savefig(f"{PWD}/figs_new/{a}VS{b}_{titletext}")
+    plt.savefig(f"{PWD}/figs/{a}VS{b}_{titletext}")
 
     # :warning: clear fig is very important as not clearing will cause many figs to be created ontop of eachother
     plt.clf()
-    logger.info(f"saved fig '{a} VS {b}' in figs_new")
+    logger.info(f"saved fig '{a} VS {b}' in figs")
     logger.info(f"--- Graph took: {round(time.time() - start_time,2)} seconds ---")
 
     return
@@ -209,7 +215,7 @@ def graph_df(df: pd.DataFrame) -> None:
     )
     plt.grid(True)
     plt.legend()
-    plt.savefig(f"{PWD}/figs_new/timeVStrafficBoth.png")
+    plt.savefig(f"{PWD}/figs/timeVStrafficBoth.png")
     return None
 
 
@@ -258,7 +264,7 @@ def create_df_matrix(titletext: str, df: pd.DataFrame) -> None:
         cov_matrix_normalized, annot=True, cmap="RdBu", vmin=-1, vmax=1, center=0
     )
     plt.title(f"Covariance Matrix Heatmap {titletext}")
-    plt.savefig(f"{PWD}/figs_new/covv_matrix_{titletext}.png")
+    plt.savefig(f"{PWD}/figs/covv_matrix_{titletext}.png")
 
     plt.clf()
 
@@ -268,7 +274,7 @@ def create_df_matrix(titletext: str, df: pd.DataFrame) -> None:
     plt.figure(figsize=(16, 16))
     sns.heatmap(corr_matrix, annot=True, cmap="RdBu", vmin=-1, vmax=1, center=0)
     plt.title(f"Correlation Matrix Heatmap {titletext}")
-    plt.savefig(f"{PWD}/figs_new/corr_matrix_{titletext}.png")
+    plt.savefig(f"{PWD}/figs/corr_matrix_{titletext}.png")
 
     return
 
@@ -280,6 +286,8 @@ def graph_all_models(main_df: pd.DataFrame, pre_change: bool) -> None:
         titletext = "PRE_CHANGES"
     else:
         titletext = "POST_CHANGES"
+
+    graph_total_traffic_overtime(main_df, VERSION=titletext)
 
     create_df_matrix(titletext, main_df)
     graph_a_vs_b(
@@ -319,6 +327,7 @@ def graph_all_models(main_df: pd.DataFrame, pre_change: bool) -> None:
             "Grader",
             "antall sykler",
         )
+
     if pre_change:
         graph_a_vs_b(
             titletext,
@@ -328,7 +337,12 @@ def graph_all_models(main_df: pd.DataFrame, pre_change: bool) -> None:
             "Grader",
             "antall sykler",
         )
+
         graph_a_vs_b(titletext, main_df, "Vindstyrke", "Vindkast", "Styrke", "Kast")
+
+        graph_a_vs_b(
+            titletext, main_df, "Vindstyrke", "Total_trafikk", "Styrke", "Sykler"
+        )
 
     graph_a_vs_b(
         titletext, main_df, "Lufttrykk", "Total_trafikk", "hPa", "antall sykler"
@@ -336,8 +350,6 @@ def graph_all_models(main_df: pd.DataFrame, pre_change: bool) -> None:
     graph_a_vs_b(
         titletext, main_df, "Vindkast", "Total_trafikk", "m/s", "antall sykler"
     )
-
-    # graph_df(main_df)
 
     logger.info("Finished graphing!")
     return

@@ -1,19 +1,13 @@
 import os
 import pickle
 from datetime import datetime
+from io import StringIO
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 from loguru import logger
 from sklearn.ensemble import RandomForestRegressor
-
-from datetime import datetime
-from io import StringIO
-from pathlib import Path
-
-import numpy as np
-import pandas as pd
 
 # get current filepath to use when opening/saving files
 PWD = Path().absolute()
@@ -235,7 +229,6 @@ def feauture_engineer(df: pd.DataFrame, data2023: bool) -> pd.DataFrame:
     # add weekend
     df["weekend"] = (df.index.weekday >= 5).astype(int)
 
-
     # add public holidays
     holidays = [
         # jul osv
@@ -435,8 +428,7 @@ def trim_transform_outliers(df: pd.DataFrame, data2023: bool) -> pd.DataFrame:
     pkl_filename = "pickle_knn.pkl"
 
     try:
-
-        with open(pkl_filename, 'rb') as file:
+        with open(pkl_filename, "rb") as file:
             imputer = pickle.load(file)
 
             df_imputed = imputer.transform(df_no_traffic)
@@ -447,9 +439,9 @@ def trim_transform_outliers(df: pd.DataFrame, data2023: bool) -> pd.DataFrame:
         imputer = KNNImputer(n_neighbors=20, weights="distance")
         df_imputed = imputer.fit_transform(df_no_traffic)
 
-        #pickle
+        # pickle
         if len(df_no_traffic) > 40000:
-            with open(pkl_filename, 'wb') as file:
+            with open(pkl_filename, "wb") as file:
                 print("PICKLING")
                 pickle.dump(imputer, file)
 
@@ -591,7 +583,6 @@ def treat_2023_file(df, model):
     return df_final
 
 
-
 def load_best_model() -> RandomForestRegressor:
     """
     Loads the best model
@@ -716,7 +707,6 @@ def prep_data_from_user(input_dict):
     for col in col_keys:
         try:
             if col in input_dict.keys():
-
                 if input_dict[col] == "":
                     df_dict[col] = [np.nan]
                     continue
@@ -728,8 +718,7 @@ def prep_data_from_user(input_dict):
             else:
                 df_dict[col] = [np.nan]
 
-
-        except (TypeError,ValueError) as e:
+        except (TypeError, ValueError) as e:
             print(e)
             return "ERROR"
 

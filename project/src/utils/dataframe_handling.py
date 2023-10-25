@@ -1,6 +1,6 @@
 import json
-from pathlib import Path
 import pickle
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -82,7 +82,6 @@ def feauture_engineer(df: pd.DataFrame, data2023: bool) -> pd.DataFrame:
 
     # add weekend
     df["weekend"] = (df.index.weekday >= 5).astype(int)
-
 
     # add public holidays
     holidays = [
@@ -292,20 +291,6 @@ def trim_transform_outliers(df: pd.DataFrame, data2023: bool) -> pd.DataFrame:
     if not data2023:
         df_fixed = pd.concat([df_fixed, total_traffic_series], axis=1)
 
-    # # Drop the DateFormatted column from df_no_traffic
-    # df_no_traffic = df_no_traffic.drop(columns=["DateFormatted"])
-
-    # # Now, perform the imputation
-    # df_imputed = imputer.fit_transform(df_no_traffic)
-
-    # # Convert the result back to DataFrame
-    # df_fixed = pd.DataFrame(
-    #     df_imputed, columns=df_no_traffic.columns, index=df_no_traffic.index
-    # )
-
-    # # Add back the DateFormatted column
-    # df_fixed = pd.concat([df_fixed, date_formatted_series], axis=1)
-
     return df_fixed
 
 
@@ -413,10 +398,6 @@ def treat_2023_file(df, model):
     df_final = feauture_engineer(df_fixed, True)
     logger.info("Features engineered")
 
-    # normalize coloumns from 0-1 or square coloumns^2
-    # df_final = normalize_cols(df_final)
-    # logger.info("Coloumns normalized")
-
     # drop coloumns which are not needed (noise)
     df_final = drop_uneeded_cols(df_final)
     logger.info("Uneeded cols dropped")
@@ -426,6 +407,19 @@ def treat_2023_file(df, model):
     except ValueError as e:
         print(e)
 
-    df_final.to_csv("src/out/predictions.csv")
+    # convert to wanted format
+
+    df_final["Dato"] = pd.to_datetime(df_final.index).date
+    df_final["Tid"] = pd.to_datetime(df_final.index).hour
+
+    df_final["Prediksjon"] = df_final["Total_trafikk"]
+
+    new_df = df_final[["Dato", "Tid", "Prediksjon"]].copy()
+
+    new_df["Prediksjon"] = new_df["Prediksjon"].astype(int)
+
+    new_df.reset_index()
+
+    new_df.to_csv("src/out/predictions.csv")
 
     return df_final

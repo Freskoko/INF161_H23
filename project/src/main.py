@@ -22,9 +22,7 @@ from utils.file_parsing import treat_florida_files, treat_trafikk_files
 from utils.graphing import (
     graph_a_vs_b,
     graph_all_models,
-    graph_df,
     graph_hour_diff,
-    graph_hour_traffic_peryear,
     graph_hour_variance,
     graph_monthly_amounts,
     graph_weekly_amounts,
@@ -38,7 +36,7 @@ from utils.models import (
 
 # get current filepath to use when opening/saving files
 PWD = Path().absolute()
-GRAPHING = False
+GRAPHING = True
 TRAIN_MANY = False
 FINAL_RUN = False
 RANDOM_STATE = 2
@@ -118,6 +116,34 @@ def main():
         df_transforming = normalize_data(df_transforming)
         logger.info(f"Coloumns normalized for {name}")
 
+        if GRAPHING:
+            if name == "training_df":
+                # graph Vindkast vs
+                graph_a_vs_b(
+                    "POST_CHANGES",
+                    df_transforming,
+                    "Vindstyrke",
+                    "Vindkast",
+                    "Styrke",
+                    "Kast",
+                )
+                graph_a_vs_b(
+                    "POST_CHANGES",
+                    df_transforming,
+                    "Vindstyrke",
+                    "Total_trafikk",
+                    "Retning",
+                    "Sykler",
+                )
+                graph_a_vs_b(
+                    "POST_CHANGES",
+                    df_transforming,
+                    "Vindretning",
+                    "Total_trafikk",
+                    "Retning",
+                    "Sykler",
+                )
+
         # drop coloumns which are not needed or redundant
         df_transforming = drop_uneeded_cols(df_transforming)
         logger.info(f"Uneeded cols dropped for {name}")
@@ -138,7 +164,6 @@ def main():
         graph_weekly_amounts(training_df)
         graph_monthly_amounts(training_df)
         graph_hour_variance(training_df)
-        graph_hour_traffic_peryear(training_df)
         logger.info("Graph all models POSTCHANGE")
 
     split_dict_post = {
