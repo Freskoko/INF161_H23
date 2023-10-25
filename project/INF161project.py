@@ -25,20 +25,21 @@ from sklearn.tree import DecisionTreeRegressor
 
 # get current filepath to use when opening/saving files
 PWD = Path().absolute()
-DEBUG = True
-GRAPHING = True
-TRAIN_MANY = True
+DEBUG = False
+GRAPHING = False
+TRAIN_MANY = False
 FINAL_RUN = True
 RANDOM_STATE = 2
 
 
-def train_models(split_dict: dict) -> dict:
+def train_models(split_dict: dict) -> None:
     """
-    Trains a variety of models on test data, and checks their MSE on validation data
+    Input:
+        split_dict : split_dict containing x/y train/val/test
+    Trains a variety of models on training data, and checks their MSE on validation data
     """
 
-    # split ting opp i
-
+    # grab train and validation data
     X_train = split_dict["x_train"]
     y_train = split_dict["y_train"]
     X_val = split_dict["x_val"]
@@ -85,18 +86,20 @@ def train_models(split_dict: dict) -> dict:
         {"model_type": DecisionTreeRegressor, "settings": {"max_depth": 100}},
     ]
 
+    # intilaize
     model_strings = []
     mse_values_models = []
     clf_vals = []
 
+    # loop over models, train and add values to list
     for mod in models:
         name = str(mod["model_type"].__name__)[0:8]
         settings = mod["settings"]
 
-        print(f"Training model type: {name}_{settings}")
+        print(f"MODELS : Training model type: {name}_{settings}")
         clf = mod["model_type"](
-            **mod["settings"]
-        )  # henter ut settings her med unpacking
+            **mod["settings"]  # henter ut settings her med unpacking
+        )
         clf.fit(X_train, y_train)
 
         y_predicted = clf.predict(X_val)
@@ -113,6 +116,9 @@ def train_models(split_dict: dict) -> dict:
             "mse_values": [sqrt(i) for i in mse_values_models],
         }
     )
+
+    # sorter etter mse
+    data_models.sort_values(by="mse_values")
 
     fig = px.bar(
         data_models,
@@ -131,14 +137,14 @@ def train_models(split_dict: dict) -> dict:
 
     fig.write_image(f"{PWD}/figs/MANYMODELS_MSE.png")
 
-    print("Done training a variety of models!")
-
-    return
+    print("MODELS : Done training a variety of models!")
 
 
-def find_hyper_param(split_dict: dict) -> dict:
+def find_hyper_param(split_dict: dict) -> None:
     """
-    Trains a single model (testing multiple hyperparameters) on test data, finds its MSE on validation data
+    Input:
+        split_dict : split_dict containing x/y train/val/test
+    Trains RandomForestRegressor with multiple hyperparameters on training data, finds its MSE on validation data
     """
 
     X_train = split_dict["x_train"]
@@ -165,7 +171,7 @@ def find_hyper_param(split_dict: dict) -> dict:
         name = str(mod["model_type"].__name__)[0:8]
         settings = mod["settings"]
 
-        print(f"Training model type: {name}_{settings}")
+        print(f"MODELS : Training model type: {name}_{settings}")
         clf = mod["model_type"](**mod["settings"])  # henter ut settings her
         clf.fit(X_train, y_train)
 
@@ -185,7 +191,10 @@ def find_hyper_param(split_dict: dict) -> dict:
         }
     )
 
-    print(data_models.sort_values(by="mse_values"))
+    # sort model by mse
+    data_models.sort_values(by="mse_values")
+
+    print(data_models)
 
     fig = px.bar(
         data_models,
@@ -200,13 +209,13 @@ def find_hyper_param(split_dict: dict) -> dict:
 
     fig.write_image(f"{PWD}/figs/MSE_hyperparam_models_V3.png")
 
-    print("Done training hyperparameter models!")
-
-    return
+    print("MODELS : Done training hyperparameter models!")
 
 
-def find_hyper_param_further(split_dict: dict) -> dict:
+def find_hyper_param_further(split_dict: dict) -> None:
     """
+    Input:
+        split_dict : split_dict containing x/y train/val/test
     Trains a single model (testing multiple hyperparameters) on test data, finds its MSE on validation data
     """
 
@@ -234,7 +243,7 @@ def find_hyper_param_further(split_dict: dict) -> dict:
         name = str(mod["model_type"].__name__)[0:8]
         settings = mod["settings"]
 
-        print(f"Training model type: {name}_{settings}")
+        print(f"MODELS : Training model type: {name}_{settings}")
         clf = mod["model_type"](**mod["settings"])  # henter ut settings her
         clf.fit(X_train, y_train)
 
@@ -254,7 +263,10 @@ def find_hyper_param_further(split_dict: dict) -> dict:
         }
     )
 
-    print(data_models.sort_values(by="mse_values"))
+    # sort models by mse
+    data_models.sort_values(by="mse_values")
+
+    print(data_models)
 
     fig = px.bar(
         data_models,
@@ -269,14 +281,14 @@ def find_hyper_param_further(split_dict: dict) -> dict:
 
     fig.write_image(f"{PWD}/figs/MSE_hyperparam_models_further.png")
 
-    print("Done training hyperparameter models!")
+    print("MODELS : Done training hyperparameter models even further!")
 
     return
 
 
 def train_best_model(split_dict: dict, test_data: bool) -> None:
     """
-    Trains the model that performed best on validation/test data
+    Trains the model that performed (RandomForestRegressor) best on validation/test data
     """
 
     if test_data:
@@ -299,7 +311,7 @@ def train_best_model(split_dict: dict, test_data: bool) -> None:
     test_mse = mean_squared_error(y_chosen, y_test_predicted)
     test_rmse = sqrt(test_mse)
 
-    print(f"Model for test data = {test_data}")
+    print(f"MODELS : Model for test data = {test_data}")
     print("MSE:", test_mse)
     print("RMSE:", test_rmse)
 
@@ -310,16 +322,17 @@ def train_best_model(split_dict: dict, test_data: bool) -> None:
     print(importance_df.sort_values(by="Importance", ascending=False))
 
 
-def graph_hour_variance(df: pd.DataFrame):
-    # given a dataframe where the index is a date in the format
-    # 2023-01-01 14:00:00
-
-    # graph the amount of variance between the highest and lowest value for that hour
-
-    # the values are found in "Total_trafikk"
+def graph_hour_variance(df: pd.DataFrame) -> None:
+    """
+    Given a dataframe with its index as date in the format of "2023-01-01 14:00:00",
+    this function graphs the variance of traffic values in "Total_trafikk" for each hour.
+    The variance is calculated from the total traffic values for each hour.
+    """
 
     df.index = pd.to_datetime(df.index)
     df["hour"] = df.index.hour
+
+    # find hourly variance
     hourly_variance = df.groupby("hour")["Total_trafikk"].var()
 
     plt.figure(figsize=[10, 5])
@@ -329,11 +342,16 @@ def graph_hour_variance(df: pd.DataFrame):
     plt.suptitle("Variance in Total Traffic by Hour of the Day")
     plt.title("(After removing traffic in the 99th quantile)")
     plt.xticks(range(0, 24))
-    plt.savefig(f"src/figs/hour_variance_99")
+    plt.savefig(f"{PWD}/figs/hour_variance_99")
+    plt.clf()
 
 
-def graph_hour_diff(df: pd.DataFrame):
-    # Group the data by 'hour' and calculate the highest and lowest 'Total_trafikk' for each hour
+def graph_hour_diff(df: pd.DataFrame) -> None:
+    """
+    Given a dataframe with its index as date in the format of "2023-01-01 14:00:00",
+    this function calculates and graphs the difference between the maximum and minimum
+    traffic values in "Total_trafikk" for each hour.
+    """
 
     df["hour"] = df.index.hour
     df_grouped = df.groupby("hour")["Total_trafikk"]
@@ -350,12 +368,16 @@ def graph_hour_diff(df: pd.DataFrame):
     plt.ylabel("Difference in Total Traffic")
     plt.title("Difference in Total Traffic by Hour of the Day")
     plt.xticks(range(0, 24))
-    plt.savefig(f"src/figs/traffic_diff_perhour")
+    plt.savefig(f"{PWD}/figs/traffic_diff_perhour")
+    plt.clf()
 
 
-def graph_total_traffic_overtime(df: pd.DataFrame, VERSION):
+def graph_total_traffic_overtime(df: pd.DataFrame, VERSION: str) -> None:
     """
-    Graphs total traffic over time.
+    Given a dataframe with its index as date in the format of "2023-01-01 14:00:00",
+    Graphs total traffic over time. Traffic is found in the "Total_trafikk" col.
+
+    VERSION is a string to help indicate if graphing is pre or post processing
     """
     plt.clf()
     plt.figure(figsize=(15, 7))
@@ -371,11 +393,15 @@ def graph_total_traffic_overtime(df: pd.DataFrame, VERSION):
 
     plt.grid(True)
     plt.legend()
-    plt.savefig(f"src/figs/timeVStraffic_{VERSION}.png")
-    return None
+    plt.savefig(f"{PWD}/figs/timeVStraffic_{VERSION}.png")
 
 
-def graph_weekly_amounts(df: pd.DataFrame):
+def graph_weekly_amounts(df: pd.DataFrame) -> None:
+    """
+    Given a dataframe with its index as date in the format of "2023-01-01 14:00:00",
+    Graphs average traffic per day. Traffic is found in the "Total_trafikk" col.
+    """
+
     days = [
         "d_Monday",
         "d_Tuesday",
@@ -437,13 +463,21 @@ def graph_a_vs_b(
     General function to plot two items in a dataframe against eachother
 
     Also calculates spearmann and pearson correlation between the two values
+
+    Inputs:
+        titletext: the title of the plot
+        df: df contaning the two items needing to be graphed
+        a: item 1 to be graphed
+        b: item 2 to be graphed
+        alabel: label to be used for this variable in the graph
+        blabel: label to be used for this variable in the graph
     """
 
     # see limits on data
-    print(f" fig working on graphing '{a} vs {b}'")
-    print(f"{a} looks like :")
-    print(f"max {a} is {max(df[a])}")
-    print(f"min {a} is {min(df[a])}")
+    print(f"GRAPHING : working on graphing '{a} vs {b}'")
+    print(f"GRAPHING : {a} looks like :")
+    print(f"GRAPHING : max {a} is {max(df[a])}")
+    print(f"GRAPHING : min {a} is {min(df[a])}")
 
     # Set limits on x - axis to limits + 5 in order to see range of data
     start_time = time.time()
@@ -465,62 +499,36 @@ def graph_a_vs_b(
 
     # :warning: clear fig is very important as not clearing will cause many figs to be created ontop of eachother
     plt.clf()
-    print(f"saved fig '{a} VS {b}' in figs")
-    print(f"--- Graph took: {round(time.time() - start_time,2)} seconds ---")
-
-    return
+    print(f"GRAPHING : saved fig '{a} VS {b}' in figs")
+    print(f"GRAPHING : --- Graph took: {round(time.time() - start_time,2)} seconds ---")
 
 
 def pearson_r_corr(a: float, b: float) -> float:
+    """
+    Helper function to generate pearson correlation
+    """
     corr = np.corrcoef(a, b)[0, 1]
     return corr
 
 
 def spearman_rho_corr(a: float, b: float) -> float:
+    """
+    Helper function to generate spearmann corr
+    """
     corr, _ = spearmanr(a, b)
     return corr
-
-
-def graph_df(df: pd.DataFrame) -> None:
-    """
-    Graphs Trafikkmengde_Totalt_i_retning_Danmarksplass vs Traffic towards Danmarksplass.
-
-    This is to visualize how well the two lanes correlate.
-
-    """
-    plt.clf()
-    plt.figure(figsize=(15, 7))
-    plt.plot(
-        df.index,
-        df["Trafikkmengde_Totalt_i_retning_Danmarksplass"],
-        label="Traffic towards Danmarksplass",
-    )
-    plt.plot(
-        df.index,
-        df["Trafikkmengde_Totalt_i_retning_Florida"],
-        label="Traffic towards Florida",
-    )
-
-    plt.xlabel("Time")
-    plt.ylabel("Traffic")
-    plt.suptitle("Time vs Traffic")
-    a = df["Trafikkmengde_Totalt_i_retning_Danmarksplass"]
-    b = df["Trafikkmengde_Totalt_i_retning_Florida"]
-    plt.title(
-        f"""pearson_corr = {round(pearson_r_corr(a,b),4)} spearmann_corr = {round(spearman_rho_corr(a,b),4)}"""
-    )
-    plt.grid(True)
-    plt.legend()
-    plt.savefig(f"{PWD}/figs/timeVStrafficBoth.png")
-    return None
 
 
 def create_df_matrix(titletext: str, df: pd.DataFrame) -> None:
     """
     Function to create a covariance and correlation matrix for values in a dataframe
+
+    Inputs:
+        titletext: Text for graph
+        df : the dataframe to create a covarience and correlation matrix from
     """
 
-    # drop uneeded cols: #TODO
+    # drop uneeded cols:
     df = df.drop(
         labels=[
             "d_Monday",
@@ -572,16 +580,22 @@ def create_df_matrix(titletext: str, df: pd.DataFrame) -> None:
     plt.title(f"Correlation Matrix Heatmap {titletext}")
     plt.savefig(f"{PWD}/figs/corr_matrix_{titletext}.png")
 
-    return
-
 
 def graph_all_models(main_df: pd.DataFrame, pre_change: bool) -> None:
-    print("Graphing all graphs...")
+    """
+    Large wrapper function to call many other graphing functions.
+
+    Inputs:
+        main_df: dataframe to perform graphing on
+        pre_change boolean describing if graphing is occouring pre/post processing
+    """
 
     if pre_change:
         titletext = "PRE_CHANGES"
     else:
         titletext = "POST_CHANGES"
+
+    print(f"GRAPHING : Graphing all graphs... {titletext}")
 
     graph_total_traffic_overtime(main_df, VERSION=titletext)
 
@@ -647,21 +661,21 @@ def graph_all_models(main_df: pd.DataFrame, pre_change: bool) -> None:
         titletext, main_df, "Vindkast", "Total_trafikk", "m/s", "antall sykler"
     )
 
-    print("Finished graphing!")
-    return
+    print("GRAPHING : Finished graphing!")
 
 
 def treat_florida_files(filename: str) -> pd.DataFrame:
     """
-    Input: filename of a florida weather file
+    Input:
+        filename: filename of a florida weather file
 
     Process:
-    set date to index
-    change from 1 hour having 6 values, to one hour having the mean of those 6 values
-    drop date and time coloumns which are now represented in the index
+        set date to index
+        change from 1 hour having 6 values, to one hour having the mean of those 6 values
+        drop date and time coloumns which are now represented in the index
 
     Output:
-    a dataframe of the csv file
+        a dataframe of the csv file
     """
 
     df = pd.read_csv(filename, delimiter=",")
@@ -683,15 +697,18 @@ def treat_florida_files(filename: str) -> pd.DataFrame:
     return df
 
 
+# TODO KEEP COMMENTING FROM HERE !!!
 def treat_trafikk_files(filename: str) -> pd.DataFrame:
+    # TODO KEEP COMMENTING FROM HERE !!!
     """
-    Input: filename of a traffic data file
+    Input:
+        filename: filename of a traffic data file
 
     Process:
-    set date to index
+        set date to index
 
     Output:
-    a dataframe of the csv file
+        a dataframe of the csv file
     """
 
     # read file as string
@@ -773,15 +790,7 @@ def treat_trafikk_files(filename: str) -> pd.DataFrame:
 
         result_df = result_df.join(felt_df)
 
-    # save to csv
-    directory = f"{str(PWD)}/out"
-    result_df.to_csv(f"{directory}/check_traffic.csv")
-
     return result_df
-
-
-def create_dirs():
-    os.mkdir("figs")
 
 
 def feauture_engineer(df: pd.DataFrame, data2023: bool) -> pd.DataFrame:
@@ -930,20 +939,10 @@ def merge_frames(frames: list) -> pd.DataFrame:
     # remove lines where we dont have traffic information, as many missing values can cause model training
     # to overly rely on values which are there often.
 
-    # Drops missing values
-    PWD = Path().absolute()
-    directory = f"{str(PWD)}/out"
-    # print("before drop ", len(df_final))
-    df_final.to_csv(f"{directory}/before_drop.csv")
-
-    # print(df_final)
     df_2023 = df_2023 = df_final.loc["2023-01-01":"2023-12-31"]
-    df_2023.to_csv(f"{directory}/2023data.csv")
     # get where index is between 2023-01-01 00:00:00 and 2023-12-31 00:00:00
 
     df_final = df_final.dropna(subset=["Trafikkmengde_Totalt_i_retning_Florida"])
-    # print("after drop ", len(df_final))
-    df_final.to_csv(f"{directory}/after_drop.csv")
 
     # finding means of values lead to floating point errors, round to fix these
     df_final = df_final.apply(pd.to_numeric, errors="ignore").round(30)
@@ -972,9 +971,6 @@ def trim_transform_outliers(df: pd.DataFrame, data2023: bool) -> pd.DataFrame:
 
     What values are considered abnormal are covered in the README under "Dropped values"
     """
-
-    # print("IN")
-    # print(df)
 
     # Transform malformed data to NaN.
     length_dict = {"before": len(df)}
@@ -1015,15 +1011,12 @@ def trim_transform_outliers(df: pd.DataFrame, data2023: bool) -> pd.DataFrame:
     df["Vindstyrke"] = np.where(df["Vindstyrke"] >= 1000, np.nan, df["Vindstyrke"])
     length_dict["afterVindstyrke"] = len(df)
 
-    if DEBUG == True:
-        print(json.dumps(length_dict, indent=2))
-
     # replace outliers (this should be fixed above, but this is just in case)
     df = df.replace(99999, np.nan)
 
     # observe NaN
     num_nan = df.isna().sum()
-    print(f"Number of NaNs in each column:\n{num_nan}")
+    print(f"PARSING : Number of NaNs in each column:\n{num_nan}")
 
     if not data2023:
         # reserve the "Total_trafikk" column, it will not used for imputation
@@ -1052,7 +1045,6 @@ def trim_transform_outliers(df: pd.DataFrame, data2023: bool) -> pd.DataFrame:
     imputer = KNNImputer(n_neighbors=20, weights="distance")
     df_imputed = imputer.fit_transform(df_no_traffic)
 
-    # print("fixed")
     df_fixed = pd.DataFrame(
         df_imputed, columns=df_no_traffic.columns, index=df_no_traffic.index
     )
@@ -1083,12 +1075,12 @@ def normalize_data(df: pd.DataFrame) -> pd.DataFrame:
 
     # df["Vindkast"] = df["Vindkast"]**2
 
-    print(f"Values pre removal of outliers: {len(df)}")
+    print(f"PARSING : Values pre removal of outliers: {len(df)}")
 
     quant = df["Total_trafikk"].quantile(0.99)
     df = df[df["Total_trafikk"] <= quant]
 
-    print(f"Values post removal of outliers: {len(df)}")
+    print(f"PARSING : Values post removal of outliers: {len(df)}")
 
     return df
 
@@ -1165,11 +1157,11 @@ def treat_2023_file(df, model):
 
     # add important features to help the model
     df_final = feauture_engineer(df_fixed, True)
-    print("Features engineered")
+    print("PARSING : Features engineered")
 
     # drop coloumns which are not needed (noise)
     df_final = drop_uneeded_cols(df_final)
-    print("Uneeded cols dropped")
+    print("PARSING : Uneeded cols dropped")
 
     try:
         df_final["Total_trafikk"] = model.predict(df_final)
@@ -1189,13 +1181,13 @@ def treat_2023_file(df, model):
 
     new_df.reset_index()
 
-    new_df.to_csv("src/out/predictions.csv")
+    new_df.to_csv(f"{PWD}/out/predictions.csv")
 
     return df_final
 
 
 def main():
-    print("Starting parsing ... ")
+    print("INFO : Starting parsing ... ")
     # loop over files in local directory
     directory = f"{str(PWD)}/raw_data"
 
@@ -1210,34 +1202,34 @@ def main():
         if "trafikkdata" in str(filename):
             trafikk_df = treat_trafikk_files(f"{str(directory)}/{filename.name}")
 
-    print("All files parsed!")
+    print("INFO : All files parsed!")
 
     # concat all the florida df's to one
     big_florida_df = pd.concat(florida_df_list, axis=0)
-    print("Florida files concacted")
+    print("INFO : Florida files concacted")
 
     # merge the dataframes
     df_2023, df_final = merge_frames([big_florida_df, trafikk_df])
-    print("All files looped over")
+    print("INFO : All files merged over")
 
     # divide data into training,test and validation
     split_dict_pre, training_df, test_df, validation_df = train_test_split_process(
         df_final
     )
-    print("Data divided into training,validation and test")
+    print("INFO : Data divided into training,validation and test")
 
-    # Calculate the average traffic for each year
+    # average traffic per year to observe
     average_traffic_per_year = (
         training_df["Total_trafikk"].groupby(training_df.index.year).mean()
     )
 
-    # Print the average traffic for each year
-    print("AVERAGE TRAFFIC TRAINING DATA =")
-    print(average_traffic_per_year)  # TODO SAVE THIS INTO A FILE
+    print("INFO : Average traffic per year (for training data):")
+    print(average_traffic_per_year)
 
     if GRAPHING:
+
         graph_all_models(training_df, pre_change=True)
-        print("Graphed all models PRECHANGE")
+        print("INFO : Graphed all models PRE-CHANGE")
 
     dataframes_pre = {
         "training_df": training_df,
@@ -1252,24 +1244,26 @@ def main():
 
     for name, df_transforming in dataframes_pre.items():
         print(
-            f"Applying KNN imputer on missing data, and removing outliers.. for {name}"
+            f"INFO : Applying KNN imputer on missing data, and removing outliers.. for {name}"
         )
-        print("This could take a while...")
+        print("INFO : This could take a while...")
 
         # transform NaN and outliers to usable data
         df_transforming = trim_transform_outliers(df_transforming, False)
-        print(f"Outliers trimmed for {name}")
+        print(f"INFO : Outliers trimmed for {name}")
 
         # add important features to help the model
         df_transforming = feauture_engineer(df_transforming, False)
-        print(f"Features engineered for {name}")
+        print(f"INFO : Features engineered for {name}")
 
         # normalize data outliers
         df_transforming = normalize_data(df_transforming)
-        print(f"Coloumns normalized for {name}")
+        print(f"INFO : Coloumns normalized for {name}")
 
         if GRAPHING:
+
             if name == "training_df":
+
                 # graph Vindkast vs
                 graph_a_vs_b(
                     "POST_CHANGES",
@@ -1298,7 +1292,7 @@ def main():
 
         # drop coloumns which are not needed or redundant
         df_transforming = drop_uneeded_cols(df_transforming)
-        print(f"Uneeded cols dropped for {name}")
+        print(f"INFO : Uneeded cols dropped for {name}")
 
         dataframes_post[name] = df_transforming
 
@@ -1306,17 +1300,22 @@ def main():
     test_df = dataframes_post["test_df"]
     validation_df = dataframes_post["validation_df"]
 
-    training_df.to_csv(f"{directory}/main_training_data.csv")
-    print("Data saved to CSV")
+    training_df.to_csv(f"{PWD}/out/main_training_data.csv")
+    print("INFO : Data saved to CSV")
 
     if GRAPHING:
         # Graph post data processing to visualize and analyze data
+        print("GRAPHING : GRAPHING HOUR DIFF")
         graph_hour_diff(training_df)
-        graph_all_models(training_df, pre_change=False)
+        print("GRAPHING : GRAPHING WEEKLY AMOUNTS")
         graph_weekly_amounts(training_df)
+        print("GRAPHING : GRAPHING MONTHLY AMOUNTS")
         graph_monthly_amounts(training_df)
+        print("GRAPHING : GRAPHING HOUR VARIANCE")
         graph_hour_variance(training_df)
-        print("Graph all models POSTCHANGE")
+
+        graph_all_models(training_df, pre_change=False)
+        print("INFO : Graph all models POSTCHANGE")
 
     split_dict_post = {
         "y_train": training_df["Total_trafikk"],
@@ -1335,13 +1334,15 @@ def main():
         find_hyper_param_further(split_dict_post)
 
     # train the best model on validation data
+    print("INFO: Training model on validation data")
     train_best_model(split_dict_post, test_data=False)
 
     if FINAL_RUN:
         # train best model on test data
+        print("INFO: Training model on test data")
         train_best_model(split_dict_post, test_data=True)
 
-        print("Treating 2023 files")
+        print("INFO : Treating 2023 files")
 
         # use the best model to get values for 2023
         best_model = RandomForestRegressor(n_estimators=181, random_state=RANDOM_STATE)
@@ -1355,6 +1356,19 @@ def main():
     return split_dict_post, training_df, test_df, validation_df
 
 
+def create_dirs():
+    try:
+        os.mkdir("figs")
+    except FileExistsError:
+        pass
+
+    try:
+        os.mkdir("out")
+    except FileExistsError:
+        pass
+
+
 if __name__ == "__main__":
     create_dirs()
-    # split_dict, training_df, test_df, validation_df = main()
+    split_dict, training_df, test_df, validation_df = main()
+    print("INFO : main function complete!")

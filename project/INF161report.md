@@ -4,29 +4,14 @@
 
 - GOOGLE DOCS
 
-- Update part talking about different models
-
-
-### WEBSITE
-
-
-SO JUST MOVE EVERYTHING OVER AND WE ARE GOOD!!
-
 
 ### CODE
-
-- mkdirs
 
 - cleanup files that may not be used
 
 - cleanup
 
 - conda and lock file
-
-- put into one giant python file
-
-
-- change log to print
 
 # Report for INF161 cycle traffic project
 
@@ -169,7 +154,7 @@ This coloumn is dropped from the start, since there is so much missing data (565
 
 - Outliers in traffic data
 
-![FloridaDanmarksplass vs time](src/figs/timeVStraffic_PRE_CHANGES.png) 
+![FloridaDanmarksplass vs time](figs/timeVStraffic_PRE_CHANGES.png) 
 
 Looking at traffic data above, a clear peak was the year 2017, where there was a cycling competiton in bergen. These outliers may effect the data, as there is not a large scale cycling competion every year.
 Values in the 99th percentile were removed, in hopes of normalizing data each year, so that the model can understand trends across months, not a trend which occoured one year. 
@@ -185,7 +170,7 @@ This choice is a toss-up because the model will become generally better at guess
 This also removes the bottom 99th percentile, again making the model worse at guessing very low values, but better at general values. The hope is that the model is able to understand that at night there are less cyclists, through other variables/features.
 
 
-![FloridaDanmarksplass vs time](src/figs/timeVStraffic_POST_CHANGES.png) 
+![FloridaDanmarksplass vs time](figs/timeVStraffic_POST_CHANGES.png) 
 
 #TODO COMMENT ON THIS
 
@@ -193,29 +178,29 @@ Now after removing outliers, data is more uniform across years.
 
 
 # Data exploration:
-In src/figs, there are images presenting each of the coloums in the final data frame, plotted against the total amount of traffic. This part of the report explores these figures.
+In figs, there are images presenting each of the coloums in the final data frame, plotted against the total amount of traffic. This part of the report explores these figures.
 
 # Variations within time
 
-![year](src/figs/monthly_traffic.png)
+![year](figs/monthly_traffic.png)
 
 Certain months have different amounts of mean traffic, so providing the model the month will help it understand this correlation. I am using dummies from python in order to setup a coloumn for each month. 
 
-![week1](src/figs/weekly_traffic.png)
+![week1](figs/weekly_traffic.png)
 
 Certain days have different amounts of mean traffic, so providing the model the day will help it understand this correlation. I am using dummies from python in order to setup a coloumn for each day. 
 
-![day](src/figs/daily_traffic.png)
+<!-- ![day](figs/daily_traffic.png) -->
 
 Certain hours differ in traffic amounts, and this will be a key aspect of the model to understand.
 
-![diff min/max traffic per hour](src/yearfigs/traffic_diff_perhour.png)
+![diff min/max traffic per hour](figs/traffic_diff_perhour.png)
 
 It is also important to note that within an hour, there is alot of variation between the highest and lowest amounts.
 
 ### Yearly variations of traffic data / Correlation of the two directions
 
-![FloridaDanmarksplass vs time](src/figs/timeVStraffic.png)
+![FloridaDanmarksplass vs time](figs/timeVStraffic_POST_CHANGES.png)
 
 Looking at the *FloridaDanmarksplass vs time* graph above, one can see that the two variables describing the amount of people driving each direction are very correlated.
 
@@ -230,13 +215,13 @@ This is the cause of a great deal of outliers. The solution to this is removing 
 
 **Raw-observation**
 
-![Corr matrix](src/figs/corr_matrix_PRE_CHANGES.png)
+![Corr matrix](figs/corr_matrix_PRE_CHANGES.png)
 
 Looking at the *Corr matrix* graph above, it tells us that the data needs to be processed, as values are all over the place, most probably due to outliers.
 
 **Post-processing**
 
-![Corr matrix](src/figs/corr_matrix_POST_CHANGES.png)
+![Corr matrix](figs/corr_matrix_POST_CHANGES.png)
 
 The variables *Globalstråling* and *Solskinnstid* have a high degree of correlation, at 0.68.
 This is high, but not high enough that they tell us the same thing, so i am going to keep both variables. It is also important to note that both variables have a decent degree of correlation with *Total_trafikk*, so they could both be very important.
@@ -263,13 +248,13 @@ Data is staistically analysed using spearmann and pearson correlation.
 
 **Raw-observation**
 
-![globalstråling vs traffik](src/figs/GlobalstralingVSTotal_trafikk_PRE_CHANGES.png)
+![globalstråling vs traffik](figs/GlobalstralingVSTotal_trafikk_PRE_CHANGES.png)
 
 Looking at the figure above , it is clear that the data contains outliers, as a the amount of global radation cannot exceed many thousands. #TODO REFRENCE
 
 **Post-processing**
 
-![globalstråling vs traffik](src/figs/GlobalstralingVSTotal_trafikk_POST_CHANGES.png)
+![globalstråling vs traffik](figs/GlobalstralingVSTotal_trafikk_POST_CHANGES.png)
 
 After processing this data, treating outliers, one can see that the data sits between values of .-4 to 900.
 
@@ -287,13 +272,13 @@ The spearmann correlation value of *0.4716* is a good sign. Due to the nature of
 
 **Raw-observation**
 
-![lufttemp vs traffik](src/figs/LufttemperaturVSTotal_trafikk_PRE_CHANGES.png)
+![lufttemp vs traffik](figs/LufttemperaturVSTotal_trafikk_PRE_CHANGES.png)
 
 Looking at the figure above , it is clear that the data contains outliers, and the data seems to pool weirdly around certain values. This needs to be adjusted for. 
 
 **Post-processing**
 
-![lufttemp vs traffik](src/figs/LufttemperaturVSTotal_trafikk_POST_CHANGES.png)
+![lufttemp vs traffik](figs/LufttemperaturVSTotal_trafikk_POST_CHANGES.png)
 
 After processing this data, treating outliers, one can see that the data sits between values of -10-32.
 
@@ -311,13 +296,13 @@ The spearmann correlation value of *0.3405* is a good sign. However, this data i
 
 **Raw-observation**
 
-![lufttrykk vs traffik](src/figs/LufttrykkVSTotal_trafikk_PRE_CHANGES.png)
+![lufttrykk vs traffik](figs/LufttrykkVSTotal_trafikk_PRE_CHANGES.png)
 
 Looking at the figure above , it is clear that the data contains outliers, and the data seems to pool weirdly around certain values. This needs to be adjusted for. 
 
 **Post-processing**
 
-![lufttrykk vs traffik](src/figs/LufttrykkVSTotal_trafikk_POST_CHANGES.png)
+![lufttrykk vs traffik](figs/LufttrykkVSTotal_trafikk_POST_CHANGES.png)
 
 Looking at the *Lufttrykk vs Total_trafikk* graph above, it may seem like there is a correlation between the two. It seems that values around 980-1020 provide around the same amount of cyclists. Values higher than 1020 and lower than 980 causes a drop off inn traffic.
 
@@ -330,13 +315,13 @@ The spearmann correlation value of *0.0818* is also a bad sign, but the spearman
 
 **Raw-observation**
 
-![solskinn vs traffik](src/figs/SolskinstidVSTotal_trafikk_PRE_CHANGES.png)
+![solskinn vs traffik](figs/SolskinstidVSTotal_trafikk_PRE_CHANGES.png)
 
 Looking at the figure above , it is clear that the data contains outliers, and the data seems to pool weirdly around certain values. This needs to be adjusted for. 
 
 **Post-processing**
 
-![solskinn vs traffik](src/figs/SolskinstidVSTotal_trafikk_POST_CHANGES.png)
+![solskinn vs traffik](figs/SolskinstidVSTotal_trafikk_POST_CHANGES.png)
 
 Looking at the *Solskinn vs Total_trafikk* graph above, it may be hard to spot a correlation between the two. It seems that solskinnstid does not effect the amount of cyclists. 
 
@@ -349,20 +334,20 @@ The spearmann correlation value of *0.3616*  is ok, but the spearmann corr may n
 
 **Raw-observation**
 
-![vindretning vs traffik](src/figs/VindretningVSTotal_trafikk_PRE_CHANGES.png)
+![vindretning vs traffik](figs/VindretningVSTotal_trafikk_PRE_CHANGES.png)
 
 Looking at the figure above , it is clear that the data contains outliers, and the data seems to pool weirdly around certain values. This needs to be adjusted for. 
 
 **Post-processing**
 
-![Vindretning vs traffik](src/figs/VindretningVSTotal_trafikk_POST_CHANGES.png)
+![Vindretning vs traffik](figs/VindretningVSTotal_trafikk_POST_CHANGES.png)
 
 Looking at the *Vindretning vs Total_trafikk*  graph above, it is up for argument if there is a strong correlation between the two, but there is some data that can be useful.
 It seems that between x=100-350 values are pretty much consistent, however a drop is seen at around 250. Values between 100-0 are also very very low, and could be reflective of something else? Vindretning and traffic seem to be correlated, but these vindretning values can be further processed, to try to extract further data from the wind.  
 
-![vindretning vs traffik](src/figs/Vindretning_xVSTotal_trafikk_POST_CHANGES.png)
+![vindretning vs traffik](figs/Vindretning_xVSTotal_trafikk_POST_CHANGES.png)
 
-![vindretning vs traffik](src/figs/Vindretning_yVSTotal_trafikk_POST_CHANGES.png)
+![vindretning vs traffik](figs/Vindretning_yVSTotal_trafikk_POST_CHANGES.png)
 
 This data has been transformed quite a bit. Vindretning was originally a number between 0-360, and has transformed to two values. The degrees (0-360) can be imagined as points on a unit circle. 
 Converting this point to two sperate values, x and y reveal more about the nature of the wind. Originally only the wind direction was known, but now the wind x and y directions are known, or atleast simulated.
@@ -385,13 +370,13 @@ Since vindretning has been transformed to two different variables, the original 
 
 **Raw-observation**
 
-![vindkast vs traffik](src/figs/VindkastVSTotal_trafikk_PRE_CHANGES.png)
+![vindkast vs traffik](figs/VindkastVSTotal_trafikk_PRE_CHANGES.png)
 
 Looking at the figure above , it is clear that the data contains outliers, and the data seems to pool weirdly around certain values. This needs to be adjusted for. 
 
 **Post-processing**
 
-![vindkast vs traffik](src/figs/VindkastVSTotal_trafikk_POST_CHANGES.png)
+![vindkast vs traffik](figs/VindkastVSTotal_trafikk_POST_CHANGES.png)
 
 Looking at the *Vindkast vs Total_trafikk* graph above, it is clear that vindkast has a correlation with cycle traffic.
 Values bteween 0-15 dont seem to effect traffic, but values above 15 m/s indicate strong winds and therefore we see a drop in traffic at these values.
@@ -405,16 +390,16 @@ The spearmann correlation value of *0.109*  is ok, and since this data portrays 
 
 **Raw-observation**
 
-![vindstyrke vs traffik](src/figs/VindstyrkeVSTotal_trafikk_PRE_CHANGES.png)
+![vindstyrke vs traffik](figs/VindstyrkeVSTotal_trafikk_PRE_CHANGES.png)
 
 Looking at the figure above , it is clear that the data contains outliers, and the data seems to pool weirdly around certain values. This needs to be adjusted for. 
 
 **Post-processing**
 
-![vindstyrke vs traffik](src/figs/VindstyrkeVSTotal_trafikk_POST_CHANGES.png)
+![vindstyrke vs traffik](figs/VindstyrkeVSTotal_trafikk_POST_CHANGES.png)
 
 
-![vindstyrke vs vindkast](src/figs/VindstyrkeVSVindkast_POST_CHANGES.png)
+![vindstyrke vs vindkast](figs/VindstyrkeVSVindkast_POST_CHANGES.png)
 
 The *Vindkast* and *Vindstyrke* variables have a pearson correlation of 0.979, for the purpouses of the data, they tell us virtually the same thing. 
 
@@ -645,7 +630,7 @@ However, not much was acheived by doing this.
 
 - *Vindkast*
 
-!["graph"](src/figs/VindkastVSTotal_trafikk_POST_CHANGES.png)
+!["graph"](figs/VindkastVSTotal_trafikk_POST_CHANGES.png)
 
 <p>
 These values are between 0-25, but there is a clear link between high vindkast and low traffic, so by squaring the values of vindkast could help the model understand that higher numbers mean a large descrease in traffic, while lower numbers do not have an effect on traffic.
@@ -658,17 +643,17 @@ However, not much was acheived by doing this.
 
 # RESULTS :
 
-![attempt1_MSE](src/figs/MANYMODELS_MSE.png)
+![attempt1_MSE](figs/MANYMODELS_MSE.png)
 
 One can see that RandomForestRegressor with n_estimators; 200 is the best model with a RMSE of 22.723.
 
 After finding the best model hyper-parameters were found.
 
-![hyperparam](src/figs/MSE_hyperparam_models_V3.png)
+![hyperparam](figs/MSE_hyperparam_models_V3.png)
 
 Seemingly, a higher n_estimators yeiled slightly better results.
 
-![hyperparam](src/figs/MSE_hyperparam_models_further.png)
+![hyperparam](figs/MSE_hyperparam_models_further.png)
 
 Attempting to optimize hyper-parameters even further, results show that 181 n_estimators was the best. 
 
@@ -799,9 +784,9 @@ The thought behind this is that since these values are all between 0-10 or in th
 
 And 
 
-All values of "Vindkast" were taken to the second power.
+All values of "Vindkast" were taken to the second power. #TODO
 
-![graph](src/figs/VindkastVSTotal_trafikk_POST_CHANGES.png)
+![graph](figs/VindkastVSTotal_trafikk_POST_CHANGES.png)
 
 The thought behind this is that since values between 0-15 do not effect traffic, but values between 15-25 do, it would be a way to make the model understand this.  
 
@@ -908,7 +893,7 @@ RMSE: 22.97098973754138
 
 Completely removing these years led to a higher RMSE. The reason i bring this up is because if the goal is to predict 2023 data, it may be smart to drop these years since 2023 society resembles 2017-2019 society more than 2020-2021. However, removing so much data would probably do more harm than good, as traffic did not vary that much across these two years.
 
-![FloridaDanmarksplass vs time](src/figs/timeVStraffic_POST_CHANGES.png) 
+![FloridaDanmarksplass vs time](figs/timeVStraffic_POST_CHANGES.png) 
 
 #TODO REMOVE THIS MAYBE
 Simply graphing average traffic per hour for each year also reveals that while there is some variance between years, the general idea of a "rush hour" still stands.
@@ -973,7 +958,7 @@ RMSE: 25.52727596645201
 9         d_Sunday    0.000228
 ```
 
-![FloridaDanmarksplass vs time](src/figs/timeVStraffic_POST_CHANGES.png)
+![FloridaDanmarksplass vs time](figs/timeVStraffic_POST_CHANGES.png)
 
 Adding the year as a column seems to make the model worse. This may make sense as the amount of traffic does not vary greatly across years. The one may have been 2017, but this has been evened out, as can be seen above.
 
@@ -1022,7 +1007,7 @@ RMSE: 23.882217256418606
 
 **The chosen best model was "RandomForestRegressor" with an *n_estimators* of 181 which has an RMSE of 22.7217 on validation data and 23.8822 on test data**
 
-![attempt1_MSE](src/figs/MANYMODELS_MSE.png)
+![attempt1_MSE](figs/MANYMODELS_MSE.png)
 
 ### Exploring Results acheived with a RandomForestRegressor model
 
@@ -1066,6 +1051,10 @@ The predictor takes some time to build, so the library `pickle` was used to save
 The website allows all fields to not have values, except the date. The date is something that  is hard to be predicted by a KNNimputer. It is possible, but requires data represented in a different format, rather than the datetime format this project uses. 
 
 KNNimputer.
+
+#TODO
+
+instead of taking the mean could have tkane median or sum from some coloumns when combing all 6 to 1 for traffic data
 
 ### Conclusion:
 

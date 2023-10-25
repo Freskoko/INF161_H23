@@ -69,7 +69,7 @@ def treat_trafikk_files(filename: str) -> pd.DataFrame:
 
     # now that delimiter is uniform, file can be handled
 
-    df = pd.read_csv(csvStringIO, delimiter=";")
+    df = pd.read_csv(csvStringIO, delimiter=";", low_memory=False)
 
     # change to a uniform date -> see # Issues in README
     df["DateFormatted"] = df.apply(
@@ -292,13 +292,11 @@ def merge_frames(frames: list) -> pd.DataFrame:
     PWD = Path().absolute()
     directory = f"{str(PWD)}/src/out"
 
-    # print(df_final)
     df_2023 = df_2023 = df_final.loc["2023-01-01":"2023-12-31"]
 
     # get where index is between 2023-01-01 00:00:00 and 2023-12-31 00:00:00
 
     df_final = df_final.dropna(subset=["Trafikkmengde_Totalt_i_retning_Florida"])
-    # print("after drop ", len(df_final))
 
     # finding means of values lead to floating point errors, round to fix these
     df_final = df_final.apply(pd.to_numeric, errors="ignore").round(30)
@@ -327,10 +325,6 @@ def trim_transform_outliers(df: pd.DataFrame, data2023: bool) -> pd.DataFrame:
 
     What values are considered abnormal are covered in the README under "Dropped values"
     """
-
-    # print("IN")
-    # print(df)
-
     # Transform malformed data to NaN.
     length_dict = {"before": len(df)}
 
@@ -370,15 +364,12 @@ def trim_transform_outliers(df: pd.DataFrame, data2023: bool) -> pd.DataFrame:
     df["Vindstyrke"] = np.where(df["Vindstyrke"] >= 1000, np.nan, df["Vindstyrke"])
     length_dict["afterVindstyrke"] = len(df)
 
-    if DEBUG == True:
-        print(json.dumps(length_dict, indent=2))
-
     # replace outliers (this should be fixed above, but this is just in case)
     df = df.replace(99999, np.nan)
 
     # observe NaN
     num_nan = df.isna().sum()
-    print(f"Number of NaNs in each column:\n{num_nan}")
+    # print(f"Number of NaNs in each column:\n{num_nan}")
 
     if not data2023:
         # reserve the "Total_trafikk" column, it will not used for imputation
@@ -410,7 +401,7 @@ def trim_transform_outliers(df: pd.DataFrame, data2023: bool) -> pd.DataFrame:
             imputer = pickle.load(file)
 
             df_imputed = imputer.transform(df_no_traffic)
-            print("FOUND PICKLE")
+            print("PICKLE : FOUND PICKLE")
 
     except FileNotFoundError as e:
         print("DID NOT FIND PICKLE -> MAKING IT!")
@@ -420,14 +411,14 @@ def trim_transform_outliers(df: pd.DataFrame, data2023: bool) -> pd.DataFrame:
         # pickle
         if len(df_no_traffic) > 40000:
             with open(pkl_filename, "wb") as file:
-                print("PICKLING")
+                print("PICKLE : PICKLING MADE MODEL")
                 pickle.dump(imputer, file)
 
-    print("DF NO TRAFFIC -> ")
-    print(df_no_traffic)
+    # print("DF NO TRAFFIC -> ")
+    # print(df_no_traffic)
 
-    print("DF IMPUTED ->>>>>>>>>>>>>")
-    print(df_imputed)
+    # print("DF IMPUTED ->>>>>>>>>>>>>")
+    # print(df_imputed)
 
     df_fixed = pd.DataFrame(
         df_imputed, columns=df_no_traffic.columns, index=df_no_traffic.index
@@ -459,12 +450,12 @@ def normalize_data(df: pd.DataFrame) -> pd.DataFrame:
 
     # df["Vindkast"] = df["Vindkast"]**2
 
-    print(f"Values pre removal of outliers: {len(df)}")
+    # print(f"Values pre removal of outliers: {len(df)}")
 
     quant = df["Total_trafikk"].quantile(0.99)
     df = df[df["Total_trafikk"] <= quant]
 
-    print(f"Values post removal of outliers: {len(df)}")
+    # print(f"Values post removal of outliers: {len(df)}")
 
     return df
 
@@ -541,7 +532,7 @@ def treat_2023_file(df, model):
 
     # add important features to help the model
     df_final = feauture_engineer(df_fixed, True)
-    print("Features engineered")
+    # print("Features engineered")
 
     # normalize coloumns from 0-1 or square coloumns^2
     # df_final = normalize_cols(df_final)
@@ -549,7 +540,7 @@ def treat_2023_file(df, model):
 
     # drop coloumns which are not needed (noise)
     df_final = drop_uneeded_cols(df_final)
-    print("Uneeded cols dropped")
+    # print("Uneeded cols dropped")
 
     try:
         df_final["Total_trafikk"] = model.predict(df_final)
@@ -565,16 +556,15 @@ def load_best_model() -> RandomForestRegressor:
     """
 
     # if the model already exists as pickle, return it
-
     try:
         pickled_model = pickle.load(open("model.pkl", "rb"))
         return pickled_model
     except FileNotFoundError as e:
         pass
 
-    print("No pre-existing model found... building from baseline")
+    print("INFO : No pre-existing model found... building from baseline")
 
-    print("Starting parsing on loading best model ... ")
+    print("INFO : Starting parsing on loading best model ... ")
     # loop over files in local directory
     directory = f"{str(PWD)}/raw_data"  # change
 
@@ -589,21 +579,21 @@ def load_best_model() -> RandomForestRegressor:
         if "trafikkdata" in str(filename):
             trafikk_df = treat_trafikk_files(f"{str(directory)}/{filename.name}")
 
-    print("All files parsed!")
+    print("INFO : All files parsed!")
 
     # concat all the florida df's to one
     big_florida_df = pd.concat(florida_df_list, axis=0)
-    print("Florida files concacted")
+    print("INFO : Florida files concacted")
 
     # merge the dataframes
     df_2023, df_final = merge_frames([big_florida_df, trafikk_df])
-    print("All files looped over")
+    print("INFO : All files looped over")
 
     # divide data into training,test and validation
     split_dict_pre, training_df, test_df, validation_df = train_test_split_process(
         df_final
     )
-    print("Data divided into training,validation and test")
+    print("INFO : Training df received from test train split")
 
     dataframes_pre = {
         "training_df": training_df,
@@ -616,25 +606,25 @@ def load_best_model() -> RandomForestRegressor:
 
     for name, df_transforming in dataframes_pre.items():
         print(
-            f"Applying KNN imputer on missing data, and removing outliers.. for {name}"
+            f"PARSING : Applying KNN imputer on missing data, and removing outliers.. for {name}"
         )
-        print("This could take a while...")
+        print("PARSING : This could take a while...")
 
         # transform NaN and outliers to usable data
         df_transforming = trim_transform_outliers(df_transforming, False)
-        print(f"Outliers trimmed for {name}")
+        print(f"PARSING : Outliers trimmed for {name}")
 
         # add important features to help the model
         df_transforming = feauture_engineer(df_transforming, False)
-        print(f"Features engineered for {name}")
+        print(f"PARSING : Features engineered for {name}")
 
         # normalize data outliers
         df_transforming = normalize_data(df_transforming)
-        print(f"Coloumns normalized for {name}")
+        print(f"PARSING : Coloumns normalized for {name}")
 
         # drop coloumns which are not needed or redundant
         df_transforming = drop_uneeded_cols(df_transforming)
-        print(f"Uneeded cols dropped for {name}")
+        print(f"PARSING : Uneeded cols dropped for {name}")
 
         dataframes_post[name] = df_transforming
 
@@ -649,7 +639,7 @@ def load_best_model() -> RandomForestRegressor:
     y_train = split_dict_post["y_train"]
 
     # BEST MODEL:
-    print("Training best model")
+    print("MODEL : Training best model")
     best_model = RandomForestRegressor(n_estimators=181, random_state=2)
     best_model.fit(X_train, y_train)
 
@@ -663,7 +653,7 @@ def prep_data_from_user(input_dict):
     """
     Loads the best model
     """
-    print("Starting prep data from user ... ")
+    print("INFO : Starting prep data from user ... ")
 
     col_keys = [
         "DateFormatted",
@@ -698,36 +688,33 @@ def prep_data_from_user(input_dict):
             print(e)
             return "ERROR"
 
-    print(df_dict)
+    # print(df_dict)
 
     df = pd.DataFrame(df_dict)  # Converts input data into dataframe
 
     df["DateFormatted"] = pd.to_datetime(df["DateFormatted"])
     df.set_index("DateFormatted", inplace=True)
 
-    print("halfway df ----------------------")
-    print(df)
-
     name = "userinp"
 
-    print(f"Applying KNN imputer on missing data, and removing outliers.. for {name}")
-    print("This could take a while...")
+    print(
+        f"PARSING : Applying KNN imputer on missing data, and removing outliers.. for {name}"
+    )
+    print("PARSING : This could take a while...")
 
     # transform NaN and outliers to usable data
     df = trim_transform_outliers(df, True)
-    print(f"Outliers trimmed for {name}")
+    print(f"PARSING : Outliers trimmed for {name}")
 
     # add important features to help the model
     df = feauture_engineer(df, True)
-    print(f"Features engineered for {name}")
+    print(f"PARSING : Features engineered for {name}")
 
     # drop coloumns which are not needed or redundant
     df = drop_uneeded_cols(df)
-    print(f"Uneeded cols dropped for {name}")
+    print(f"PARSING : Uneeded cols dropped for {name}")
 
-    print("re-aranging df to fit")
-
-    # df["DateFormatted"] = df.index
+    print("PARSING : re-aranging df to fit")
 
     df = df[
         [
@@ -779,5 +766,5 @@ if __name__ == "__main__":
 
     df = prep_data_from_user(input_dict)
     prediction = best_model.predict(df)
-    print(prediction)
-    print(int(prediction[0]))
+
+    print(f"Prediction = {int(prediction[0])}")

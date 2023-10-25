@@ -37,8 +37,8 @@ from utils.models import (
 # get current filepath to use when opening/saving files
 PWD = Path().absolute()
 GRAPHING = True
-TRAIN_MANY = False
-FINAL_RUN = False
+TRAIN_MANY = True
+FINAL_RUN = True
 RANDOM_STATE = 2
 
 
