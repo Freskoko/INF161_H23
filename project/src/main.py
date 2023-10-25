@@ -159,7 +159,6 @@ def main():
 
     # train the best model on validation data
     train_best_model(split_dict_post, test_data=False)
-    train_best_model(split_dict_post, test_data=True)
 
     if FINAL_RUN:
         # train best model on test data
@@ -168,7 +167,7 @@ def main():
         logger.info("Treating 2023 files")
 
         # use the best model to get values for 2023
-        best_model = RandomForestRegressor(n_estimators=250, random_state=RANDOM_STATE)
+        best_model = RandomForestRegressor(n_estimators=181, random_state=RANDOM_STATE)
 
         X_train = split_dict_post["x_train"]
         y_train = split_dict_post["y_train"]

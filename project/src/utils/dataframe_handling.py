@@ -74,35 +74,6 @@ def feauture_engineer(df: pd.DataFrame, data2023: bool) -> pd.DataFrame:
         if not day in df.columns:
             df[day] = 0
 
-    # df["day"] = df.index.weekday
-    # ---------------------------
-
-    # BASIC DATE FEATURES
-    # print(df)
-
-    # df["year"] = df.index.year
-
-    # ---------------------------
-    # TODO FIX THIS REMOVE
-    # month_dict = {
-    #     0 :"January",
-    #     1 :"Feburary",
-    #     2 :"March",
-    #     3 :"April",
-    #     4 :"May",
-    #     5 :"June",
-    #     6 :"July",
-    #     7 :"August",
-    #     8 :"September",
-    #     9 :"October",
-    #     10:"November",
-    #     11:"December",
-    # }
-
-    # df["m"] = df.index.month.map(month_dict)
-
-    # make each month their own coloumn REMOVED SEE REPORT
-    # df = pd.get_dummies(df, columns=["m"])  # convert to True/False
     # ---------------
     df["month"] = df.index.month
 
@@ -111,15 +82,6 @@ def feauture_engineer(df: pd.DataFrame, data2023: bool) -> pd.DataFrame:
     # add weekend
     df["weekend"] = (df.index.weekday >= 5).astype(int)
 
-    # THIS COULD NOT BE DONE - Check the README under "Feature engineering"
-    # ------------------
-    # add the hour values of the previous row, this can be a good indicator
-    # df["Last_Danmarksplass"] = df["Trafikkmengde_Totalt_i_retning_Danmarksplass"].shift(
-    # 1
-    # )
-    # df["Last_Florida"] = df["Trafikkmengde_Totalt_i_retning_Florida"].shift(1)
-    # df["Last_total"] = df["Last_Danmarksplass"] + df["Last_Florida"]
-    # ------------------
 
     # add public holidays
     holidays = [

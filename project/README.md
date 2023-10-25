@@ -4,8 +4,6 @@
 
 - GOOGLE DOCS
 
-- Update graphs to have titles or undertext (WHAT DATA SET MADE FIGURE?)
-
 - Update part talking about different models
 
 
@@ -1047,6 +1045,9 @@ Given enough time and data, the model could be improved upon in a variety of way
 More data such as the actual amount of precipitation, the amount of ice on the ground, the current news scene, or data around COVID-19 restrictions could have made the model better.
 
 I think a RandomForestRegressor with an even more well-tuned *n_estimators* could make the model marginally better aswell, but this is held back by training time. 
+
+
+TODO: hour as cos/sin
 
 
 ### Website
