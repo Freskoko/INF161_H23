@@ -28,7 +28,7 @@ PWD = Path().absolute()
 DEBUG = False
 GRAPHING = False
 TRAIN_MANY = False
-FINAL_RUN = True
+FINAL_RUN = False
 RANDOM_STATE = 2
 
 
@@ -697,15 +697,10 @@ def treat_florida_files(filename: str) -> pd.DataFrame:
     return df
 
 
-# TODO KEEP COMMENTING FROM HERE !!!
 def treat_trafikk_files(filename: str) -> pd.DataFrame:
-    # TODO KEEP COMMENTING FROM HERE !!!
     """
     Input:
         filename: filename of a traffic data file
-
-    Process:
-        set date to index
 
     Output:
         a dataframe of the csv file
@@ -719,7 +714,6 @@ def treat_trafikk_files(filename: str) -> pd.DataFrame:
     csvStringIO = StringIO(my_csv_text.replace("|", ";"))
 
     # now that delimiter is uniform, file can be handled
-
     df = pd.read_csv(csvStringIO, delimiter=";")
 
     # change to a uniform date -> see # Issues in README
@@ -734,7 +728,7 @@ def treat_trafikk_files(filename: str) -> pd.DataFrame:
     df["Trafikkmengde"] = df["Trafikkmengde"].replace("-", np.nan).astype(float)
 
     # replace " " in 'Felt' values with "_" to avoid errors
-    df["Felt"] = df["Felt"].str.replace(" ", "_")
+    df["Felt"] = df["Felt"].str.replace(" ", "_")  # todo try without
 
     # dropping cols - see README on "Dropped coloumns"
     df = df.drop(
@@ -765,7 +759,6 @@ def treat_trafikk_files(filename: str) -> pd.DataFrame:
     )
 
     # drop all rows where the coloum "Felt" != "Totalt i retning Danmarksplass" or "Totalt i retning Florida"
-    # the two other values for felt are "1" and "2" and are the same as the "Totalt ... Danmarkplass" and  "Totalt ... Florida"
     df = df[
         df["Felt"].isin(["Totalt_i_retning_Danmarksplass", "Totalt_i_retning_Florida"])
     ]
@@ -773,21 +766,25 @@ def treat_trafikk_files(filename: str) -> pd.DataFrame:
     # create empty dataframe with 'DateFormatted' as index
     result_df = pd.DataFrame(index=df["DateFormatted"].unique())
 
-    # loop through unique 'Felt' values, filter original dataframe by 'Felt',
-    # drop 'Felt' column and join to the result dataframe
+    # What this is essentially doing is transforming "Totalt_i_retning_Danmarksplass" and "Totalt_i_retning_Florida" from being
+    # values in a coloumn called "Felt", to being two columns. Their values for the hours are just the same
+    # The "felt" coloumn is removed and has been transformed into two different "Felt" coloumns.
 
-    # so basically we sort of pivot the "Totalt i retning Danmarksplass" and "Totalt i retning Florida"
-    # from being values, to them being coloums contaning the values in "trafikkmengde" (since we dropped all other cols)
+    # loop through each unique felt value in the df, in this case "Totalt_i_retning_Danmarksplass" and "Totalt_i_retning_Florida"
     for felt in df["Felt"].unique():
-        felt_df = (
-            df[df["Felt"] == felt]
-            .drop(columns="Felt")
-            .add_suffix(
-                f"_{felt}"
-            )  # add suffix to column names to distinguish them when joining
-            .set_index("DateFormatted_{0}".format(felt))
-        )
 
+        # filter the dataframe so where the coloumn "felt" = the felt we have chosen for this iteration
+        felt_df = df[df["Felt"] == felt]
+
+        # remove felt, since we are making new cols
+        felt_df = felt_df.drop(columns="Felt")
+
+        # the name should be different for the two felt
+        felt_df = felt_df.add_suffix(f"_{felt}")
+        felt_df = felt_df.set_index(f"DateFormatted_{felt}")
+
+        # put the filtered dataframe onto the result one.
+        # after doing this for both they should line up nicely
         result_df = result_df.join(felt_df)
 
     return result_df
@@ -809,17 +806,17 @@ def feauture_engineer(df: pd.DataFrame, data2023: bool) -> pd.DataFrame:
     winter: 0/1
     rush_hour: 0/1
     sleeptime: : 0/1
-    traffic: the value of the traffic in a given hour
+    Vindretning x/y : 0-1
 
     Returns: df with more features
     """
 
     # BASIC DATE FEATURES
     # hour as own coloumn 0-23
-    df["hour"] = df.index.hour  # get first two values
+    df["hour"] = df.index.hour
 
     # Instead of "day_in_week" being a num 0-6, add 7 coloumns to the dataframe, monday, tuesday .. etc
-    # And have the value being 0/1 , 0 if it is not that day, 1 if it is
+    # Have the value be 0 or 1, 0 if it is not that day of the week, 1 if it is
 
     day_week_dict = {
         0: "Monday",
@@ -834,8 +831,7 @@ def feauture_engineer(df: pd.DataFrame, data2023: bool) -> pd.DataFrame:
     df["d"] = df.index.weekday.map(day_week_dict)
 
     # make each day their own coloumn
-    df = pd.get_dummies(df, columns=["d"])  # convert to True/False
-    # TODO: ADD THE COLOUMNS FOR ALL THE OTHER DAYS AND MAKE THEIR VALUE 0
+    df = pd.get_dummies(df, columns=["d"])
 
     complete_days = [
         "d_Monday",
@@ -847,19 +843,19 @@ def feauture_engineer(df: pd.DataFrame, data2023: bool) -> pd.DataFrame:
         "d_Sunday",
     ]
 
-    # iterate through the complete set of days
+    # loop through days
     for day in complete_days:
         # if the day is not a column in df, add it with a value of 0
         if not day in df.columns:
             df[day] = 0
 
-    # ---------------
+    # add month
     df["month"] = df.index.month
-
-    # MORE ADVANCED FEATURES
 
     # add weekend
     df["weekend"] = (df.index.weekday >= 5).astype(int)
+
+    # MORE ADVANCED FEATURES
 
     # add public holidays
     holidays = [
@@ -901,53 +897,46 @@ def feauture_engineer(df: pd.DataFrame, data2023: bool) -> pd.DataFrame:
     df["Vindretning_y"] = np.sin(df["Vindretning_radians"])
 
     # we cant train where there are no traffic values
-    if not data2023:
+    if not data2023:  # dont drop values in 2023 data!
         df = df.dropna(subset=["Total_trafikk"])
 
     # change all values of TRUE in all rows to 1 and FALSE to 0
     # models need NUMERIC data
     df = df.replace({True: 1, False: 0})
 
-    # once we done with it drop month
-    # df.drop("month",axis=1,inplace=True)
-
     return df
 
 
-def merge_frames(frames: list) -> pd.DataFrame:
+def merge_frames(frames: list) -> (pd.DataFrame, pd.DataFrame):
     """
     Given a list of dataframes, merges the frames to one large dataframe, given that the
     index is a date, and the same across all dataframes
 
     """
 
-    # first DataFrame
+    # grab first df
     df_final = frames[0]
 
-    # convert index (date) from string to datetime once only as we'll apply it to other frames
+    # index to date
     df_final.index = pd.to_datetime(df_final.index)
 
     for frame in frames[1:]:
-        # convert index from string to datetime
         frame.index = pd.to_datetime(frame.index)
 
-        # since the dataframes have the same index, they can be merged!
+        # since dataframes have the same index, -> they can be merged
         df_final = df_final.merge(frame, how="outer", left_index=True, right_index=True)
 
     df_final = df_final.sort_index()
 
-    # remove lines where we dont have traffic information, as many missing values can cause model training
-    # to overly rely on values which are there often.
-
     df_2023 = df_2023 = df_final.loc["2023-01-01":"2023-12-31"]
-    # get where index is between 2023-01-01 00:00:00 and 2023-12-31 00:00:00
+    # get where index is between 2023-01-01 00:00:00 and 2023-12-31 00:00:00 to save.
 
     df_final = df_final.dropna(subset=["Trafikkmengde_Totalt_i_retning_Florida"])
 
     # finding means of values lead to floating point errors, round to fix these
     df_final = df_final.apply(pd.to_numeric, errors="ignore").round(30)
 
-    # combine the two traffic cols
+    # combine the two traffic cols to one total trafikk col!
     df_final["Total_trafikk"] = (
         df_final["Trafikkmengde_Totalt_i_retning_Florida"]
         + df_final["Trafikkmengde_Totalt_i_retning_Danmarksplass"]
@@ -971,11 +960,11 @@ def trim_transform_outliers(df: pd.DataFrame, data2023: bool) -> pd.DataFrame:
 
     What values are considered abnormal are covered in the README under "Dropped values"
     """
+    # debug dict to look at lengths
+    length_dict = {"before": len(df)}
+    length_dict["afterGlobal"] = len(df)
 
     # Transform malformed data to NaN.
-    length_dict = {"before": len(df)}
-
-    length_dict["afterGlobal"] = len(df)
 
     # df["Globalstraling"] values above 1000 are set to NaN
     df["Globalstraling"] = np.where(
@@ -1019,29 +1008,24 @@ def trim_transform_outliers(df: pd.DataFrame, data2023: bool) -> pd.DataFrame:
     print(f"PARSING : Number of NaNs in each column:\n{num_nan}")
 
     if not data2023:
-        # reserve the "Total_trafikk" column, it will not used for imputation
+        # "Total_trafikk" column, will not used for imputation -> keep it for later
         total_traffic_series = df["Total_trafikk"]
 
-        # drop the "Total_trafikk" column from the main DataFrame
+        # "Total_trafikk" column, will not used for imputation -> remove it from df
         df_no_traffic = df.drop(columns=["Total_trafikk"])
 
     if data2023:
+        # 2023 data does not have
         df_no_traffic = df
 
     # Drop "Relativ luftfuktighet" as this data only exists in 2022 and 2023.
-    # errors="ignore" as most of the data (back to 2015) will not have this coloumn
-    # this also leads to memory errors?
-    # Drop "Relativ luftfuktighet" as this data only exists in 2022 and 2023.
-    # errors="ignore" as most of the data (back to 2015) will not have this coloumn
-    # this also leads to memory errors?
-
-    # Save the DateFormatted column
+    # errors="ignore" since pandas complains when dropping data from dataframes where it does not exist
 
     df_no_traffic = df_no_traffic.drop(
         columns=["Relativ luftfuktighet"], errors="ignore"
     )
 
-    # 20 is right
+    # n_neighbors = 20 is best -> see report
     imputer = KNNImputer(n_neighbors=20, weights="distance")
     df_imputed = imputer.fit_transform(df_no_traffic)
 
@@ -1061,6 +1045,8 @@ def normalize_data(df: pd.DataFrame) -> pd.DataFrame:
 
     Normalized values are covered in the README under "Normalized values"
     """
+
+    # These were ideas that were considered but dropped. This was kept in for learning purposes.
 
     # scaler = MinMaxScaler()
     # df[["Globalstraling", "Lufttrykk", "Solskinstid",]] = scaler.fit_transform(
@@ -1112,23 +1098,20 @@ def train_test_split_process(
     validation_df : reconstructed dataframe containing only validation data
     """
 
-    # df = df.reset_index()
-    # df = df.drop(["DateFormatted"], axis=1)
-
     y = df["Total_trafikk"]
     x = df.drop(["Total_trafikk"], axis=1)
 
-    # vi gjør at 70% blir treningsdata
+    # transform 70% to training data
     x_train, x_val, y_train, y_val = train_test_split(
         x, y, shuffle=False, test_size=0.3
     )
 
-    # deler opp 30% som var validation til 15% val og 15% test
+    # split 30% which was validation into 15% val and 15% test
     x_val, x_test, y_val, y_test = train_test_split(
         x_val, y_val, shuffle=False, test_size=0.5
     )
 
-    # utforskende anaylse ser kun på trenignsdata -> bruk x_train/y_train
+    # data exploration is only supposed to look at training data -> use x_train/y_train
     test_df = x_test.merge(y_test, how="outer", left_index=True, right_index=True)
     validation_df = x_val.merge(y_val, how="outer", left_index=True, right_index=True)
     training_df = x_train.merge(y_train, how="outer", left_index=True, right_index=True)
@@ -1145,7 +1128,17 @@ def train_test_split_process(
     return split_dict, training_df, test_df, validation_df
 
 
-def treat_2023_file(df, model):
+def treat_2023_file(df: pd.DataFrame, model: RandomForestRegressor) -> pd.DataFrame:
+    """
+    A 2023 file handler, to fill in missing values given weather data
+
+    Inputs:
+        df: A dataframe contaning 2023 data
+        model: the model to use to predict cycle trafikk
+    Returns:
+        A dataframe much like the input, with the cycle traffic values filled in.
+
+    """
     df = df.drop(
         columns=[
             "Trafikkmengde_Totalt_i_retning_Danmarksplass",
@@ -1166,10 +1159,9 @@ def treat_2023_file(df, model):
     try:
         df_final["Total_trafikk"] = model.predict(df_final)
     except ValueError as e:
-        print(e)
+        print(f"WARNING: MODEL PREDICTION ERROR {e}")
 
-    # convert to wanted format
-
+    # convert time, date and prediction to wanted format
     df_final["Dato"] = pd.to_datetime(df_final.index).date
     df_final["Tid"] = pd.to_datetime(df_final.index).hour
 
@@ -1177,6 +1169,7 @@ def treat_2023_file(df, model):
 
     new_df = df_final[["Dato", "Tid", "Prediksjon"]].copy()
 
+    # make predictions to ints as float number of cyclists makes no sense.
     new_df["Prediksjon"] = new_df["Prediksjon"].astype(int)
 
     new_df.reset_index()
@@ -1194,6 +1187,7 @@ def main():
     # multiple florida files will all be converted to df's, placed in this list, and concacted
     florida_df_list = []
 
+    # parse files
     for filename in os.scandir(directory):
         if "Florida" in str(filename):
             florida_df = treat_florida_files(f"{str(directory)}/{filename.name}")
@@ -1231,6 +1225,7 @@ def main():
         graph_all_models(training_df, pre_change=True)
         print("INFO : Graphed all models PRE-CHANGE")
 
+    # make dataframe dict to treat them differently
     dataframes_pre = {
         "training_df": training_df,
         "validation_df": validation_df,
@@ -1252,7 +1247,7 @@ def main():
         df_transforming = trim_transform_outliers(df_transforming, False)
         print(f"INFO : Outliers trimmed for {name}")
 
-        # add important features to help the model
+        # add features to help the model
         df_transforming = feauture_engineer(df_transforming, False)
         print(f"INFO : Features engineered for {name}")
 
@@ -1294,12 +1289,14 @@ def main():
         df_transforming = drop_uneeded_cols(df_transforming)
         print(f"INFO : Uneeded cols dropped for {name}")
 
+        # save dataframes to use later
         dataframes_post[name] = df_transforming
 
     training_df = dataframes_post["training_df"]
     test_df = dataframes_post["test_df"]
     validation_df = dataframes_post["validation_df"]
 
+    # save training data to csv to have a look
     training_df.to_csv(f"{PWD}/out/main_training_data.csv")
     print("INFO : Data saved to CSV")
 
@@ -1350,13 +1347,17 @@ def main():
         X_train = split_dict_post["x_train"]
         y_train = split_dict_post["y_train"]
 
+        # the best model is used to treat 2023 files.
         best_model.fit(X_train, y_train)
         df_with_values = treat_2023_file(df_2023, best_model)
 
     return split_dict_post, training_df, test_df, validation_df
 
 
-def create_dirs():
+def create_dirs() -> None:
+    """
+    Helper function to create directories for saving figs and files
+    """
     try:
         os.mkdir("figs")
     except FileExistsError:

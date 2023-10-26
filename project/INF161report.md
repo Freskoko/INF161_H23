@@ -4,12 +4,7 @@
 
 - GOOGLE DOCS
 
-
 ### CODE
-
-- cleanup files that may not be used
-
-- cleanup
 
 - conda and lock file
 
@@ -23,13 +18,15 @@ This report pertains to the INF161 project this fall, in creating a model which 
 
 ### Index:
 
-- Data Exploration
-- Removed data / Data loss
-- Feature engineering
 - Issues/Choices
-- Data exploration post processing
-- Model choice and evaluation
+- Data processing
+- Data Exploration
+- Dropped columns
+- Feature engineering
 - Results
+- discussion
+- Improvements
+- Website
 - Conclusion
 
 
@@ -828,8 +825,6 @@ The model got worse, by about  a 0.5 increase in RMSE!
 But looking at the importances, nothing changed! This made me run my base model again, since that is quite interesting that the model is worse but none of the feature importances changed.
 
 I suspect data normalization may be a useful tool sometimes, but in this case it made the model worse, as maybe while data is transformed, it is also lost.  
-
-### TODO - ASK ABOUT THIS
 
 ### Changing the n_neighbours for the KNNimputer
 
